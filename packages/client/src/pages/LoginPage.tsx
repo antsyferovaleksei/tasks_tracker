@@ -79,7 +79,7 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(formData);
-      navigate('/dashboard');
+      navigate('/tasks');
     } catch (error) {
       console.error('Login error:', error);
     }

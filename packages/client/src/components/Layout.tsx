@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Dashboard,
+
   Assignment,
   Folder,
   Analytics,
@@ -78,12 +78,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [activeTimer]);
 
   const menuItems = [
-    {
-      text: 'Дашборд',
-      icon: Dashboard,
-      path: '/dashboard',
-      color: theme.palette.primary.main,
-    },
     {
       text: 'Завдання',
       icon: Assignment,

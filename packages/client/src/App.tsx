@@ -15,7 +15,7 @@ import Layout from './components/Layout';
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+
 const TasksPage = lazy(() => import('./pages/TasksPage'));
 const TaskDetailPage = lazy(() => import('./pages/TaskDetailPage'));
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
@@ -61,7 +61,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/tasks" replace />;
   }
   
   return <>{children}</>;
@@ -316,8 +316,7 @@ const App: React.FC = () => {
                       <Layout>
                         <Suspense fallback={<LoadingSpinner />}>
                           <Routes>
-                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                            <Route path="/dashboard" element={<DashboardPage />} />
+                            <Route path="/" element={<Navigate to="/tasks" replace />} />
                             <Route path="/tasks" element={<TasksPage />} />
                             <Route path="/tasks/:id" element={<TaskDetailPage />} />
                             <Route path="/projects" element={<ProjectsPage />} />

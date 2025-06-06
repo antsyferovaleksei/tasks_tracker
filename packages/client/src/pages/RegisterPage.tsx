@@ -44,7 +44,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
       });
-      navigate('/dashboard');
+      navigate('/tasks');
     } catch (err: any) {
       setError(err.message || 'Помилка реєстрації');
     } finally {
