@@ -23,6 +23,9 @@ import {
   AccordionSummary,
   AccordionDetails,
   FormHelperText,
+  Tooltip,
+  CircularProgress,
+  Divider,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -33,11 +36,116 @@ import {
   ExpandMore as ExpandMoreIcon,
   Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
+  AccessTime as TimeIcon,
+  Timer as TimerIcon,
+  Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useProjects } from '../hooks';
-import { Task, TaskStatus, TaskPriority, TaskFilters, Project } from '../types';
+import { 
+  useTasks, 
+  useCreateTask, 
+  useUpdateTask, 
+  useDeleteTask, 
+  useProjects,
+  useActiveTimer,
+  useStartTimer,
+  useStopTimer,
+  useTimeStats,
+  useCreateTimeEntry
+} from '../hooks';
+import { Task, TaskStatus, TaskPriority, TaskFilters, Project, TimeEntry } from '../types';
 import { formatDate, getTaskStatusColor, getTaskPriorityColor } from '../utils';
+
+// Функція для форматування часу в секундах
+const formatDuration = (seconds: number): string => {
+  if (!seconds) return '0хв';
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}г ${minutes}хв`;
+  } else if (minutes > 0) {
+    return `${minutes}хв ${secs}с`;
+  } else {
+    return `${secs}с`;
+  }
+};
+
+// Компонент для відображення поточного активного таймера
+const ActiveTimerDisplay = () => {
+  const { activeTimer } = useActiveTimer();
+  const stopTimer = useStopTimer();
+  const [currentTime, setCurrentTime] = useState(0);
+
+  React.useEffect(() => {
+    if (activeTimer) {
+      const updateTimer = () => {
+        const elapsed = Math.floor((Date.now() - new Date(activeTimer.startTime).getTime()) / 1000);
+        setCurrentTime(elapsed);
+      };
+      
+      updateTimer();
+      const interval = setInterval(updateTimer, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTimer]);
+
+  if (!activeTimer) return null;
+
+  return (
+    <Paper 
+      elevation={3} 
+      sx={{ 
+        p: 2, 
+        mb: 3, 
+        backgroundColor: 'primary.main', 
+        color: 'primary.contrastText',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}
+    >
+      <Box display="flex" alignItems="center" gap={2}>
+        <TimerIcon />
+        <Box>
+          <Typography variant="subtitle1" fontWeight="bold">
+            {activeTimer.task?.title}
+          </Typography>
+          <Typography variant="h5" fontWeight="bold">
+            {formatDuration(currentTime)}
+          </Typography>
+        </Box>
+      </Box>
+      <Button
+        variant="contained"
+        color="secondary"
+        startIcon={<StopIcon />}
+        onClick={() => stopTimer.mutate(activeTimer.id)}
+        disabled={stopTimer.isPending}
+      >
+        Зупинити
+      </Button>
+    </Paper>
+  );
+};
+
+// Компонент для відображення статистики часу завдання
+const TaskTimeStats = ({ taskId }: { taskId: string }) => {
+  const { data: timeStats } = useTimeStats(taskId);
+  
+  if (!timeStats?.success || !timeStats.data?.totalTime) return null;
+
+  return (
+    <Box display="flex" alignItems="center" gap={1} mt={1}>
+      <TimeIcon fontSize="small" color="action" />
+      <Typography variant="caption" color="text.secondary">
+        Витрачено: {formatDuration(timeStats.data.totalTime)}
+      </Typography>
+    </Box>
+  );
+};
 
 export default function TasksPage() {
   const navigate = useNavigate();
@@ -47,6 +155,8 @@ export default function TasksPage() {
     search: '',
   });
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [timeEntryDialogOpen, setTimeEntryDialogOpen] = useState(false);
+  const [selectedTaskForTime, setSelectedTaskForTime] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
     title: '',
@@ -56,14 +166,23 @@ export default function TasksPage() {
     archived: false,
     projectId: '',
   });
+  const [newTimeEntry, setNewTimeEntry] = useState({
+    description: '',
+    duration: '',
+    startTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm format
+  });
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   const { tasks: rawTasks = [], isLoading } = useTasks(filter);
   const tasks = Array.isArray(rawTasks) ? rawTasks : [];
   const { projects = [], isLoading: isLoadingProjects } = useProjects();
+  const { activeTimer } = useActiveTimer();
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
+  const startTimer = useStartTimer();
+  const stopTimer = useStopTimer();
+  const createTimeEntry = useCreateTimeEntry();
 
   // Групування завдань за проектами
   const groupedTasks = useMemo(() => {
@@ -175,9 +294,58 @@ export default function TasksPage() {
     }
   };
 
+  const handleStartTimer = (task: Task) => {
+    startTimer.mutate({ 
+      taskId: task.id, 
+      description: `Робота над завданням: ${task.title}` 
+    });
+  };
+
+  const handleStopTimer = () => {
+    if (activeTimer) {
+      stopTimer.mutate(activeTimer.id);
+    }
+  };
+
+  const handleAddTimeEntry = (task: Task) => {
+    setSelectedTaskForTime(task);
+    setNewTimeEntry({
+      description: '',
+      duration: '',
+      startTime: new Date().toISOString().slice(0, 16),
+    });
+    setTimeEntryDialogOpen(true);
+  };
+
+  const handleCreateTimeEntry = () => {
+    if (!selectedTaskForTime || !newTimeEntry.duration) return;
+
+    const durationInSeconds = parseInt(newTimeEntry.duration) * 60; // конвертуємо хвилини в секунди
+    const startTime = new Date(newTimeEntry.startTime);
+    const endTime = new Date(startTime.getTime() + durationInSeconds * 1000);
+
+    createTimeEntry.mutate({
+      taskId: selectedTaskForTime.id,
+      description: newTimeEntry.description,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      duration: durationInSeconds,
+      isRunning: false,
+    }, {
+      onSuccess: () => {
+        setTimeEntryDialogOpen(false);
+        setSelectedTaskForTime(null);
+        setNewTimeEntry({
+          description: '',
+          duration: '',
+          startTime: new Date().toISOString().slice(0, 16),
+        });
+      },
+    });
+  };
+
   const handleOpenDialog = () => {
     if (projects.length === 0) {
-      // Показуємо попередження та пропонуємо створити проект
       return;
     }
     setDialogOpen(true);
@@ -186,13 +354,17 @@ export default function TasksPage() {
   if (isLoading || isLoadingProjects) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
-        <Typography>Завантаження...</Typography>
+        <CircularProgress />
+        <Typography ml={2}>Завантаження...</Typography>
       </Box>
     );
   }
 
   return (
     <Box p={3}>
+      {/* Активний таймер */}
+      <ActiveTimerDisplay />
+
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
           Завдання
@@ -307,56 +479,99 @@ export default function TasksPage() {
               </AccordionSummary>
               <AccordionDetails>
                 <Grid container spacing={2}>
-                  {projectTasks.map((task: Task) => (
-                    <Grid item xs={12} sm={6} md={4} key={task.id}>
-                      <Card variant="outlined">
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                            <Typography variant="h6" component="h3">
-                              {task.title}
-                            </Typography>
-                            <Box>
-                              <IconButton size="small" onClick={() => handleEditTask(task)}>
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDeleteTask(task.id)}
-                                color="error"
-                              >
-                                <DeleteIcon />
-                              </IconButton>
+                  {projectTasks.map((task: Task) => {
+                    const isActiveTimer = activeTimer?.taskId === task.id;
+                    
+                    return (
+                      <Grid item xs={12} sm={6} md={4} key={task.id}>
+                        <Card variant="outlined">
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                              <Typography variant="h6" component="h3">
+                                {task.title}
+                              </Typography>
+                              <Box>
+                                <IconButton size="small" onClick={() => handleEditTask(task)}>
+                                  <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleDeleteTask(task.id)}
+                                  color="error"
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Box>
                             </Box>
-                          </Box>
-                          
-                          {task.description && (
-                            <Typography variant="body2" color="text.secondary" mb={2}>
-                              {task.description}
-                            </Typography>
-                          )}
+                            
+                            {task.description && (
+                              <Typography variant="body2" color="text.secondary" mb={2}>
+                                {task.description}
+                              </Typography>
+                            )}
 
-                          <Box display="flex" gap={1} mb={2}>
-                            <Chip
-                              label={task.status}
-                              size="small"
-                              color={getTaskStatusColor(task.status) as any}
-                            />
-                            <Chip
-                              label={task.priority}
-                              size="small"
-                              color={getTaskPriorityColor(task.priority) as any}
-                            />
-                          </Box>
+                            <Box display="flex" gap={1} mb={2}>
+                              <Chip
+                                label={task.status}
+                                size="small"
+                                color={getTaskStatusColor(task.status) as any}
+                              />
+                              <Chip
+                                label={task.priority}
+                                size="small"
+                                color={getTaskPriorityColor(task.priority) as any}
+                              />
+                            </Box>
 
-                          {task.createdAt && (
-                            <Typography variant="caption" color="text.secondary">
-                              Створено: {formatDate(task.createdAt)}
-                            </Typography>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
+                            {/* Статистика часу */}
+                            <TaskTimeStats taskId={task.id} />
+
+                            <Divider sx={{ my: 1 }} />
+
+                            {/* Кнопки управління часом */}
+                            <Box display="flex" gap={1} mt={2}>
+                              {isActiveTimer ? (
+                                <Tooltip title="Зупинити таймер">
+                                  <IconButton
+                                    color="error"
+                                    onClick={handleStopTimer}
+                                    disabled={stopTimer.isPending}
+                                  >
+                                    <StopIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              ) : (
+                                <Tooltip title="Запустити таймер">
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() => handleStartTimer(task)}
+                                    disabled={!!activeTimer || startTimer.isPending}
+                                  >
+                                    <PlayIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              
+                              <Tooltip title="Додати час вручну">
+                                <IconButton
+                                  color="secondary"
+                                  onClick={() => handleAddTimeEntry(task)}
+                                >
+                                  <ScheduleIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+
+                            {task.createdAt && (
+                              <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+                                Створено: {formatDate(task.createdAt)}
+                              </Typography>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
                 </Grid>
               </AccordionDetails>
             </Accordion>
@@ -364,7 +579,7 @@ export default function TasksPage() {
         ))
       )}
 
-      {/* Create/Edit Dialog */}
+      {/* Create/Edit Task Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
           {editingTask ? 'Редагувати завдання' : 'Створити завдання'}
@@ -466,6 +681,55 @@ export default function TasksPage() {
             disabled={!newTask.title || !newTask.projectId}
           >
             {editingTask ? 'Оновити' : 'Створити'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Manual Time Entry Dialog */}
+      <Dialog open={timeEntryDialogOpen} onClose={() => setTimeEntryDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Додати час для: {selectedTaskForTime?.title}
+        </DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={2} pt={1}>
+            <TextField
+              label="Опис роботи"
+              value={newTimeEntry.description}
+              onChange={(e) => setNewTimeEntry({ ...newTimeEntry, description: e.target.value })}
+              fullWidth
+              placeholder="Що ви робили..."
+            />
+            
+            <TextField
+              label="Тривалість (хвилини)"
+              type="number"
+              value={newTimeEntry.duration}
+              onChange={(e) => setNewTimeEntry({ ...newTimeEntry, duration: e.target.value })}
+              required
+              fullWidth
+              inputProps={{ min: 1 }}
+            />
+            
+            <TextField
+              label="Час початку"
+              type="datetime-local"
+              value={newTimeEntry.startTime}
+              onChange={(e) => setNewTimeEntry({ ...newTimeEntry, startTime: e.target.value })}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTimeEntryDialogOpen(false)}>
+            Скасувати
+          </Button>
+          <Button
+            onClick={handleCreateTimeEntry}
+            variant="contained"
+            disabled={!newTimeEntry.duration || createTimeEntry.isPending}
+          >
+            Додати
           </Button>
         </DialogActions>
       </Dialog>

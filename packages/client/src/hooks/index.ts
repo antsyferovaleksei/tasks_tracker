@@ -440,6 +440,83 @@ export const useStopTimer = () => {
   });
 };
 
+export const useTimeEntries = (params?: {
+  taskId?: string;
+  projectId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  return useQuery({
+    queryKey: queryKeys.timeEntries.list(params),
+    queryFn: () => apiClient.getTimeEntries(params),
+    staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
+export const useCreateTimeEntry = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Omit<TimeEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) =>
+      apiClient.createTimeEntry(data),
+    onSuccess: (response) => {
+      if (response.success && response.data) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
+        toast.success('Запис часу створено!');
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка створення запису часу');
+    },
+  });
+};
+
+export const useUpdateTimeEntry = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<TimeEntry> }) =>
+      apiClient.updateTimeEntry(id, data),
+    onSuccess: (response, variables) => {
+      if (response.success && response.data) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
+        toast.success('Запис часу оновлено!');
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка оновлення запису часу');
+    },
+  });
+};
+
+export const useDeleteTimeEntry = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => apiClient.deleteTimeEntry(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+      toast.success('Запис часу видалено!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка видалення запису часу');
+    },
+  });
+};
+
+export const useTimeStats = (taskId: string) => {
+  return useQuery({
+    queryKey: queryKeys.timeEntries.stats(taskId),
+    queryFn: () => apiClient.getTimeStats(taskId),
+    enabled: !!taskId,
+    staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
 // Analytics Hooks
 export const useDashboard = (period = 30) => {
   return useQuery({

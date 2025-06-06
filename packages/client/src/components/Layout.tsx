@@ -27,6 +27,7 @@ import {
 
   Assignment,
   Folder,
+  Timer,
   Analytics,
   Settings,
   Notifications,
@@ -89,6 +90,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: Folder,
       path: '/projects',
       color: theme.palette.success.main,
+    },
+    {
+      text: 'Час',
+      icon: Timer,
+      path: '/time-tracking',
+      color: theme.palette.primary.main,
     },
     {
       text: 'Аналітика',

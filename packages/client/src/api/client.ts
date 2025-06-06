@@ -250,12 +250,12 @@ class ApiClient {
   }
 
   async startTimer(taskId: string, description?: string): Promise<ApiResponse<TimeEntry>> {
-    const response = await this.instance.post('/time-entries/start', { taskId, description });
+    const response = await this.instance.post(`/time-entries/tasks/${taskId}/start`, { description });
     return response.data;
   }
 
   async stopTimer(id: string): Promise<ApiResponse<TimeEntry>> {
-    const response = await this.instance.post(`/time-entries/${id}/stop`);
+    const response = await this.instance.put(`/time-entries/${id}/stop`);
     return response.data;
   }
 
@@ -265,7 +265,7 @@ class ApiClient {
   }
 
   async getTimeStats(taskId: string): Promise<ApiResponse<TimeStats>> {
-    const response = await this.instance.get(`/time-entries/stats/${taskId}`);
+    const response = await this.instance.get(`/time-entries/tasks/${taskId}/stats`);
     return response.data;
   }
 
