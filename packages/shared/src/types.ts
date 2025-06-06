@@ -101,7 +101,7 @@ export interface CreateTaskDto {
   description?: string;
   priority?: TaskPriority;
   dueDate?: Date;
-  projectId?: string;
+  projectId: string;
   tagIds?: string[];
 }
 

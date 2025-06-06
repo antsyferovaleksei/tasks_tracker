@@ -145,7 +145,26 @@ class ApiClient {
     limit?: number;
     filters?: TaskFilters;
   }): Promise<PaginatedResponse<Task>> {
-    const response = await this.instance.get('/tasks', { params });
+    // Форматуємо параметри для правильної передачі на backend
+    const queryParams: any = {};
+    
+    if (params?.page) queryParams.page = params.page;
+    if (params?.limit) queryParams.limit = params.limit;
+    
+    // Додаємо фільтри як окремі параметри з префіксом filters
+    if (params?.filters) {
+      Object.entries(params.filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          if (Array.isArray(value) && value.length > 0) {
+            queryParams[`filters[${key}]`] = value;
+          } else if (!Array.isArray(value)) {
+            queryParams[`filters[${key}]`] = value;
+          }
+        }
+      });
+    }
+    
+    const response = await this.instance.get('/tasks', { params: queryParams });
     return response.data;
   }
 
