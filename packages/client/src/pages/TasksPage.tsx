@@ -45,7 +45,8 @@ export default function TasksPage() {
     archived: false,
   });
 
-  const { tasks = [], isLoading } = useTasks(filter);
+  const { tasks: rawTasks = [], isLoading } = useTasks(filter);
+  const tasks = Array.isArray(rawTasks) ? rawTasks : [];
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();

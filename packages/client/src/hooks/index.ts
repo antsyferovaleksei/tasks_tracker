@@ -129,18 +129,26 @@ export const useAuth = () => {
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: RegisterRequest) => apiClient.register(data),
+    mutationFn: (data: RegisterRequest) => {
+      console.log('🔄 useAuth: Starting registration API call', data);
+      return apiClient.register(data);
+    },
     onSuccess: (response) => {
+      console.log('✅ useAuth: Registration API call successful', response);
       if (response.success && response.data) {
+        console.log('✅ useAuth: Logging in user after successful registration');
         login(response.data.user, {
           accessToken: response.data.accessToken,
           refreshToken: response.data.refreshToken,
         });
         toast.success('Успішна реєстрація!');
         queryClient.invalidateQueries();
+      } else {
+        console.log('⚠️ useAuth: Registration response missing success or data');
       }
     },
     onError: (error: any) => {
+      console.error('❌ useAuth: Registration API call failed', error);
       toast.error(error.response?.data?.message || 'Помилка реєстрації');
     },
   });
@@ -187,18 +195,32 @@ export const useTasks = (filters?: TaskFilters, page = 1, limit = 20) => {
   });
 
   useEffect(() => {
-    if (query.data?.success && query.data.data) {
-      setTasks(query.data.data);
-      if (query.data.pagination) {
-        setPagination(query.data.pagination);
-      }
+    if (query.data?.success && query.data.data?.data) {
+      setTasks(query.data.data.data);
+      // The pagination info is in query.data.data, not query.data.pagination
+      const paginationInfo = {
+        page: query.data.data.page,
+        limit: query.data.data.limit,
+        total: query.data.data.total,
+        totalPages: query.data.data.totalPages,
+        hasNext: query.data.data.page < query.data.data.totalPages,
+        hasPrev: query.data.data.page > 1,
+      };
+      setPagination(paginationInfo);
     }
   }, [query.data, setTasks, setPagination]);
 
   return {
     ...query,
-    tasks: query.data?.data || [],
-    pagination: query.data?.pagination,
+    tasks: query.data?.data?.data || [],
+    pagination: query.data?.data ? {
+      page: query.data.data.page,
+      limit: query.data.data.limit,
+      total: query.data.data.total,
+      totalPages: query.data.data.totalPages,
+      hasNext: query.data.data.page < query.data.data.totalPages,
+      hasPrev: query.data.data.page > 1,
+    } : undefined,
   };
 };
 

@@ -96,7 +96,7 @@ export default function RegisterPage() {
         password: formData.password,
       });
       navigate('/tasks');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
     }
   };

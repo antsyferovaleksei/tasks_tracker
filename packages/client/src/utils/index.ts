@@ -114,24 +114,24 @@ export const getTaskPriorityLabel = (priority: TaskPriority): string => {
   return labels[priority] || priority;
 };
 
-export const getTaskStatusColor = (status: TaskStatus): string => {
-  const colors: Record<TaskStatus, string> = {
-    TODO: '#757575',
-    IN_PROGRESS: '#2196f3',
-    COMPLETED: '#4caf50',
-    CANCELLED: '#f44336',
+export const getTaskStatusColor = (status: TaskStatus): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+  const colors: Record<TaskStatus, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+    TODO: 'default',
+    IN_PROGRESS: 'primary',
+    COMPLETED: 'success',
+    CANCELLED: 'error',
   };
-  return colors[status] || '#757575';
+  return colors[status] || 'default';
 };
 
-export const getTaskPriorityColor = (priority: TaskPriority): string => {
-  const colors: Record<TaskPriority, string> = {
-    LOW: '#4caf50',
-    MEDIUM: '#ff9800',
-    HIGH: '#f44336',
-    URGENT: '#9c27b0',
+export const getTaskPriorityColor = (priority: TaskPriority): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+  const colors: Record<TaskPriority, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+    LOW: 'success',
+    MEDIUM: 'warning', 
+    HIGH: 'error',
+    URGENT: 'secondary',
   };
-  return colors[priority] || '#757575';
+  return colors[priority] || 'default';
 };
 
 export const isTaskOverdue = (dueDate?: string): boolean => {

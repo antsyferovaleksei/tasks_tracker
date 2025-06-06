@@ -14,18 +14,35 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(helmet());
 
-// Rate limiting
+// Rate limiting - більш м'які обмеження для розробки
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // limit each IP to 100 requests per windowMs
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000'), // збільшено до 1000 запитів
   message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true, // повертає rate limit інфо в `RateLimit-*` заголовках
+  legacyHeaders: false, // вимкнути `X-RateLimit-*` заголовки
 });
-app.use('/api', limiter);
+
+// Застосовувати rate limiting тільки в production
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api', limiter);
+}
 
 // CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  process.env.CLIENT_URL || 'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: allowedOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204, // деякі legacy браузери (IE11, різні SmartTVs) choke on 204
 }));
 
 // Body parsing middleware
