@@ -20,7 +20,6 @@ const TasksPage = lazy(() => import('./pages/TasksPage'));
 const TaskDetailPage = lazy(() => import('./pages/TaskDetailPage'));
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
-const TimeTrackingPage = lazy(() => import('./pages/TimeTrackingPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -322,7 +321,6 @@ const App: React.FC = () => {
                             <Route path="/tasks/:id" element={<TaskDetailPage />} />
                             <Route path="/projects" element={<ProjectsPage />} />
                             <Route path="/projects/:id" element={<ProjectDetailPage />} />
-                            <Route path="/time-tracking" element={<TimeTrackingPage />} />
                             <Route path="/analytics" element={<AnalyticsPage />} />
                             <Route path="/settings" element={<SettingsPage />} />
                             <Route path="/profile" element={<ProfilePage />} />

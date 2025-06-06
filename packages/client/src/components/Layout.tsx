@@ -43,6 +43,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth, useTheme as useAppTheme, useActiveTimer } from '../hooks';
 import { useAppSettingsStore, useNotificationsStore } from '../store';
 import { formatDuration } from '../utils';
+import { Link as RouterLink } from 'react-router-dom';
 
 const drawerWidth = 280;
 
@@ -90,12 +91,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: Folder,
       path: '/projects',
       color: theme.palette.success.main,
-    },
-    {
-      text: 'Час',
-      icon: Timer,
-      path: '/time-tracking',
-      color: theme.palette.primary.main,
     },
     {
       text: 'Аналітика',
@@ -188,7 +183,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
               <ListItemButton
-                onClick={() => navigate(item.path)}
+                component={RouterLink}
+                to={item.path}
+                selected={isActive}
                 sx={{
                   borderRadius: 2,
                   backgroundColor: isActive ? `${item.color}15` : 'transparent',
