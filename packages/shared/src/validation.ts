@@ -64,6 +64,8 @@ export const createTimeEntrySchema = z.object({
   taskId: z.string().min(1, 'ID завдання обов\'язковий'),
   description: z.string().optional(),
   startTime: z.string().datetime().optional().or(z.date().optional()),
+  endTime: z.string().datetime().optional().or(z.date().optional()),
+  duration: z.number().min(0).optional(),
 });
 
 export const updateTimeEntrySchema = z.object({

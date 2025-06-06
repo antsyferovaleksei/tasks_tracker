@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/database';
 import { createTaskSchema, updateTaskSchema, taskFiltersSchema, paginationSchema } from 'shared/src/validation';
 import { AuthRequest } from '../middleware/auth';
-import { TaskStatus, TaskPriority } from 'shared/src/types';
+// Imported types are now union types, not enums
 
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
@@ -100,8 +100,22 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 
     if (filters.search) {
       where.OR = [
-        { title: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
+        { title: { contains: filters.search } },
+        { description: { contains: filters.search } },
+        {
+          project: {
+            name: { contains: filters.search }
+          }
+        },
+        {
+          tags: {
+            some: {
+              tag: {
+                name: { contains: filters.search }
+              }
+            }
+          }
+        }
       ];
     }
 
@@ -262,9 +276,9 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
       data: {
         ...taskData,
         dueDate: taskData.dueDate ? new Date(taskData.dueDate) : undefined,
-        completedAt: taskData.status === TaskStatus.COMPLETED && existingTask.status !== TaskStatus.COMPLETED
+        completedAt: taskData.status === 'COMPLETED' && existingTask.status !== 'COMPLETED'
           ? new Date()
-          : taskData.status !== TaskStatus.COMPLETED && existingTask.status === TaskStatus.COMPLETED
+          : taskData.status !== 'COMPLETED' && existingTask.status === 'COMPLETED'
           ? null
           : undefined,
       },
@@ -405,7 +419,7 @@ export const duplicateTask = async (req: AuthRequest, res: Response) => {
         dueDate: originalTask.dueDate,
         projectId: originalTask.projectId,
         userId,
-        status: TaskStatus.TODO, // Reset status to TODO
+        status: 'TODO', // Reset status to TODO
       },
     });
 

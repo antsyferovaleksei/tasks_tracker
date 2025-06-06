@@ -25,6 +25,7 @@ model User {
   tasks         Task[]
   timeEntries   TimeEntry[]
   notifications Notification[]
+  userFilters   UserFilter[]
   
   @@map("users")
 }
@@ -132,6 +133,22 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("notifications")
+}
+
+model UserFilter {
+  id      String @id @default(cuid())
+  name    String
+  filters String // JSON string with filter parameters
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, name])
+  @@map("user_filters")
 }
 
 // For SQLite compatibility, we use string constants instead of enums
