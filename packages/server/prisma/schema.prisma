@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -51,8 +51,8 @@ model Task {
   id          String      @id @default(cuid())
   title       String
   description String?
-  status      TaskStatus  @default(TODO)
-  priority    TaskPriority @default(MEDIUM)
+  status      String      @default("TODO")
+  priority    String      @default("MEDIUM")
   dueDate     DateTime?
   completedAt DateTime?
   archived    Boolean     @default(false)
@@ -121,7 +121,7 @@ model Notification {
   id      String           @id @default(cuid())
   title   String
   message String
-  type    NotificationType @default(INFO)
+  type    String           @default("INFO")
   read    Boolean          @default(false)
   
   createdAt DateTime @default(now())
@@ -134,24 +134,7 @@ model Notification {
   @@map("notifications")
 }
 
-// Enums
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-enum TaskPriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum NotificationType {
-  INFO
-  WARNING
-  ERROR
-  SUCCESS
-} 
+// For SQLite compatibility, we use string constants instead of enums
+// TaskStatus: "TODO" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
+// TaskPriority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"  
+// NotificationType: "INFO" | "WARNING" | "ERROR" | "SUCCESS" 

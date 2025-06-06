@@ -31,7 +31,7 @@ export const updateProjectSchema = z.object({
 export const createTaskSchema = z.object({
   title: z.string().min(1, 'Назва завдання обов\'язкова'),
   description: z.string().optional(),
-  priority: z.nativeEnum(TaskPriority).optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   dueDate: z.string().datetime().optional().or(z.date().optional()),
   projectId: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
@@ -40,8 +40,8 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
-  status: z.nativeEnum(TaskStatus).optional(),
-  priority: z.nativeEnum(TaskPriority).optional(),
+  status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   dueDate: z.string().datetime().optional().or(z.date().optional()),
   projectId: z.string().optional(),
   archived: z.boolean().optional(),
@@ -77,7 +77,7 @@ export const updateTimeEntrySchema = z.object({
 export const createNotificationSchema = z.object({
   title: z.string().min(1, 'Заголовок обов\'язковий'),
   message: z.string().min(1, 'Повідомлення обов\'язкове'),
-  type: z.nativeEnum(NotificationType).optional(),
+  type: z.enum(['INFO', 'WARNING', 'ERROR', 'SUCCESS']).optional(),
   userId: z.string().min(1, 'ID користувача обов\'язковий'),
 });
 
@@ -88,8 +88,8 @@ export const paginationSchema = z.object({
 });
 
 export const taskFiltersSchema = z.object({
-  status: z.array(z.nativeEnum(TaskStatus)).optional(),
-  priority: z.array(z.nativeEnum(TaskPriority)).optional(),
+  status: z.array(z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])).optional(),
+  priority: z.array(z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])).optional(),
   projectId: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
   search: z.string().optional(),

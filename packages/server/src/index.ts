@@ -45,14 +45,31 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes will be added here
+// Import routes
+import authRoutes from './routes/authRoutes';
+import projectRoutes from './routes/projectRoutes';
+import taskRoutes from './routes/taskRoutes';
+import tagRoutes from './routes/tagRoutes';
+
+// API routes
 app.get('/api', (req, res) => {
   res.json({
     message: '🎯 Tasks Tracker API',
     version: '1.0.0',
-    status: 'Фаза 1 завершена - API готовий до розробки!',
+    status: 'Фаза 2 - Основна функціональність готова!',
+    endpoints: {
+      auth: '/api/auth',
+      projects: '/api/projects',
+      tasks: '/api/tasks',
+      tags: '/api/tags',
+    },
   });
 });
+
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/tags', tagRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
