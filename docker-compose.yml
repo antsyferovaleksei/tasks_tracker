@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: tasks-tracker-db
+    environment:
+      POSTGRES_DB: tasks_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: tasks-tracker-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: tasks-tracker-server
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/tasks_tracker?schema=public
+      JWT_SECRET: development-jwt-secret-change-in-production
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_SECRET: development-refresh-secret-change-in-production
+      JWT_REFRESH_EXPIRES_IN: 30d
+      PORT: 5000
+      NODE_ENV: development
+      CLIENT_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./packages/server:/app/packages/server
+      - ./packages/shared:/app/packages/shared
+      - /app/packages/server/node_modules
+      - /app/packages/shared/node_modules
+
+  # Frontend Client
+  client:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    container_name: tasks-tracker-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+  redis_data: 
