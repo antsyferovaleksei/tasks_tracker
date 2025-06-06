@@ -318,6 +318,43 @@ export const useCreateProject = () => {
   });
 };
 
+export const useUpdateProject = () => {
+  const queryClient = useQueryClient();
+  const { updateProject } = useProjectsStore();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Project> }) =>
+      apiClient.updateProject(id, data),
+    onSuccess: (response, variables) => {
+      if (response.success && response.data) {
+        updateProject(variables.id, response.data);
+        queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+        toast.success('Проект оновлено!');
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка оновлення проекту');
+    },
+  });
+};
+
+export const useDeleteProject = () => {
+  const queryClient = useQueryClient();
+  const { deleteProject } = useProjectsStore();
+
+  return useMutation({
+    mutationFn: (id: string) => apiClient.deleteProject(id),
+    onSuccess: (_, id) => {
+      deleteProject(id);
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      toast.success('Проект видалено!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка видалення проекту');
+    },
+  });
+};
+
 // Time Tracking Hooks
 export const useActiveTimer = () => {
   const { setActiveTimer } = useTimeTrackingStore();

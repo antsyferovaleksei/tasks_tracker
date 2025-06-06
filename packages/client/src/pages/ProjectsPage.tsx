@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogActions,
   Chip,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -20,13 +21,15 @@ import {
   Delete as DeleteIcon,
   Folder as FolderIcon,
 } from '@mui/icons-material';
-import { useProjects, useCreateProject } from '../hooks';
+import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '../hooks';
 import { Project } from '../types';
 import { formatDate } from '../utils';
 
 export default function ProjectsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
@@ -36,25 +39,88 @@ export default function ProjectsPage() {
 
   const { projects = [], isLoading } = useProjects();
   const createProjectMutation = useCreateProject();
+  const updateProjectMutation = useUpdateProject();
+  const deleteProjectMutation = useDeleteProject();
 
-  const handleCreateProject = () => {
-    createProjectMutation.mutate(newProject, {
-      onSuccess: () => {
-        setDialogOpen(false);
-        setNewProject({
-          name: '',
-          description: '',
-          color: '#2196f3',
-          archived: false,
-        });
-      },
+  const handleCreateProject = async () => {
+    if (!newProject.name.trim()) {
+      return;
+    }
+
+    console.log('Creating project:', newProject);
+    console.log('Access token:', localStorage.getItem('accessToken'));
+
+    try {
+      const result = await createProjectMutation.mutateAsync(newProject);
+      console.log('Project created successfully:', result);
+      handleCloseDialog();
+    } catch (error) {
+      console.error('Failed to create project:', error);
+      // Error is handled by the mutation's onError
+    }
+  };
+
+  const handleUpdateProject = async () => {
+    if (!editingProject || !newProject.name.trim()) {
+      return;
+    }
+
+    try {
+      await updateProjectMutation.mutateAsync({
+        id: editingProject.id,
+        data: newProject,
+      });
+      handleCloseDialog();
+    } catch (error) {
+      console.error('Failed to update project:', error);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) {
+      return;
+    }
+
+    try {
+      await deleteProjectMutation.mutateAsync(projectToDelete.id);
+      setDeleteDialogOpen(false);
+      setProjectToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+    }
+  };
+
+  const handleOpenEditDialog = (project: Project) => {
+    setEditingProject(project);
+    setNewProject({
+      name: project.name,
+      description: project.description || '',
+      color: project.color || '#2196f3',
+      archived: project.archived || false,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleOpenDeleteDialog = (project: Project) => {
+    setProjectToDelete(project);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setEditingProject(null);
+    setNewProject({
+      name: '',
+      description: '',
+      color: '#2196f3',
+      archived: false,
     });
   };
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" p={4}>
-        <Typography>Завантаження...</Typography>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress size={60} />
       </Box>
     );
   }
@@ -96,10 +162,19 @@ export default function ProjectsPage() {
                     </Typography>
                   </Box>
                   <Box>
-                    <IconButton size="small">
+                    <IconButton 
+                      size="small" 
+                      onClick={() => handleOpenEditDialog(project)}
+                      title="Редагувати проект"
+                    >
                       <EditIcon />
                     </IconButton>
-                    <IconButton size="small" color="error">
+                    <IconButton 
+                      size="small" 
+                      color="error"
+                      onClick={() => handleOpenDeleteDialog(project)}
+                      title="Видалити проект"
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </Box>
@@ -135,9 +210,9 @@ export default function ProjectsPage() {
         </Box>
       )}
 
-      {/* Create Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Створити проект</DialogTitle>
+      {/* Create/Edit Dialog */}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingProject ? 'Редагувати проект' : 'Створити проект'}</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
@@ -167,13 +242,65 @@ export default function ProjectsPage() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Скасувати</Button>
-          <Button
-            onClick={handleCreateProject}
-            variant="contained"
-            disabled={!newProject.name}
+          <Button 
+            onClick={handleCloseDialog}
+            disabled={createProjectMutation.isPending || updateProjectMutation.isPending}
           >
-            Створити
+            Скасувати
+          </Button>
+          <Button
+            onClick={editingProject ? handleUpdateProject : handleCreateProject}
+            variant="contained"
+            disabled={
+              !newProject.name.trim() || 
+              createProjectMutation.isPending || 
+              updateProjectMutation.isPending
+            }
+            startIcon={
+              (createProjectMutation.isPending || updateProjectMutation.isPending) ? 
+              <CircularProgress size={20} /> : null
+            }
+          >
+            {editingProject ? (
+              updateProjectMutation.isPending ? 'Оновлення...' : 'Оновити'
+            ) : (
+              createProjectMutation.isPending ? 'Створення...' : 'Створити'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Підтвердження видалення</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Ви впевнені, що хочете видалити проект <strong>"{projectToDelete?.name}"</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Ця дія незворотна. Всі завдання в цьому проекті також будуть видалені.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={deleteProjectMutation.isPending}
+          >
+            Скасувати
+          </Button>
+          <Button
+            onClick={handleDeleteProject}
+            variant="contained"
+            color="error"
+            disabled={deleteProjectMutation.isPending}
+            startIcon={deleteProjectMutation.isPending ? <CircularProgress size={20} /> : null}
+          >
+            {deleteProjectMutation.isPending ? 'Видалення...' : 'Видалити'}
           </Button>
         </DialogActions>
       </Dialog>

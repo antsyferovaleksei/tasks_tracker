@@ -172,6 +172,23 @@ export const refreshToken = async (req: Request, res: Response) => {
   }
 };
 
+export const logout = async (req: Request, res: Response) => {
+  try {
+    // For JWT tokens, logout is typically handled on the client side
+    // by removing the tokens from storage. Here we just return success.
+    res.json({
+      success: true,
+      message: 'Успішний вихід з системи',
+    });
+  } catch (error: any) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Помилка виходу з системи',
+    });
+  }
+};
+
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body;

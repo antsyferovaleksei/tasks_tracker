@@ -23,6 +23,7 @@ const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const TestPage = lazy(() => import('./pages/TestPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Create React Query client
@@ -296,6 +297,14 @@ const App: React.FC = () => {
                         <RegisterPage />
                       </Suspense>
                     </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/test"
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <TestPage />
+                    </Suspense>
                   }
                 />
 

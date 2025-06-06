@@ -18,6 +18,7 @@ export const createProjectSchema = z.object({
   name: z.string().min(1, 'Назва проекту обов\'язкова'),
   description: z.string().optional(),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Некоректний колір').optional(),
+  archived: z.boolean().optional(),
 });
 
 export const updateProjectSchema = z.object({
