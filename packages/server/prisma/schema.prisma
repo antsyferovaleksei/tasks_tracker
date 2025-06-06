@@ -21,11 +21,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  projects      Project[]
-  tasks         Task[]
-  timeEntries   TimeEntry[]
-  notifications Notification[]
-  userFilters   UserFilter[]
+  projects           Project[]
+  tasks              Task[]
+  timeEntries        TimeEntry[]
+  notifications      Notification[]
+  userFilters        UserFilter[]
+  reminderSettings   ReminderSettings?
+  scheduledReminders ScheduledReminder[]
   
   @@map("users")
 }
@@ -67,8 +69,9 @@ model Task {
   projectId String?
   project   Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
   
-  timeEntries TimeEntry[]
-  tags        TaskTag[]
+  timeEntries        TimeEntry[]
+  tags               TaskTag[]
+  scheduledReminders ScheduledReminder[]
   
   @@map("tasks")
 }
@@ -149,6 +152,48 @@ model UserFilter {
   
   @@unique([userId, name])
   @@map("user_filters")
+}
+
+model ReminderSettings {
+  id                    String  @id @default(cuid())
+  emailReminders        Boolean @default(true)
+  pushNotifications     Boolean @default(true)
+  reminderFrequency     String  @default("DAILY") // DAILY, WEEKLY, CUSTOM
+  daysBeforeDeadline    Int     @default(1)
+  customReminderTimes   String? // JSON array of times like ["09:00", "17:00"]
+  quietHoursStart       String? // Time like "22:00"
+  quietHoursEnd         String? // Time like "08:00"
+  weekendReminders      Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("reminder_settings")
+}
+
+model ScheduledReminder {
+  id            String   @id @default(cuid())
+  type          String   // EMAIL, PUSH
+  scheduledFor  DateTime
+  sent          Boolean  @default(false)
+  title         String
+  message       String
+  metadata      String?  // JSON with additional data (taskId, etc.)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId String?
+  task   Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  @@map("scheduled_reminders")
 }
 
 // For SQLite compatibility, we use string constants instead of enums

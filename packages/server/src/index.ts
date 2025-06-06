@@ -52,6 +52,8 @@ import taskRoutes from './routes/taskRoutes';
 import tagRoutes from './routes/tagRoutes';
 import timeEntryRoutes from './routes/timeEntryRoutes';
 import filterRoutes from './routes/filterRoutes';
+import reminderRoutes from './routes/reminderRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 // API routes
 app.get('/api', (req, res) => {
@@ -80,6 +82,8 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/time-entries', timeEntryRoutes);
 app.use('/api/filters', filterRoutes);
+app.use('/api/reminders', reminderRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
