@@ -485,7 +485,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
         entry.startTime.toLocaleDateString('uk-UA'),
         entry.startTime.toLocaleTimeString('uk-UA'),
         entry.endTime?.toLocaleTimeString('uk-UA') || 'Активно',
-        Math.round(entry.duration / 60),
+        Math.round((entry.duration || 0) / 60),
         entry.task.title,
         entry.task.project?.name || 'Без проекту',
         entry.description || '',

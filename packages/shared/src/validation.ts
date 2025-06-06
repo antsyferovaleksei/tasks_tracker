@@ -66,14 +66,14 @@ export const createTimeEntrySchema = z.object({
   description: z.string().optional(),
   startTime: z.string().datetime().optional().or(z.date().optional()),
   endTime: z.string().datetime().optional().or(z.date().optional()),
-  duration: z.number().min(0).optional(),
+  duration: z.number().optional(), // Дозволяємо негативні значення для коригування часу
 });
 
 export const updateTimeEntrySchema = z.object({
   description: z.string().optional(),
   startTime: z.string().datetime().optional().or(z.date().optional()),
   endTime: z.string().datetime().optional().or(z.date().optional()),
-  duration: z.number().min(0).optional(),
+  duration: z.number().optional(), // Дозволяємо негативні значення для коригування часу
 });
 
 // Notification validation schemas

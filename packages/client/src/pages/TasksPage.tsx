@@ -320,16 +320,25 @@ export default function TasksPage() {
   const handleCreateTimeEntry = () => {
     if (!selectedTaskForTime || !newTimeEntry.duration) return;
 
-    const durationInSeconds = parseInt(newTimeEntry.duration) * 60; // конвертуємо хвилини в секунди
+    const durationInMinutes = parseInt(newTimeEntry.duration);
+    const durationInSeconds = durationInMinutes * 60; // конвертуємо хвилини в секунди
+    
+    // Для від'ємних значень створюємо запис з негативною тривалістю
     const startTime = new Date(newTimeEntry.startTime);
-    const endTime = new Date(startTime.getTime() + durationInSeconds * 1000);
+    const endTime = durationInSeconds > 0 
+      ? new Date(startTime.getTime() + durationInSeconds * 1000)
+      : new Date(startTime.getTime()); // Для негативних значень endTime = startTime
+
+    const description = durationInMinutes < 0 
+      ? (newTimeEntry.description || `Віднято ${Math.abs(durationInMinutes)} хвилин`)
+      : (newTimeEntry.description || `Додано ${durationInMinutes} хвилин`);
 
     createTimeEntry.mutate({
       taskId: selectedTaskForTime.id,
-      description: newTimeEntry.description,
+      description: description,
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
-      duration: durationInSeconds,
+      duration: durationInSeconds, // Може бути негативним
       isRunning: false,
     }, {
       onSuccess: () => {
@@ -701,13 +710,14 @@ export default function TasksPage() {
             />
             
             <TextField
-              label="Тривалість (хвилини)"
+              label="Тривалість (хвилини) *"
               type="number"
               value={newTimeEntry.duration}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, duration: e.target.value })}
               required
               fullWidth
-              inputProps={{ min: 1 }}
+              inputProps={{ step: 1 }}
+              helperText="Додатні значення додають час, від'ємні - віднімають час від завдання"
             />
             
             <TextField
