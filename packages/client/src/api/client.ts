@@ -113,6 +113,11 @@ class ApiClient {
     return response.data;
   }
 
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<ApiResponse<any>> {
+    const response = await this.instance.post('/auth/change-password', data);
+    return response.data;
+  }
+
   // Projects API
   async getProjects(): Promise<ApiResponse<Project[]>> {
     const response = await this.instance.get('/projects');

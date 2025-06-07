@@ -26,7 +26,7 @@ import {
   Assignment,
   Folder,
   Analytics,
-  Settings,
+
   AccountCircle,
   Logout,
   LightMode,
@@ -91,12 +91,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: Analytics,
       path: '/analytics',
       color: theme.palette.warning.main,
-    },
-    {
-      text: 'Налаштування',
-      icon: Settings,
-      path: '/settings',
-      color: theme.palette.info.main,
     },
   ];
 

@@ -184,6 +184,42 @@ export const useAuth = () => {
   };
 };
 
+// Profile Hooks
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  const { updateUser } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (data: { name?: string; email?: string }) =>
+      apiClient.updateProfile(data),
+    onSuccess: (response) => {
+      if (response.success && response.data) {
+        updateUser(response.data);
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile });
+        toast.success('Профіль успішно оновлено!');
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка оновлення профілю');
+    },
+  });
+};
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      apiClient.changePassword(data),
+    onSuccess: (response: any) => {
+      if (response.success) {
+        toast.success('Пароль успішно змінено!');
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Помилка зміни паролю');
+    },
+  });
+};
+
 // Tasks Hooks
 export const useTasks = (filters?: TaskFilters, page = 1, limit = 20) => {
   const { setTasks, setPagination } = useTasksStore();

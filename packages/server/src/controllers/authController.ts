@@ -286,4 +286,64 @@ export const getProfile = async (req: Request, res: Response) => {
       message: 'Помилка отримання профілю',
     });
   }
+};
+
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+    const { name, email } = req.body;
+
+    if (!name && !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Надайте дані для оновлення',
+      });
+    }
+
+    // Перевіряємо, чи email не зайнятий іншим користувачем
+    if (email) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email,
+          NOT: { id: userId },
+        },
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Користувач з таким email вже існує',
+        });
+      }
+    }
+
+    const updateData: any = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: updatedUser,
+      message: 'Профіль успішно оновлено',
+    });
+  } catch (error: any) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Помилка оновлення профілю',
+    });
+  }
 }; 

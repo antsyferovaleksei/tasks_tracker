@@ -16,7 +16,7 @@ const TaskDetailPage = lazy(() => import('./pages/TaskDetailPage'));
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const TestPage = lazy(() => import('./pages/TestPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -320,7 +320,7 @@ const App: React.FC = () => {
                             <Route path="/projects" element={<ProjectsPage />} />
                             <Route path="/projects/:id" element={<ProjectDetailPage />} />
                             <Route path="/analytics" element={<AnalyticsPage />} />
-                            <Route path="/settings" element={<SettingsPage />} />
+      
                             <Route path="/profile" element={<ProfilePage />} />
                             <Route path="*" element={<NotFoundPage />} />
                           </Routes>
