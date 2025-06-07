@@ -105,8 +105,8 @@ export interface TimeStats {
 
 // Filter types
 export interface TaskFilters {
-  status?: TaskStatus;
-  priority?: TaskPriority;
+  status?: TaskStatus[];
+  priority?: TaskPriority[];
   projectId?: string;
   tagIds?: string[];
   search?: string;

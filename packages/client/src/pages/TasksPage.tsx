@@ -39,6 +39,7 @@ import {
   AccessTime as TimeIcon,
   Timer as TimerIcon,
   Schedule as ScheduleIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -154,6 +155,7 @@ export default function TasksPage() {
     priority: undefined,
     search: '',
   });
+  const [searchInput, setSearchInput] = useState(filter.search || ''); // Локальний стейт для поля пошуку
   const [dialogOpen, setDialogOpen] = useState(false);
   const [timeEntryDialogOpen, setTimeEntryDialogOpen] = useState(false);
   const [selectedTaskForTime, setSelectedTaskForTime] = useState<Task | null>(null);
@@ -175,6 +177,10 @@ export default function TasksPage() {
 
   const { tasks: rawTasks = [], isLoading } = useTasks(filter);
   const tasks = Array.isArray(rawTasks) ? rawTasks : [];
+  
+  // Дебаг логування
+  console.log('Current filter:', filter);
+  console.log('Tasks received:', tasks.length, tasks);
   const { projects = [], isLoading: isLoadingProjects } = useProjects();
   const { activeTimer } = useActiveTimer();
   const createTaskMutation = useCreateTask();
@@ -184,32 +190,25 @@ export default function TasksPage() {
   const stopTimer = useStopTimer();
   const createTimeEntry = useCreateTimeEntry();
 
-  // Групування завдань за проектами
+  // Групування завдань за проектами (показуємо тільки проекти з завданнями, що відповідають фільтрам)
   const groupedTasks = useMemo(() => {
     const grouped: { [projectId: string]: { project: Project | null; tasks: Task[] } } = {};
     
-    // Додаємо всі проекти
-    projects.forEach(project => {
-      grouped[project.id] = { project, tasks: [] };
-    });
-    
-    // Групуємо завдання
+    // Групуємо тільки наявні завдання (які вже відфільтровані)
     tasks.forEach(task => {
       const projectId = task.projectId || 'no-project';
       if (!grouped[projectId]) {
+        // Знаходимо проект за ID
+        const project = projectId === 'no-project' 
+          ? null 
+          : projects.find(p => p.id === projectId) || null;
+        
         grouped[projectId] = { 
-          project: task.project || null, 
+          project, 
           tasks: [] 
         };
       }
       grouped[projectId].tasks.push(task);
-    });
-    
-    // Видаляємо порожні проекти без завдань
-    Object.keys(grouped).forEach(projectId => {
-      if (grouped[projectId].tasks.length === 0 && projectId !== 'no-project') {
-        delete grouped[projectId];
-      }
     });
     
     return grouped;
@@ -360,6 +359,34 @@ export default function TasksPage() {
     setDialogOpen(true);
   };
 
+  const handleSearch = () => {
+    console.log('Searching with input:', searchInput);
+    const newFilter = { ...filter, search: searchInput };
+    console.log('New filter:', newFilter);
+    setFilter(newFilter);
+  };
+
+  const handleClearFilters = () => {
+    setSearchInput('');
+    setFilter({
+      status: undefined,
+      priority: undefined,
+      search: '',
+      projectId: undefined,
+    });
+  };
+
+  // Перевіряємо, чи є активні фільтри
+  const hasActiveFilters = () => {
+    return !!(
+      searchInput ||
+      filter.search ||
+      filter.projectId ||
+      (filter.status && filter.status.length > 0) ||
+      (filter.priority && filter.priority.length > 0)
+    );
+  };
+
   if (isLoading || isLoadingProjects) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
@@ -407,11 +434,23 @@ export default function TasksPage() {
       )}
 
       {/* Filters */}
-      <Box mb={3} display="flex" gap={2} flexWrap="wrap">
+      <Box mb={3} display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
         <TextField
           placeholder="Пошук завдань..."
-          value={filter.search || ''}
-          onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+          value={searchInput}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSearchInput(value);
+            // Якщо поле очищене, автоматично очищаємо пошук
+            if (value === '' && filter.search) {
+              setFilter({ ...filter, search: '' });
+            }
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          }}
           sx={{ minWidth: 200 }}
         />
         <FormControl sx={{ minWidth: 120 }}>
@@ -431,8 +470,14 @@ export default function TasksPage() {
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel>Статус</InputLabel>
           <Select
-            value={filter.status || ''}
-            onChange={(e) => setFilter({ ...filter, status: e.target.value as TaskStatus || undefined })}
+            value={Array.isArray(filter.status) ? filter.status[0] || '' : filter.status || ''}
+            onChange={(e) => {
+              const value = e.target.value as TaskStatus;
+              setFilter({ 
+                ...filter, 
+                status: value ? [value] : undefined 
+              });
+            }}
           >
             <MenuItem value="">Всі</MenuItem>
             <MenuItem value="TODO">Потрібно зробити</MenuItem>
@@ -443,8 +488,14 @@ export default function TasksPage() {
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel>Пріоритет</InputLabel>
           <Select
-            value={filter.priority || ''}
-            onChange={(e) => setFilter({ ...filter, priority: e.target.value as TaskPriority || undefined })}
+            value={Array.isArray(filter.priority) ? filter.priority[0] || '' : filter.priority || ''}
+            onChange={(e) => {
+              const value = e.target.value as TaskPriority;
+              setFilter({ 
+                ...filter, 
+                priority: value ? [value] : undefined 
+              });
+            }}
           >
             <MenuItem value="">Всі</MenuItem>
             <MenuItem value="LOW">Низький</MenuItem>
@@ -452,6 +503,16 @@ export default function TasksPage() {
             <MenuItem value="HIGH">Високий</MenuItem>
           </Select>
         </FormControl>
+        {hasActiveFilters() && (
+          <Button
+            variant="outlined"
+            startIcon={<ClearIcon />}
+            onClick={handleClearFilters}
+            sx={{ height: '56px' }}
+          >
+            Очистити фільтри
+          </Button>
+        )}
       </Box>
 
       {/* Групування завдань за проектами */}
