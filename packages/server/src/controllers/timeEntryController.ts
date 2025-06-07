@@ -49,6 +49,14 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при додаванні часу
+    if (task.status === 'TODO' && (validatedData.duration || 0) > 0) {
+      await prisma.task.update({
+        where: { id: validatedData.taskId },
+        data: { status: 'IN_PROGRESS' },
+      });
+    }
+
     res.status(201).json({
       success: true,
       data: timeEntry,
@@ -141,6 +149,14 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при першому запуску таймера
+    if (task.status === 'TODO') {
+      await prisma.task.update({
+        where: { id: taskId },
+        data: { status: 'IN_PROGRESS' },
+      });
+    }
+
     res.status(201).json({
       success: true,
       data: timeEntry,
@@ -168,12 +184,15 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Знаходимо активний запис часу
+    // Знаходимо активний запис часу з інформацією про завдання
     const timeEntry = await prisma.timeEntry.findFirst({
       where: {
         id,
         userId,
         isRunning: true,
+      },
+      include: {
+        task: true,
       },
     });
 
@@ -186,6 +205,14 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
 
     const endTime = new Date();
     const duration = Math.floor((endTime.getTime() - timeEntry.startTime.getTime()) / 1000);
+
+    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при зупинці таймера з витраченим часом
+    if (timeEntry.task.status === 'TODO' && duration > 0) {
+      await prisma.task.update({
+        where: { id: timeEntry.taskId },
+        data: { status: 'IN_PROGRESS' },
+      });
+    }
 
     const updatedEntry = await prisma.timeEntry.update({
       where: { id },
@@ -404,6 +431,14 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
         },
       },
     });
+
+    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при оновленні часу
+    if (timeEntry.task.status === 'TODO' && (timeEntry.duration || 0) > 0) {
+      await prisma.task.update({
+        where: { id: timeEntry.taskId },
+        data: { status: 'IN_PROGRESS' },
+      });
+    }
 
     res.json({
       success: true,
