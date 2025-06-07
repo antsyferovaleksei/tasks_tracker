@@ -104,7 +104,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
     });
 
     const dailyStats = Array.from(dailyStatsMap.values())
-      .sort((a, b) => b.date.localeCompare(a.date))
+      .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 30);
 
     // Розподіл завдань за пріоритетом

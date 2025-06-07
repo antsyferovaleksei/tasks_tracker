@@ -191,7 +191,8 @@ export const useTasks = (filters?: TaskFilters, page = 1, limit = 20) => {
   const query = useQuery({
     queryKey: queryKeys.tasks.list(filters, page),
     queryFn: () => apiClient.getTasks({ page, limit, filters }),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 10 * 1000, // 10 seconds
+    refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
   });
 
   useEffect(() => {
@@ -305,7 +306,8 @@ export const useProjects = () => {
   const query = useQuery({
     queryKey: queryKeys.projects.all,
     queryFn: () => apiClient.getProjects(),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60 * 1000, // Auto-refetch every minute
   });
 
   useEffect(() => {
@@ -410,7 +412,14 @@ export const useStartTimer = () => {
     onSuccess: (response) => {
       if (response.success && response.data) {
         setActiveTimer(response.data);
+        // Invalidate all related queries to update the UI
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
         toast.success('Таймер запущено!');
       }
     },
@@ -429,8 +438,15 @@ export const useStopTimer = () => {
     onSuccess: (response) => {
       if (response.success) {
         setActiveTimer(null);
+        // Invalidate all related queries to update the UI
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
+        // Also invalidate time stats for all tasks as status might have changed
+        queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
         toast.success('Таймер зупинено!');
       }
     },
@@ -451,7 +467,8 @@ export const useTimeEntries = (params?: {
   return useQuery({
     queryKey: queryKeys.timeEntries.list(params),
     queryFn: () => apiClient.getTimeEntries(params),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 10 * 1000, // 10 seconds
+    refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
   });
 };
 
@@ -463,8 +480,13 @@ export const useCreateTimeEntry = () => {
       apiClient.createTimeEntry(data),
     onSuccess: (response) => {
       if (response.success && response.data) {
+        // Invalidate all related queries to update the UI
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
         toast.success('Запис часу створено!');
       }
     },
@@ -482,8 +504,13 @@ export const useUpdateTimeEntry = () => {
       apiClient.updateTimeEntry(id, data),
     onSuccess: (response, variables) => {
       if (response.success && response.data) {
+        // Invalidate all related queries to update the UI
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
         queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
         toast.success('Запис часу оновлено!');
       }
     },
@@ -499,7 +526,13 @@ export const useDeleteTimeEntry = () => {
   return useMutation({
     mutationFn: (id: string) => apiClient.deleteTimeEntry(id),
     onSuccess: () => {
+      // Invalidate all related queries to update the UI
       queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
+      queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
       toast.success('Запис часу видалено!');
     },
     onError: (error: any) => {
@@ -513,7 +546,8 @@ export const useTimeStats = (taskId: string) => {
     queryKey: queryKeys.timeEntries.stats(taskId),
     queryFn: () => apiClient.getTimeStats(taskId),
     enabled: !!taskId,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 10 * 1000, // 10 seconds
+    refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
   });
 };
 
@@ -522,7 +556,8 @@ export const useDashboard = (period = 30) => {
   return useQuery({
     queryKey: queryKeys.analytics.dashboard(period),
     queryFn: () => apiClient.getDashboardMetrics(period),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 2 * 60 * 1000, // Auto-refetch every 2 minutes
   });
 };
 
@@ -530,7 +565,8 @@ export const useTimeChart = (params?: any) => {
   return useQuery({
     queryKey: queryKeys.analytics.timeChart(params),
     queryFn: () => apiClient.getTimeChartData(params),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 2 * 60 * 1000, // Auto-refetch every 2 minutes
   });
 };
 
