@@ -1,5 +1,12 @@
 const bcrypt = require('bcryptjs');
-const { query } = require('../lib/database.js');
+const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
+
+// Ініціалізація Supabase
+const supabaseUrl = 'https://gwkyqchyuihmgpvqosvk.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3a3lxY2h5dWlobWdwdnFvc3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzMTU1MTksImV4cCI6MjA2NDg5MTUxOX0.Gmwe2GFN4oN7udh_ZnZJTefSa1RZdzzB7pqUBfHok7s';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = async function handler(req, res) {
   // Set CORS headers
@@ -30,22 +37,21 @@ module.exports = async function handler(req, res) {
     }
 
     // Знаходимо користувача за email
-    const result = await query(
-      'SELECT id, name, email, password_hash, created_at FROM users WHERE email = $1',
-      [email]
-    );
+    const { data: user, error: findError } = await supabase
+      .from('users')
+      .select('id, name, email, password, created_at')
+      .eq('email', email)
+      .single();
 
-    if (result.rows.length === 0) {
+    if (findError || !user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    const user = result.rows[0];
-
     // Перевіряємо пароль
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -54,17 +60,44 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Успішний логін - повертаємо користувача без пароля
+    // Створюємо JWT токени
+    const jwtSecret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-this-in-production';
+
+    const accessToken = jwt.sign(
+      { 
+        userId: user.id,
+        email: user.email 
+      },
+      jwtSecret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
+    const refreshToken = jwt.sign(
+      { 
+        userId: user.id,
+        email: user.email 
+      },
+      jwtRefreshSecret,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
+    );
+
+    // Успішний логін
     res.status(200).json({
       success: true,
       message: 'Login successful',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.created_at
-      },
-      token: `demo-token-${user.id}-${Date.now()}` // В майбутньому замінити на JWT
+      data: {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          createdAt: user.created_at
+        },
+        tokens: {
+          accessToken,
+          refreshToken
+        }
+      }
     });
 
   } catch (error) {
