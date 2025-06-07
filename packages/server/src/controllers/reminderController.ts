@@ -5,7 +5,7 @@ import { z } from 'zod';
 import nodemailer from 'nodemailer';
 import * as cron from 'node-cron';
 
-// Схема для налаштувань нагадувань
+// Schema for reminder settings
 const reminderSettingsSchema = z.object({
   emailReminders: z.boolean().optional(),
   pushNotifications: z.boolean().optional(),
@@ -17,7 +17,7 @@ const reminderSettingsSchema = z.object({
   weekendReminders: z.boolean().optional(),
 });
 
-// Схема для створення нагадування
+// Schema for creating reminder
 const createReminderSchema = z.object({
   type: z.enum(['EMAIL', 'PUSH']),
   scheduledFor: z.string().datetime(),
@@ -27,7 +27,7 @@ const createReminderSchema = z.object({
   metadata: z.object({}).optional(),
 });
 
-// Email транспортер (в production використовуйте реальні налаштування)
+// Email transporter (use real settings in production)
 const emailTransporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'localhost',
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -38,7 +38,7 @@ const emailTransporter = nodemailer.createTransport({
   },
 });
 
-// Отримання налаштувань нагадувань користувача
+// Getting user reminder settings
 export const getReminderSettings = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -54,7 +54,7 @@ export const getReminderSettings = async (req: AuthRequest, res: Response) => {
       where: { userId },
     });
 
-    // Якщо налаштувань немає, створюємо значення за замовчуванням
+    // If no settings exist, create default values
     if (!settings) {
       settings = await prisma.reminderSettings.create({
         data: { userId },
@@ -79,7 +79,7 @@ export const getReminderSettings = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Оновлення налаштувань нагадувань
+// Updating reminder settings
 export const updateReminderSettings = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = reminderSettingsSchema.parse(req.body);
@@ -126,7 +126,7 @@ export const updateReminderSettings = async (req: AuthRequest, res: Response) =>
   }
 };
 
-// Створення запланованого нагадування
+// Creating scheduled reminder
 export const createScheduledReminder = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = createReminderSchema.parse(req.body);
@@ -139,7 +139,7 @@ export const createScheduledReminder = async (req: AuthRequest, res: Response) =
       });
     }
 
-    // Перевіряємо, чи існує task (якщо вказано)
+    // Check if task exists (if specified)
     if (validatedData.taskId) {
       const task = await prisma.task.findFirst({
         where: {
@@ -185,7 +185,7 @@ export const createScheduledReminder = async (req: AuthRequest, res: Response) =
   }
 };
 
-// Отримання запланованих нагадувань
+// Getting scheduled reminders
 export const getScheduledReminders = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -242,7 +242,7 @@ export const getScheduledReminders = async (req: AuthRequest, res: Response) => 
   }
 };
 
-// Відправка email нагадування
+// Sending email reminder
 export const sendEmailReminder = async (userId: string, taskId: string, reminder: any) => {
   try {
     const user = await prisma.user.findUnique({
@@ -286,7 +286,7 @@ export const sendEmailReminder = async (userId: string, taskId: string, reminder
   }
 };
 
-// Автоматичне створення нагадувань для tasks з дедлайнами
+// Automatic creation of reminders for tasks with deadlines
 export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -298,7 +298,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
       });
     }
 
-    // Отримуємо налаштування користувача
+    // Get user settings
     const settings = await prisma.reminderSettings.findUnique({
       where: { userId },
     });
@@ -311,7 +311,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
       });
     }
 
-    // Отримуємо task з дедлайнами
+    // Get tasks with deadlines
     const tasksWithDeadlines = await prisma.task.findMany({
       where: {
         userId,
@@ -329,7 +329,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
       const reminderDate = new Date(task.dueDate);
       reminderDate.setDate(reminderDate.getDate() - settings.daysBeforeDeadline);
 
-      // Перевіряємо, чи не існує вже нагадування для цього task
+      // Check if reminder for this task doesn't already exist
       const existingReminder = await prisma.scheduledReminder.findFirst({
         where: {
           userId,
@@ -341,7 +341,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
 
       if (existingReminder) continue;
 
-      // Створюємо нагадування
+      // Create reminder
       if (settings.emailReminders) {
         await prisma.scheduledReminder.create({
           data: {
@@ -387,12 +387,12 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
   }
 };
 
-// Обробка нагадувань (запускається по cron)
+// Process reminders (runs by cron)
 export const processReminders = async () => {
   try {
     const now = new Date();
     
-    // Отримуємо нагадування, які потрібно відправити
+    // Get reminders that need to be sent
     const dueReminders = await prisma.scheduledReminder.findMany({
       where: {
         scheduledFor: { lte: now },
@@ -412,7 +412,7 @@ export const processReminders = async () => {
           await sendEmailReminder(reminder.userId, reminder.taskId, reminder);
         }
 
-        // Позначаємо як відправлене
+        // Mark as sent
         await prisma.scheduledReminder.update({
           where: { id: reminder.id },
           data: { sent: true },
@@ -428,7 +428,7 @@ export const processReminders = async () => {
   }
 };
 
-// Видалення нагадування
+// Delete reminder
 export const deleteReminder = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -472,7 +472,7 @@ export const deleteReminder = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Запуск cron job для обробки нагадувань (кожні 5 minutes)
+// Start cron job for processing reminders (every 5 minutes)
 if (process.env.NODE_ENV !== 'test') {
   cron.schedule('*/5 * * * *', () => {
     console.log('Running reminder processing job...');

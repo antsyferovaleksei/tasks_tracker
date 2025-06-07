@@ -66,12 +66,12 @@ export default function ProfilePage() {
 
   const metrics = dashboardData?.data?.summary;
 
-  // Розрахуємо середній час на task
+  // Calculate average time per task
   const averageTimePerTask = metrics && metrics.completedTasks > 0 
     ? Math.floor(metrics.totalTimeSpent / metrics.completedTasks)
     : 0;
 
-  // Розрахуємо task на тиждень (approximately)
+  // Calculate tasks per week (approximately)
   const tasksPerWeek = Math.ceil((metrics?.completedTasks || 0) / 4) || 0;
 
   const handleUpdateProfile = () => {
@@ -351,7 +351,7 @@ export default function ProfilePage() {
           />
           <TextField
             margin="dense"
-            label="Підтвердити новий пароль"
+            label="Confirm new password"
             type="password"
             fullWidth
             variant="outlined"

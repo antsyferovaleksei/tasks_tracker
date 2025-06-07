@@ -105,7 +105,7 @@ export default function TestPage() {
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
               />
               <TextField
-                label="Пароль"
+                label="Password"
                 type="password"
                 value={loginData.password}
                 onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}

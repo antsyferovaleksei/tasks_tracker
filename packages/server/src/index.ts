@@ -14,16 +14,16 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(helmet());
 
-// Rate limiting - більш м'які обмеження для розробки
+// Rate limiting - softer limits for development
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000'), // збільшено до 1000 запитів
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000'), // increased to 1000 requests
   message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true, // повертає rate limit інфо в `RateLimit-*` заголовках
-  legacyHeaders: false, // вимкнути `X-RateLimit-*` заголовки
+  standardHeaders: true, // returns rate limit info in `RateLimit-*` headers
+  legacyHeaders: false, // disable `X-RateLimit-*` headers
 });
 
-// Застосовувати rate limiting тільки в production
+// Apply rate limiting only in production
 if (process.env.NODE_ENV === 'production') {
   app.use('/api', limiter);
 }
@@ -42,7 +42,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Per-Page'],
   preflightContinue: false,
-  optionsSuccessStatus: 204, // деякі legacy браузери (IE11, різні SmartTVs) choke on 204
+  optionsSuccessStatus: 204, // some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
 
 // Body parsing middleware

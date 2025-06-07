@@ -5,12 +5,12 @@ import { TaskStatus, TaskPriority, NotificationType } from './types';
 export const createUserSchema = z.object({
   email: z.string().email('Некоректний email'),
   name: z.string().min(2, 'Ім\'я повинно містити принаймні 2 символи'),
-  password: z.string().min(6, 'Пароль повинен містити принаймні 6 символів'),
+  password: z.string().min(6, 'Password повинен містити принаймні 6 символів'),
 });
 
 export const loginSchema = z.object({
   email: z.string().email('Некоректний email'),
-  password: z.string().min(1, 'Пароль обов\'язковий'),
+  password: z.string().min(1, 'Password обов\'язковий'),
 });
 
 // Project validation schemas
@@ -66,14 +66,14 @@ export const createTimeEntrySchema = z.object({
   description: z.string().optional(),
   startTime: z.string().datetime().optional().or(z.date().optional()),
   endTime: z.string().datetime().optional().or(z.date().optional()),
-  duration: z.number().optional(), // Дозволяємо негативні значення для коригування часу
+  duration: z.number().optional(), // Allow negative values for time adjustment
 });
 
 export const updateTimeEntrySchema = z.object({
   description: z.string().optional(),
   startTime: z.string().datetime().optional().or(z.date().optional()),
   endTime: z.string().datetime().optional().or(z.date().optional()),
-  duration: z.number().optional(), // Дозволяємо негативні значення для коригування часу
+  duration: z.number().optional(), // Allow negative values for time adjustment
 });
 
 // Notification validation schemas

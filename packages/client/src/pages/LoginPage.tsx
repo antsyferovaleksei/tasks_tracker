@@ -63,9 +63,9 @@ const LoginPage: React.FC = () => {
     }
 
     if (!formData.password) {
-      newErrors.password = 'Пароль обов\'язковий';
+      newErrors.password = 'Password обов\'язковий';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Пароль повинен містити принаймні 6 символів';
+      newErrors.password = 'Password повинен містити принаймні 6 символів';
     }
 
     setErrors(newErrors);
@@ -136,10 +136,10 @@ const LoginPage: React.FC = () => {
                 </IconButton>
               </Box>
               <Typography variant="h4" component="h2" gutterBottom fontWeight="600">
-                Вітаємо знову! 👋
+                Hello! 👋
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Увійдіть до свого акаунту для продовження роботи
+                Log in to your account to continue working.
               </Typography>
             </Box>
 
@@ -148,7 +148,7 @@ const LoginPage: React.FC = () => {
               <Typography variant="body2">
                 <strong>Демо акаунт:</strong><br />
                 Email: demo@example.com<br />
-                Пароль: demo123
+                Password: demo123
               </Typography>
             </Alert>
 
@@ -157,7 +157,7 @@ const LoginPage: React.FC = () => {
               <TextField
                 fullWidth
                 id="email"
-                label="Email адреса"
+                label="Email"
                 name="email"
                 autoComplete="email"
                 autoFocus
@@ -178,7 +178,7 @@ const LoginPage: React.FC = () => {
               <TextField
                 fullWidth
                 id="password"
-                label="Пароль"
+                label="Password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
@@ -259,7 +259,7 @@ const LoginPage: React.FC = () => {
         {/* Footer */}
         <Box sx={{ textAlign: 'center', mt: 3 }}>
           <Typography variant="body2" color="rgba(255,255,255,0.7)">
-            © 2025 Tasks Tracker. Сучасний трекер tasks.
+            © 2025 Tasks Tracker.
           </Typography>
         </Box>
       </Container>

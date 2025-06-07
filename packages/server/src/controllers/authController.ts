@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'Користувач з таким email вже існує',
+        message: 'User with this email already exists',
       });
     }
 
@@ -53,13 +53,13 @@ export const register = async (req: Request, res: Response) => {
         accessToken,
         refreshToken,
       },
-      message: 'Користувач успішно зареєстрований',
+      message: 'User successfully registered',
     });
   } catch (error: any) {
     console.error('Registration error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка реєстрації',
+      message: error.message || 'Registration error',
     });
   }
 };
@@ -77,7 +77,7 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Невірний email або пароль',
+        message: 'Wrong email or password',
       });
     }
 
@@ -87,7 +87,7 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Невірний email або пароль',
+        message: 'Wrong email or password',
       });
     }
 
@@ -106,13 +106,13 @@ export const login = async (req: Request, res: Response) => {
         accessToken,
         refreshToken,
       },
-      message: 'Успішний вхід в систему',
+      message: 'Success login',
     });
   } catch (error: any) {
     console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка входу в систему',
+      message: error.message || 'Login error',
     });
   }
 };
@@ -124,7 +124,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     if (!refreshToken) {
       return res.status(401).json({
         success: false,
-        message: 'Refresh token обов\'язковий',
+        message: 'Refresh token is required',
       });
     }
 
@@ -146,7 +146,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Користувач не знайдений',
+        message: 'User not found',
       });
     }
 
@@ -167,7 +167,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     console.error('Refresh token error:', error);
     res.status(401).json({
       success: false,
-      message: 'Невірний refresh token',
+      message: 'Wrong refresh token',
     });
   }
 };
@@ -178,13 +178,13 @@ export const logout = async (req: Request, res: Response) => {
     // by removing the tokens from storage. Here we just return success.
     res.json({
       success: true,
-      message: 'Успішний вихід з системи',
+      message: 'Success logout',
     });
   } catch (error: any) {
     console.error('Logout error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка виходу з системи',
+      message: 'Logout error',
     });
   }
 };
@@ -197,14 +197,14 @@ export const changePassword = async (req: Request, res: Response) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Поточний та новий паролі обов\'язкові',
+        message: 'Current and new passwords are required',
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'New Password повинен містити принаймні 6 символів',
+        message: 'New Password must have at least 6 characters',
       });
     }
 
@@ -216,7 +216,7 @@ export const changePassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Користувач не знайдений',
+        message: 'User not found',
       });
     }
 
@@ -226,7 +226,7 @@ export const changePassword = async (req: Request, res: Response) => {
     if (!isCurrentPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Невірний поточний пароль',
+        message: 'Wrong current password',
       });
     }
 
@@ -241,13 +241,13 @@ export const changePassword = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: 'Пароль успішно змінено',
+      message: 'Password successfully changed',
     });
   } catch (error: any) {
     console.error('Change password error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка зміни пароля',
+      message: 'Change password error',
     });
   }
 };
@@ -271,7 +271,7 @@ export const getProfile = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Користувач не знайдений',
+        message: 'User not found',
       });
     }
 
@@ -283,7 +283,7 @@ export const getProfile = async (req: Request, res: Response) => {
     console.error('Get profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка отримання профілю',
+      message: 'Get profile error',
     });
   }
 };
@@ -300,7 +300,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи email не зайнятий іншим користувачем
+    // Check if email is not taken by another user
     if (email) {
       const existingUser = await prisma.user.findFirst({
         where: {
@@ -312,7 +312,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       if (existingUser) {
         return res.status(400).json({
           success: false,
-          message: 'Користувач з таким email вже існує',
+          message: 'User with this email already exists',
         });
       }
     }
@@ -337,13 +337,13 @@ export const updateProfile = async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: updatedUser,
-      message: 'Profile успішно оновлено',
+      message: 'Profile successfully updated',
     });
   } catch (error: any) {
     console.error('Update profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Update error профілю',
+      message: 'Update error profile',
     });
   }
 }; 

@@ -10,19 +10,19 @@ import {
 
 const router = Router();
 
-// Middleware для всіх маршрутів
+// Middleware for all routes
 router.use(authenticateToken);
 
-// Dashboard метрики
+// Dashboard metrics
 router.get('/dashboard', getDashboardMetrics);
 
-// Діаграми та чарти
+// Charts and diagrams
 router.get('/time-chart', getTimeChartData);
 
-// Звіти
+// Reports
 router.get('/projects', getProjectReport);
 
-// Експорт звітів
+// Export reports
 router.get('/export/csv', exportReportCSV);
 router.get('/export/pdf', exportReportPDF);
 

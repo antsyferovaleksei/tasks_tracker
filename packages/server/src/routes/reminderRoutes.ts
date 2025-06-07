@@ -11,19 +11,19 @@ import {
 
 const router = Router();
 
-// Middleware для всіх маршрутів
+// Middleware for all routes
 router.use(authenticateToken);
 
-// Settings нагадувань
+// Reminder settings
 router.get('/settings', getReminderSettings);
 router.put('/settings', updateReminderSettings);
 
-// Заплановані нагадування
+// Scheduled reminders
 router.get('/scheduled', getScheduledReminders);
 router.post('/scheduled', createScheduledReminder);
 router.delete('/scheduled/:id', deleteReminder);
 
-// Автоматичне планування нагадувань для дедлайнів
+// Automatic scheduling of reminders for deadlines
 router.post('/schedule-deadlines', scheduleDeadlineReminders);
 
 export default router; 

@@ -211,7 +211,7 @@ export const useChangePassword = () => {
       apiClient.changePassword(data),
     onSuccess: (response: any) => {
       if (response.success) {
-        toast.success('Пароль успішно змінено!');
+        toast.success('Password успішно змінено!');
       }
     },
     onError: (error: any) => {
@@ -768,7 +768,7 @@ export const useTheme = () => {
 export const useUserSettings = () => {
   const queryClient = useQueryClient();
 
-  // Load settings from localStorage (тільки загальні налаштування)
+  // Load settings from localStorage (only general settings)
   const loadLocalSettings = () => {
     try {
       const saved = localStorage.getItem('userSettings');

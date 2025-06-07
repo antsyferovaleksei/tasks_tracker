@@ -69,9 +69,9 @@ export default function RegisterPage() {
     }
 
     if (!formData.password) {
-      newErrors.password = 'Пароль обов\'язковий';
+      newErrors.password = 'Password обов\'язковий';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Пароль повинен містити мінімум 6 символів';
+      newErrors.password = 'Password повинен містити мінімум 6 символів';
     }
 
     if (!formData.confirmPassword) {
@@ -181,7 +181,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="email"
-                label="Email адреса"
+                label="Email"
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -202,7 +202,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="password"
-                label="Пароль"
+                label="Password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
@@ -234,7 +234,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="confirmPassword"
-                label="Підтвердіть пароль"
+                label="Confirm password"
                 name="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 autoComplete="new-password"

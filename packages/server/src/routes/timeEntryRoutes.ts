@@ -13,21 +13,21 @@ import {
 
 const router = Router();
 
-// All маршрути потребують аутентифікації
+// All routes require authentication
 router.use(authenticateToken);
 
-// Управління записами часу
+// Time entry management
 router.get('/', getTimeEntries);
 router.post('/', createTimeEntry);
 router.put('/:id', updateTimeEntry);
 router.delete('/:id', deleteTimeEntry);
 
-// Таймери
+// Timers
 router.get('/active', getActiveTimer);
 router.post('/tasks/:taskId/start', startTimer);
 router.put('/:id/stop', stopTimer);
 
-// Статистика
+// Statistics
 router.get('/tasks/:taskId/stats', getTaskTimeStats);
 
 export default router; 

@@ -3,7 +3,7 @@ import { prisma } from '../config/database';
 import { createTimeEntrySchema, updateTimeEntrySchema, timeEntryFiltersSchema, paginationSchema } from 'shared/src/validation';
 import { AuthRequest } from '../middleware/auth';
 
-// Створення нового запису часу (ручне введення)
+// Creating new time entry (manual input)
 export const createTimeEntry = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = createTimeEntrySchema.parse(req.body);
@@ -16,7 +16,7 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує task і чи воно належить користувачу
+    // Check if task exists and belongs to user
     const task = await prisma.task.findFirst({
       where: {
         id: validatedData.taskId,
@@ -49,7 +49,7 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Автоматично змінюємо статус task з TODO на IN_PROGRESS when adding time
+    // Automatically change task status from TODO to IN_PROGRESS when adding time
     if (task.status === 'TODO' && (validatedData.duration || 0) > 0) {
       await prisma.task.update({
         where: { id: validatedData.taskId },
@@ -71,7 +71,7 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Запуск таймера для task
+// Start timer for task
 export const startTimer = async (req: AuthRequest, res: Response) => {
   try {
     const { taskId } = req.params;
@@ -85,7 +85,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує task і чи воно належить користувачу
+    // Check if task exists and belongs to user
     const task = await prisma.task.findFirst({
       where: {
         id: taskId,
@@ -100,7 +100,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Зупиняємо всі активні таймери користувача
+    // Stop all user active timers
     await prisma.timeEntry.updateMany({
       where: {
         userId,
@@ -112,7 +112,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Обновляємо duration для зупинених таймерів
+    // Update duration for stopped timers
     const stoppedEntries = await prisma.timeEntry.findMany({
       where: {
         userId,
@@ -131,7 +131,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Створюємо новий запис з запущеним таймером
+    // Create new entry with started timer
     const timeEntry = await prisma.timeEntry.create({
       data: {
         taskId,
@@ -149,7 +149,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Автоматично змінюємо статус task з TODO на IN_PROGRESS on first timer start
+    // Automatically change task status from TODO to IN_PROGRESS on first timer start
     if (task.status === 'TODO') {
       await prisma.task.update({
         where: { id: taskId },
@@ -171,7 +171,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Зупинка таймера
+// Stop timer
 export const stopTimer = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -184,7 +184,7 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Знаходимо активний запис часу з інформацією про task
+    // Find active time entry with task information
     const timeEntry = await prisma.timeEntry.findFirst({
       where: {
         id,
@@ -206,7 +206,7 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
     const endTime = new Date();
     const duration = Math.floor((endTime.getTime() - timeEntry.startTime.getTime()) / 1000);
 
-    // Автоматично змінюємо статус task з TODO на IN_PROGRESS when stopping timer with spent time
+    // Automatically change task status from TODO to IN_PROGRESS when stopping timer with spent time
     if (timeEntry.task.status === 'TODO' && duration > 0) {
       await prisma.task.update({
         where: { id: timeEntry.taskId },
@@ -244,7 +244,7 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Отримання поточного активного таймера
+// Getting current active timer
 export const getActiveTimer = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -283,7 +283,7 @@ export const getActiveTimer = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Отримання записів часу з фільтрацією
+// Getting time entries with filtering
 export const getTimeEntries = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -302,7 +302,7 @@ export const getTimeEntries = async (req: AuthRequest, res: Response) => {
       userId,
     };
 
-    // Застосовуємо фільтри
+    // Apply filters
     if (filters.taskId) {
       where.taskId = filters.taskId;
     }
@@ -363,7 +363,7 @@ export const getTimeEntries = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Оновлення запису часу
+// Update time entry
 export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -377,7 +377,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує запис і чи він належить користувачу
+    // Check if entry exists and belongs to user
     const existingEntry = await prisma.timeEntry.findFirst({
       where: {
         id,
@@ -410,7 +410,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
       updateData.duration = validatedData.duration;
     }
 
-    // Якщо оновлюємо startTime або endTime, пересчитуємо duration
+    // If updating startTime or endTime, recalculate duration
     if (updateData.startTime || updateData.endTime) {
       const startTime = updateData.startTime || existingEntry.startTime;
       const endTime = updateData.endTime || existingEntry.endTime;
@@ -432,7 +432,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Автоматично змінюємо статус task з TODO на IN_PROGRESS when updating time
+    // Automatically change task status from TODO to IN_PROGRESS when updating time
     if (timeEntry.task.status === 'TODO' && (timeEntry.duration || 0) > 0) {
       await prisma.task.update({
         where: { id: timeEntry.taskId },
@@ -454,7 +454,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Видалення запису часу
+// Delete time entry
 export const deleteTimeEntry = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -467,7 +467,7 @@ export const deleteTimeEntry = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує запис і чи він належить користувачу
+    // Check if entry exists and belongs to user
     const existingEntry = await prisma.timeEntry.findFirst({
       where: {
         id,
@@ -499,7 +499,7 @@ export const deleteTimeEntry = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Отримання статистики часу для task
+// Get time statistics for task
 export const getTaskTimeStats = async (req: AuthRequest, res: Response) => {
   try {
     const { taskId } = req.params;
@@ -512,7 +512,7 @@ export const getTaskTimeStats = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує task і чи воно належить користувачу
+    // Check if task exists and belongs to user
     const task = await prisma.task.findFirst({
       where: {
         id: taskId,
@@ -539,7 +539,7 @@ export const getTaskTimeStats = async (req: AuthRequest, res: Response) => {
         return sum + entry.duration;
       }
       if (entry.isRunning) {
-        // Для запущених таймерів рахуємо поточний час
+        // For running timers calculate current time
         return sum + Math.floor((new Date().getTime() - entry.startTime.getTime()) / 1000);
       }
       return sum;

@@ -31,7 +31,7 @@ export default function NotFoundPage() {
         </Typography>
         
         <Typography variant="h4" component="h2" gutterBottom>
-          Сторінку не знайдено
+          Page not found
         </Typography>
         
         <Typography variant="body1" color="text.secondary" mb={4}>

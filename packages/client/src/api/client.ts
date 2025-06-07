@@ -150,13 +150,13 @@ class ApiClient {
     limit?: number;
     filters?: TaskFilters;
   }): Promise<PaginatedResponse<Task>> {
-    // Форматуємо параметри для правильної передачі на backend
+    // Format parameters for correct backend transmission
     const queryParams: any = {};
     
     if (params?.page) queryParams.page = params.page;
     if (params?.limit) queryParams.limit = params.limit;
     
-    // Додаємо фільтри як окремі параметри (без префіксу filters)
+    // Add filters as separate parameters (without filters prefix)
     if (params?.filters) {
       Object.entries(params.filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {

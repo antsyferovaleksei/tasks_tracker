@@ -5,7 +5,7 @@ import { z } from 'zod';
 import * as ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
 
-// Схема для параметрів звіту
+// Schema for report parameters
 const reportParamsSchema = z.object({
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
@@ -15,7 +15,7 @@ const reportParamsSchema = z.object({
   groupBy: z.enum(['day', 'week', 'month', 'project', 'status', 'priority']).optional(),
 });
 
-// Dashboard метрики
+// Dashboard metrics
 export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -32,7 +32,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Загальні статистики
+    // General statistics
     const [
       totalTasks,
       completedTasks,
@@ -41,19 +41,19 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       totalTimeSpent,
       projectsCount,
     ] = await Promise.all([
-      // Загальна кількість tasks
+      // Total task count
       prisma.task.count({
         where: { userId, archived: false },
       }),
-      // Виконані task
+      // Completed tasks
       prisma.task.count({
         where: { userId, status: 'COMPLETED', archived: false },
       }),
-      // Tasks в роботі
+      // Tasks in progress
       prisma.task.count({
         where: { userId, status: 'IN_PROGRESS', archived: false },
       }),
-      // Прострочені task
+      // Overdue tasks
       prisma.task.count({
         where: {
           userId,
@@ -76,7 +76,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       }),
     ]);
 
-    // Статистика за taskми по дням (simplified version)
+    // Statistics за taskми по дням (simplified version)
     const recentTasks = await prisma.task.findMany({
       where: {
         userId,
@@ -89,7 +89,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Групуємо по дням
+    // Group by days
     const dailyStatsMap = new Map();
     recentTasks.forEach(task => {
       const date = task.createdAt.toISOString().split('T')[0];
@@ -107,21 +107,21 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 30);
 
-    // Розподіл tasks By prioirity
+    // Task distribution by priority
     const priorityStats = await prisma.task.groupBy({
       by: ['priority'],
       where: { userId, archived: false },
       _count: { priority: true },
     });
 
-    // Розподіл tasks за статусом
+    // Task distribution by status
     const statusStats = await prisma.task.groupBy({
       by: ['status'],
       where: { userId, archived: false },
       _count: { status: true },
     });
 
-    // Time по projectах (simplified version)
+    // Time by projects (simplified version)
     const timeEntries = await prisma.timeEntry.findMany({
       where: {
         userId,
@@ -155,7 +155,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       .sort((a, b) => b.total_time - a.total_time)
       .slice(0, 10);
 
-    // Продуктивність по дням тижня (simplified version)
+    // Productivity by weekdays (simplified version)
     const weekdayMap = new Map();
     const weekdays = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота'];
     
@@ -211,7 +211,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Отримання даних для діаграм часу
+// Getting data for time charts
 export const getTimeChartData = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -229,7 +229,7 @@ export const getTimeChartData = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо записи часу за період
+    // Get time entries for period
     const timeEntries = await prisma.timeEntry.findMany({
       where: {
         userId,
@@ -358,7 +358,7 @@ export const getProjectReport = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо projectи з taskми та записами часу
+    // Get projects with tasks and time entries
     const projects = await prisma.project.findMany({
       where: {
         userId,
@@ -427,7 +427,7 @@ export const getProjectReport = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Експорт звіту в CSV
+// Export report to CSV
 export const exportReportCSV = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -445,7 +445,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо всі task для експорту
+    // Get all tasks for export
     const tasks = await prisma.task.findMany({
       where: {
         userId,
@@ -465,7 +465,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Отримуємо загальний час для кожного task
+    // Get total time for each task
     const tasksWithTime = await Promise.all(
       tasks.map(async (task) => {
         const timeStats = await prisma.timeEntry.aggregate({
@@ -484,11 +484,11 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       })
     );
 
-    // Створюємо Excel файл
+    // Create Excel file
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Звіт tasks');
 
-    // Заголовки
+    // Headers
     worksheet.addRow([
       'Task title',
       'Status',
@@ -501,7 +501,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       'Description',
     ]);
 
-    // Функція для перекладу статусу
+    // Function for translating status
     const translateStatus = (status: string) => {
       switch (status) {
         case 'TODO': return 'До виконання';
@@ -512,7 +512,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       }
     };
 
-    // Функція для перекладу пріоритету
+    // Function for translating priority
     const translatePriority = (priority: string) => {
       switch (priority) {
         case 'LOW': return 'Low';
@@ -523,7 +523,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       }
     };
 
-    // Дані
+    // Data
     tasksWithTime.forEach(task => {
       worksheet.addRow([
         task.title,
@@ -538,13 +538,13 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       ]);
     });
 
-    // Settings стилів
+    // Styling settings
     worksheet.getRow(1).font = { bold: true };
     worksheet.columns.forEach(column => {
       column.width = 15;
     });
 
-    // Відправляємо файл
+    // Send file
     res.setHeader(
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -565,7 +565,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Експорт звіту в PDF
+// Export report to PDF
 export const exportReportPDF = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -583,7 +583,7 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо дані
+    // Get data
     const [user, timeEntries, totalStats] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       prisma.timeEntry.findMany({
@@ -614,7 +614,7 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
       }),
     ]);
 
-    // Створюємо PDF документ
+    // Create PDF document
     const doc = new PDFDocument();
     
     res.setHeader('Content-Type', 'application/pdf');
@@ -625,17 +625,17 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
 
     doc.pipe(res);
 
-    // Заголовок
+    // Header
     doc.fontSize(20).text('Звіт витраченого часу', { align: 'center' });
     doc.moveDown();
 
-    // Інформація про користувача та період
+    // User and period information
     doc.fontSize(12);
     doc.text(`Користувач: ${user?.name || user?.email}`);
     doc.text(`Період: ${start.toLocaleDateString('uk-UA')} - ${end.toLocaleDateString('uk-UA')}`);
     doc.moveDown();
 
-    // Загальна статистика
+    // General statistics
     doc.fontSize(14).text('Загальна статистика:');
     doc.fontSize(12);
     doc.text(`Total time: ${Math.round((totalStats._sum.duration || 0) / 60)} minutes`);
@@ -643,7 +643,7 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
     doc.text(`Medium час на запис: ${totalStats._count.id > 0 ? Math.round((totalStats._sum.duration || 0) / totalStats._count.id / 60) : 0} minutes`);
     doc.moveDown();
 
-    // Детальний список
+    // Detailed list
     doc.fontSize(14).text('Детальний звіт:');
     doc.moveDown(0.5);
 

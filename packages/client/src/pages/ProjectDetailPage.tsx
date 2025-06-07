@@ -49,8 +49,8 @@ export default function ProjectDetailPage() {
   if (error || !project) {
     return (
       <Box p={3}>
-        <Alert severity="error">
-          Project не знайдено або сталася помилка завантаження
+                <Alert severity="error">
+          Project not found or loading error occurred
         </Alert>
         <Button
           startIcon={<ArrowBackIcon />}

@@ -3,7 +3,7 @@ import { prisma } from '../config/database';
 import { AuthRequest } from '../middleware/auth';
 import { z } from 'zod';
 
-// Схема для збереження фільтру
+// Schema for saving filter
 const saveFilterSchema = z.object({
   name: z.string().min(1, 'Task name фільтру обов\'язкова'),
   filters: z.object({
@@ -18,7 +18,7 @@ const saveFilterSchema = z.object({
   }),
 });
 
-// Збереження користувацького фільтру
+// Saving user filter
 export const saveFilter = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = saveFilterSchema.parse(req.body);
@@ -31,7 +31,7 @@ export const saveFilter = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи не існує фільтр з такою назвою
+    // Check if filter with this name doesn't exist
     const existingFilter = await prisma.userFilter.findFirst({
       where: {
         userId,
@@ -71,7 +71,7 @@ export const saveFilter = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Отримання збережених фільтрів користувача
+// Getting user saved filters
 export const getUserFilters = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -106,7 +106,7 @@ export const getUserFilters = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Видалення збереженого фільтру
+// Deleting saved filter
 export const deleteFilter = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -150,7 +150,7 @@ export const deleteFilter = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Швидкі фільтри
+// Quick filters
 export const getQuickFilters = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -162,7 +162,7 @@ export const getQuickFilters = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Отримуємо кількість tasks для швидких фільтрів
+    // Get task count for quick filters
     const [
       todoCount,
       inProgressCount,

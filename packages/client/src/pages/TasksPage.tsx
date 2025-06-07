@@ -57,7 +57,7 @@ import {
 import { Task, TaskStatus, TaskPriority, TaskFilters, Project, TimeEntry } from '../types';
 import { formatDate, getTaskStatusColor, getTaskPriorityColor } from '../utils';
 
-// Функція для форматування часу в секундах
+// Function for formatting time in seconds
 const formatDuration = (seconds: number): string => {
   if (!seconds) return '0хв';
   
@@ -74,7 +74,7 @@ const formatDuration = (seconds: number): string => {
   }
 };
 
-// Компонент для відображення поточного активного таймера
+// Component for displaying current active timer
 const ActiveTimerDisplay = () => {
   const { activeTimer } = useActiveTimer();
   const stopTimer = useStopTimer();
@@ -155,7 +155,7 @@ export default function TasksPage() {
     priority: undefined,
     search: '',
   });
-  const [searchInput, setSearchInput] = useState(filter.search || ''); // Локальний стейт для поля пошуку
+  const [searchInput, setSearchInput] = useState(filter.search || ''); // Local state for search field
   const [dialogOpen, setDialogOpen] = useState(false);
   const [timeEntryDialogOpen, setTimeEntryDialogOpen] = useState(false);
   const [selectedTaskForTime, setSelectedTaskForTime] = useState<Task | null>(null);
@@ -178,7 +178,7 @@ export default function TasksPage() {
   const { tasks: rawTasks = [], isLoading } = useTasks(filter);
   const tasks = Array.isArray(rawTasks) ? rawTasks : [];
   
-  // Дебаг логування
+  // Debug logging
   console.log('Current filter:', filter);
   console.log('Tasks received:', tasks.length, tasks);
   const { projects = [], isLoading: isLoadingProjects } = useProjects();
@@ -320,13 +320,13 @@ export default function TasksPage() {
     if (!selectedTaskForTime || !newTimeEntry.duration) return;
 
     const durationInMinutes = parseInt(newTimeEntry.duration);
-    const durationInSeconds = durationInMinutes * 60; // конвертуємо minutesи в секунди
+          const durationInSeconds = durationInMinutes * 60; // convert minutes to seconds
     
-    // Для від'ємних значень створюємо запис з негативною тривалістю
+    // For negative values create entry with negative duration
     const startTime = new Date(newTimeEntry.startTime);
     const endTime = durationInSeconds > 0 
       ? new Date(startTime.getTime() + durationInSeconds * 1000)
-      : new Date(startTime.getTime()); // Для негативних значень endTime = startTime
+      : new Date(startTime.getTime()); // For negative values endTime = startTime
 
     const description = durationInMinutes < 0 
       ? (newTimeEntry.description || `Subtracted ${Math.abs(durationInMinutes)} minutes`)
@@ -337,7 +337,7 @@ export default function TasksPage() {
       description: description,
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
-      duration: durationInSeconds, // Може бути негативним
+      duration: durationInSeconds, // Can be negative
       isRunning: false,
     }, {
       onSuccess: () => {
@@ -510,16 +510,16 @@ export default function TasksPage() {
             onClick={handleClearFilters}
             sx={{ height: '56px' }}
           >
-            Clear фільтри
+                         Clear filters
           </Button>
         )}
       </Box>
 
-      {/* Групування tasks за projectами */}
+      {/* Group tasks by projects */}
       {Object.keys(groupedTasks).length === 0 ? (
         <Box textAlign="center" py={4}>
           <Typography variant="h6" color="text.secondary">
-            {projects.length === 0 ? 'Create a project to get started' : 'Tasks не знайдено'}
+            {projects.length === 0 ? 'Create a project to get started' : 'No tasks found'}
           </Typography>
         </Box>
       ) : (
@@ -593,12 +593,12 @@ export default function TasksPage() {
                               />
                             </Box>
 
-                            {/* Статистика часу */}
+                            {/* Time statistics */}
                             <TaskTimeStats taskId={task.id} />
 
                             <Divider sx={{ my: 1 }} />
 
-                            {/* Кнопки управління часом */}
+                            {/* Time management buttons */}
                             <Box display="flex" gap={1} mt={2}>
                               {isActiveTimer ? (
                                 <Tooltip title="Зупинити таймер">
@@ -656,7 +656,7 @@ export default function TasksPage() {
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
-            {/* Обов'язковий вибір projectу */}
+            {/* Required project selection */}
             <FormControl fullWidth error={!!validationErrors.projectId}>
               <InputLabel>Project *</InputLabel>
               <Select

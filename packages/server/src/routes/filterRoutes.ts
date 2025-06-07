@@ -9,15 +9,15 @@ import {
 
 const router = Router();
 
-// All маршрути потребують аутентифікації
+// All routes require authentication
 router.use(authenticateToken);
 
-// Збережені фільтри користувача
+// User saved filters
 router.get('/', getUserFilters);
 router.post('/', saveFilter);
 router.delete('/:id', deleteFilter);
 
-// Швидкі фільтри
+// Quick filters
 router.get('/quick', getQuickFilters);
 
 export default router; 

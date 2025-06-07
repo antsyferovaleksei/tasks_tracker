@@ -188,19 +188,19 @@ export const validatePassword = (password: string): { valid: boolean; errors: st
   const errors: string[] = [];
   
   if (password.length < 8) {
-    errors.push('Пароль повинен містити принаймні 8 символів');
+    errors.push('Password повинен містити принаймні 8 символів');
   }
   
   if (!/[A-Z]/.test(password)) {
-    errors.push('Пароль повинен містити принаймні одну велику літеру');
+    errors.push('Password повинен містити принаймні одну велику літеру');
   }
   
   if (!/[a-z]/.test(password)) {
-    errors.push('Пароль повинен містити принаймні одну малу літеру');
+    errors.push('Password повинен містити принаймні одну малу літеру');
   }
   
   if (!/\d/.test(password)) {
-    errors.push('Пароль повинен містити принаймні одну цифру');
+    errors.push('Password повинен містити принаймні одну цифру');
   }
   
   return {
