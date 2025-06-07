@@ -1,38 +1,13 @@
 {
-  "name": "tasks-tracker",
+  "name": "tasks-tracker-api",
   "version": "1.0.0",
-  "description": "Task tracking web application",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
-    "dev:client": "npm run dev --workspace=client",
-    "dev:server": "npm run dev --workspace=server",
-    "build": "npm run build --workspace=client && npm run build --workspace=server",
-    "build:vercel": "npm run build --workspace=client",
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
-    "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "type-check": "npm run type-check --workspaces"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
-    "concurrently": "^8.2.2",
-    "eslint": "^8.50.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
+  "description": "Tasks Tracker API",
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
     "bcryptjs": "^3.0.2",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.0"
+    "jsonwebtoken": "^9.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

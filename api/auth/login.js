@@ -36,14 +36,14 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Знаходимо користувача за email
-    const { data: user, error: findError } = await supabase
+    // Знаходимо користувача в Supabase
+    const { data: user, error: selectError } = await supabase
       .from('users')
-      .select('id, name, email, password, created_at')
+      .select('id, name, email, password')
       .eq('email', email)
       .single();
 
-    if (findError || !user) {
+    if (selectError || !user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -82,7 +82,6 @@ module.exports = async function handler(req, res) {
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
     );
 
-    // Успішний логін
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -90,8 +89,7 @@ module.exports = async function handler(req, res) {
         user: {
           id: user.id,
           name: user.name,
-          email: user.email,
-          createdAt: user.created_at
+          email: user.email
         },
         tokens: {
           accessToken,

@@ -8,7 +8,6 @@ const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Vercel serverless function export
 module.exports = async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -88,7 +87,7 @@ module.exports = async function handler(req, res) {
     if (insertError) {
       console.error('Supabase insert error:', insertError);
       
-      if (insertError.code === '23505') { // Unique constraint error
+      if (insertError.code === '23505') {
         return res.status(409).json({
           success: false,
           message: 'User with this email already exists'
