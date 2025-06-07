@@ -1,17 +1,17 @@
 {
   "version": 2,
   "functions": {
-    "pages/api/*.js": {
+    "packages/client/pages/api/*.js": {
       "runtime": "nodejs18.x"
     },
-    "pages/api/**/*.js": {
+    "packages/client/pages/api/**/*.js": {
       "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/pages/api/$1"
+      "destination": "/packages/client/pages/api/$1"
     },
     {
       "source": "/(.*)",
