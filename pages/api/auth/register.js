@@ -1,5 +1,12 @@
 const bcrypt = require('bcryptjs');
-const { query, initializeTables } = require('../lib/database.js');
+const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
+
+// Ініціалізація Supabase
+const supabaseUrl = 'https://gwkyqchyuihmgpvqosvk.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3a3lxY2h5dWlobWdwdnFvc3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkzMTU1MTksImV4cCI6MjA2NDg5MTUxOX0.Gmwe2GFN4oN7udh_ZnZJTefSa1RZdzzB7pqUBfHok7s';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Vercel serverless function export
 module.exports = async function handler(req, res) {
@@ -20,9 +27,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Ініціалізуємо таблиці при першому запиті
-    await initializeTables();
-
     const { email, password, name } = req.body;
 
     // Basic validation
@@ -41,13 +45,23 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Перевіряємо чи користувач вже існує
-    const existingUserResult = await query(
-      'SELECT id FROM users WHERE email = $1',
-      [email]
-    );
+    // Email валідація
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format'
+      });
+    }
 
-    if (existingUserResult.rows.length > 0) {
+    // Перевіряємо чи користувач вже існує
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
       return res.status(409).json({
         success: false,
         message: 'User with this email already exists'
@@ -58,38 +72,77 @@ module.exports = async function handler(req, res) {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Створюємо нового користувача
-    const result = await query(
-      `INSERT INTO users (name, email, password_hash) 
-       VALUES ($1, $2, $3) 
-       RETURNING id, name, email, created_at`,
-      [name, email, passwordHash]
+    // Створюємо нового користувача в Supabase
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert([
+        {
+          name: name,
+          email: email,
+          password: passwordHash
+        }
+      ])
+      .select('id, name, email, created_at')
+      .single();
+
+    if (insertError) {
+      console.error('Supabase insert error:', insertError);
+      
+      if (insertError.code === '23505') { // Unique constraint error
+        return res.status(409).json({
+          success: false,
+          message: 'User with this email already exists'
+        });
+      }
+      
+      return res.status(500).json({
+        success: false,
+        message: 'Database error. Please try again later.'
+      });
+    }
+
+    // Створюємо JWT токени
+    const jwtSecret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-this-in-production';
+
+    const accessToken = jwt.sign(
+      { 
+        userId: newUser.id,
+        email: newUser.email 
+      },
+      jwtSecret,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    const newUser = result.rows[0];
+    const refreshToken = jwt.sign(
+      { 
+        userId: newUser.id,
+        email: newUser.email 
+      },
+      jwtRefreshSecret,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d' }
+    );
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        createdAt: newUser.created_at
+      data: {
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          createdAt: newUser.created_at
+        },
+        tokens: {
+          accessToken,
+          refreshToken
+        }
       }
     });
 
   } catch (error) {
     console.error('Registration error:', error);
     
-    // Перевіряємо тип помилки для більш детального повідомлення
-    if (error.code === '23505') { // PostgreSQL unique constraint error
-      return res.status(409).json({
-        success: false,
-        message: 'User with this email already exists'
-      });
-    }
-
     res.status(500).json({
       success: false,
       message: 'Internal server error. Please try again later.'

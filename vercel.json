@@ -1,14 +1,18 @@
 {
   "version": 2,
   "functions": {
-    "api/*.js": {
+    "pages/api/*.js": {
       "runtime": "nodejs18.x"
     },
-    "api/**/*.js": {
+    "pages/api/**/*.js": {
       "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/pages/api/$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/packages/client/dist/index.html"
