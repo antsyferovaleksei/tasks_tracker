@@ -59,23 +59,23 @@ import { formatDate, getTaskStatusColor, getTaskPriorityColor } from '../utils';
 
 // Function for formatting time in seconds
 const formatDuration = (seconds: number): string => {
-  if (!seconds) return '0хв';
+  if (!seconds) return '0m';
   
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
   
   if (hours > 0) {
-    return `${hours}г ${minutes}хв`;
+    return `${hours}h ${minutes}m`;
   } else if (minutes > 0) {
-    return `${minutes}хв ${secs}с`;
+    return `${minutes}m ${secs}s`;
   } else {
-    return `${secs}с`;
+    return `${secs}s`;
   }
 };
 
 // Component for displaying current active timer
-const ActiveTimerDisplay = () => {
+const ActiveTimerDisplay = ({ onStopTimer }: { onStopTimer?: () => void }) => {
   const { activeTimer } = useActiveTimer();
   const stopTimer = useStopTimer();
   const [currentTime, setCurrentTime] = useState(0);
@@ -94,6 +94,14 @@ const ActiveTimerDisplay = () => {
   }, [activeTimer]);
 
   if (!activeTimer) return null;
+
+  const handleStopClick = () => {
+    if (onStopTimer) {
+      onStopTimer();
+    } else {
+      stopTimer.mutate(activeTimer.id);
+    }
+  };
 
   return (
     <Paper 
@@ -123,10 +131,10 @@ const ActiveTimerDisplay = () => {
         variant="contained"
         color="secondary"
         startIcon={<StopIcon />}
-        onClick={() => stopTimer.mutate(activeTimer.id)}
+        onClick={handleStopClick}
         disabled={stopTimer.isPending}
       >
-        Зупинити
+        Stop
       </Button>
     </Paper>
   );
@@ -142,7 +150,7 @@ const TaskTimeStats = ({ taskId }: { taskId: string }) => {
     <Box display="flex" alignItems="center" gap={1} mt={1}>
       <TimeIcon fontSize="small" color="action" />
       <Typography variant="caption" color="text.secondary">
-        Витрачено: {formatDuration(timeStats.data.totalTime)}
+        Spent: {formatDuration(timeStats.data.totalTime)}
       </Typography>
     </Box>
   );
@@ -302,7 +310,20 @@ export default function TasksPage() {
 
   const handleStopTimer = () => {
     if (activeTimer) {
-      stopTimer.mutate(activeTimer.id);
+      stopTimer.mutate(activeTimer.id, {
+        onSuccess: () => {
+          // Auto-complete the task when timer is stopped
+          if (activeTimer.task && activeTimer.task.status !== 'COMPLETED') {
+            updateTaskMutation.mutate({
+              id: activeTimer.task.id,
+              data: {
+                ...activeTimer.task,
+                status: 'COMPLETED' as TaskStatus
+              }
+            });
+          }
+        }
+      });
     }
   };
 
@@ -399,7 +420,7 @@ export default function TasksPage() {
   return (
     <Box p={3}>
       {/* Active Timer */}
-      <ActiveTimerDisplay />
+      <ActiveTimerDisplay onStopTimer={handleStopTimer} />
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
