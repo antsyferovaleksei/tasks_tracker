@@ -51,7 +51,7 @@ export default function TaskDetailPage() {
     return (
       <Box p={3}>
         <Alert severity="error">
-          Tasks не знайдено або сталася помилка завантаження
+          Tasks не знайдено or сталася помилка завантаження
         </Alert>
         <Button
           startIcon={<ArrowBackIcon />}

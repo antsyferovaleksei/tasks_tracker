@@ -35,7 +35,7 @@ export default function NotFoundPage() {
         </Typography>
         
         <Typography variant="body1" color="text.secondary" mb={4}>
-          Вибачте, але сторінка, яку ви шукаєте, не існує або була переміщена.
+          Вибачте, але сторінка, яку ви шукаєте, не існує or була переміщена.
         </Typography>
         
         <Box display="flex" gap={2} flexDirection={{ xs: 'column', sm: 'row' }}>

@@ -18,8 +18,13 @@ module.exports = async function handler(req, res) {
 
   res.status(200).json({
     success: true,
-    message: 'API is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    message: 'Tasks Tracker API',
+    version: '1.0.0',
+    endpoints: [
+      'GET /api/health - API health check',
+      'POST /api/auth/register - User registration',
+      'POST /api/auth/login - User login'
+    ],
+    timestamp: new Date().toISOString()
   });
 }; 

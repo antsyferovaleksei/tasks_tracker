@@ -1,19 +1,17 @@
 {
   "version": 2,
   "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
+    },
     "api/**/*.js": {
-      "runtime": "nodejs18.x",
-      "memory": 512
+      "runtime": "nodejs18.x"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/packages/client/dist/$1"
+      "source": "/(.*)",
+      "destination": "/packages/client/dist/index.html"
     }
   ],
   "env": {

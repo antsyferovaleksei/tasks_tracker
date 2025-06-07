@@ -285,7 +285,7 @@ export default function RegisterPage() {
 
               <Divider sx={{ my: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  або
+                  or
                 </Typography>
               </Divider>
 

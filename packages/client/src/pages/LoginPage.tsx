@@ -221,7 +221,7 @@ const LoginPage: React.FC = () => {
 
               <Divider sx={{ my: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  або
+                  or
                 </Typography>
               </Divider>
 
