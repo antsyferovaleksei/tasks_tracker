@@ -132,7 +132,7 @@ const ActiveTimerDisplay = () => {
   );
 };
 
-// Компонент для відображення статистики часу завдання
+  // Component for displaying task time statistics
 const TaskTimeStats = ({ taskId }: { taskId: string }) => {
   const { data: timeStats } = useTimeStats(taskId);
   
@@ -190,15 +190,15 @@ export default function TasksPage() {
   const stopTimer = useStopTimer();
   const createTimeEntry = useCreateTimeEntry();
 
-  // Групування завдань за проектами (показуємо тільки проекти з завданнями, що відповідають фільтрам)
+  // Group tasks by projects (show only projects with tasks that match filters)
   const groupedTasks = useMemo(() => {
     const grouped: { [projectId: string]: { project: Project | null; tasks: Task[] } } = {};
     
-    // Групуємо тільки наявні завдання (які вже відфільтровані)
+    // Group only existing tasks (which are already filtered)
     tasks.forEach(task => {
       const projectId = task.projectId || 'no-project';
       if (!grouped[projectId]) {
-        // Знаходимо проект за ID
+        // Find project by ID
         const project = projectId === 'no-project' 
           ? null 
           : projects.find(p => p.id === projectId) || null;
@@ -218,11 +218,11 @@ export default function TasksPage() {
     const errors: {[key: string]: string} = {};
     
     if (!newTask.title.trim()) {
-      errors.title = 'Назва завдання обов\'язкова';
+      errors.title = 'Task title is required';
     }
     
     if (!newTask.projectId) {
-      errors.projectId = 'Оберіть проект для завдання';
+      errors.projectId = 'Please select a project for the task';
     }
     
     setValidationErrors(errors);
@@ -288,7 +288,7 @@ export default function TasksPage() {
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (window.confirm('Ви впевнені, що хочете видалити це завдання?')) {
+    if (window.confirm('Are you sure you want to delete this task?')) {
       deleteTaskMutation.mutate(taskId);
     }
   };
@@ -296,7 +296,7 @@ export default function TasksPage() {
   const handleStartTimer = (task: Task) => {
     startTimer.mutate({ 
       taskId: task.id, 
-      description: `Робота над завданням: ${task.title}` 
+      description: `Working on task: ${task.title}` 
     });
   };
 
@@ -320,7 +320,7 @@ export default function TasksPage() {
     if (!selectedTaskForTime || !newTimeEntry.duration) return;
 
     const durationInMinutes = parseInt(newTimeEntry.duration);
-    const durationInSeconds = durationInMinutes * 60; // конвертуємо хвилини в секунди
+    const durationInSeconds = durationInMinutes * 60; // конвертуємо minutesи в секунди
     
     // Для від'ємних значень створюємо запис з негативною тривалістю
     const startTime = new Date(newTimeEntry.startTime);
@@ -329,8 +329,8 @@ export default function TasksPage() {
       : new Date(startTime.getTime()); // Для негативних значень endTime = startTime
 
     const description = durationInMinutes < 0 
-      ? (newTimeEntry.description || `Віднято ${Math.abs(durationInMinutes)} хвилин`)
-      : (newTimeEntry.description || `Додано ${durationInMinutes} хвилин`);
+      ? (newTimeEntry.description || `Subtracted ${Math.abs(durationInMinutes)} minutes`)
+      : (newTimeEntry.description || `Added ${durationInMinutes} minutes`);
 
     createTimeEntry.mutate({
       taskId: selectedTaskForTime.id,
@@ -376,7 +376,7 @@ export default function TasksPage() {
     });
   };
 
-  // Перевіряємо, чи є активні фільтри
+  // Check if there are active filters
   const hasActiveFilters = () => {
     return !!(
       searchInput ||
@@ -391,30 +391,30 @@ export default function TasksPage() {
     return (
       <Box display="flex" justifyContent="center" p={4}>
         <CircularProgress />
-        <Typography ml={2}>Завантаження...</Typography>
+        <Typography ml={2}>Loading...</Typography>
       </Box>
     );
   }
 
   return (
     <Box p={3}>
-      {/* Активний таймер */}
+      {/* Active Timer */}
       <ActiveTimerDisplay />
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Завдання
+          Tasks
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpenDialog}
         >
-          Додати завдання
+          Add Task
         </Button>
       </Box>
 
-      {/* Попередження про відсутність проектів */}
+      {/* Warning about missing projects */}
       {projects.length === 0 && (
         <Alert 
           severity="warning" 
@@ -425,23 +425,23 @@ export default function TasksPage() {
               size="small" 
               onClick={() => navigate('/projects')}
             >
-              Створити проект
+              Create Project
             </Button>
           }
         >
-          Для створення завдань потрібно спочатку створити хоча б один проект. 
+          To create tasks, you need to create at least one project first. 
         </Alert>
       )}
 
       {/* Filters */}
       <Box mb={3} display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
         <TextField
-          placeholder="Пошук завдань..."
+          placeholder="Search tasks..."
           value={searchInput}
           onChange={(e) => {
             const value = e.target.value;
             setSearchInput(value);
-            // Якщо поле очищене, автоматично очищаємо пошук
+            // If field is cleared, automatically clear search
             if (value === '' && filter.search) {
               setFilter({ ...filter, search: '' });
             }
@@ -454,12 +454,12 @@ export default function TasksPage() {
           sx={{ minWidth: 200 }}
         />
         <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Проект</InputLabel>
+          <InputLabel>Project</InputLabel>
           <Select
             value={filter.projectId || ''}
             onChange={(e) => setFilter({ ...filter, projectId: e.target.value || undefined })}
           >
-            <MenuItem value="">Всі проекти</MenuItem>
+            <MenuItem value="">All projects</MenuItem>
             {projects.map((project) => (
               <MenuItem key={project.id} value={project.id}>
                 {project.name}
@@ -468,7 +468,7 @@ export default function TasksPage() {
           </Select>
         </FormControl>
         <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Статус</InputLabel>
+          <InputLabel>Status</InputLabel>
           <Select
             value={Array.isArray(filter.status) ? filter.status[0] || '' : filter.status || ''}
             onChange={(e) => {
@@ -479,14 +479,14 @@ export default function TasksPage() {
               });
             }}
           >
-            <MenuItem value="">Всі</MenuItem>
-            <MenuItem value="TODO">Потрібно зробити</MenuItem>
-            <MenuItem value="IN_PROGRESS">В процесі</MenuItem>
-            <MenuItem value="COMPLETED">Завершено</MenuItem>
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="TODO">To Do</MenuItem>
+            <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+            <MenuItem value="COMPLETED">Completed</MenuItem>
           </Select>
         </FormControl>
         <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Пріоритет</InputLabel>
+          <InputLabel>Priority</InputLabel>
           <Select
             value={Array.isArray(filter.priority) ? filter.priority[0] || '' : filter.priority || ''}
             onChange={(e) => {
@@ -497,10 +497,10 @@ export default function TasksPage() {
               });
             }}
           >
-            <MenuItem value="">Всі</MenuItem>
-            <MenuItem value="LOW">Низький</MenuItem>
-            <MenuItem value="MEDIUM">Середній</MenuItem>
-            <MenuItem value="HIGH">Високий</MenuItem>
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="LOW">Low</MenuItem>
+            <MenuItem value="MEDIUM">Medium</MenuItem>
+            <MenuItem value="HIGH">High</MenuItem>
           </Select>
         </FormControl>
         {hasActiveFilters() && (
@@ -510,16 +510,16 @@ export default function TasksPage() {
             onClick={handleClearFilters}
             sx={{ height: '56px' }}
           >
-            Очистити фільтри
+            Clear фільтри
           </Button>
         )}
       </Box>
 
-      {/* Групування завдань за проектами */}
+      {/* Групування tasks за projectами */}
       {Object.keys(groupedTasks).length === 0 ? (
         <Box textAlign="center" py={4}>
           <Typography variant="h6" color="text.secondary">
-            {projects.length === 0 ? 'Створіть проект для початку роботи' : 'Завдання не знайдено'}
+            {projects.length === 0 ? 'Create a project to get started' : 'Tasks не знайдено'}
           </Typography>
         </Box>
       ) : (
@@ -538,10 +538,10 @@ export default function TasksPage() {
                 <Box display="flex" alignItems="center" gap={1}>
                   <FolderIcon sx={{ color: project?.color || 'text.secondary' }} />
                   <Typography variant="h6">
-                    {project?.name || 'Без проекту'}
+                    {project?.name || 'No project'}
                   </Typography>
                   <Chip 
-                    label={`${projectTasks.length} завдань`} 
+                    label={`${projectTasks.length} tasks`} 
                     size="small" 
                     variant="outlined"
                   />
@@ -622,7 +622,7 @@ export default function TasksPage() {
                                 </Tooltip>
                               )}
                               
-                              <Tooltip title="Додати час вручну">
+                              <Tooltip title="Add час вручну">
                                 <IconButton
                                   color="secondary"
                                   onClick={() => handleAddTimeEntry(task)}
@@ -652,13 +652,13 @@ export default function TasksPage() {
       {/* Create/Edit Task Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingTask ? 'Редагувати завдання' : 'Створити завдання'}
+          {editingTask ? 'Edit task' : 'Create task'}
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
-            {/* Обов'язковий вибір проекту */}
+            {/* Обов'язковий вибір projectу */}
             <FormControl fullWidth error={!!validationErrors.projectId}>
-              <InputLabel>Проект *</InputLabel>
+              <InputLabel>Project *</InputLabel>
               <Select
                 value={newTask.projectId}
                 onChange={(e) => {
@@ -689,7 +689,7 @@ export default function TasksPage() {
             </FormControl>
 
             <TextField
-              label="Назва *"
+              label="Task name *"
               value={newTask.title}
               onChange={(e) => {
                 setNewTask({ ...newTask, title: e.target.value });
@@ -704,7 +704,7 @@ export default function TasksPage() {
             />
             
             <TextField
-              label="Опис"
+              label="Description"
               value={newTask.description}
               onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
               multiline
@@ -713,27 +713,27 @@ export default function TasksPage() {
             />
             
             <FormControl fullWidth>
-              <InputLabel>Пріоритет</InputLabel>
+              <InputLabel>Priority</InputLabel>
               <Select
                 value={newTask.priority}
                 onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as TaskPriority })}
               >
-                <MenuItem value="LOW">Низький</MenuItem>
-                <MenuItem value="MEDIUM">Середній</MenuItem>
-                <MenuItem value="HIGH">Високий</MenuItem>
-                <MenuItem value="URGENT">Терміновий</MenuItem>
+                <MenuItem value="LOW">Low</MenuItem>
+                <MenuItem value="MEDIUM">Medium</MenuItem>
+                <MenuItem value="HIGH">High</MenuItem>
+                <MenuItem value="URGENT">Urgent</MenuItem>
               </Select>
             </FormControl>
             
             <FormControl fullWidth>
-              <InputLabel>Статус</InputLabel>
+              <InputLabel>Status</InputLabel>
               <Select
                 value={newTask.status}
                 onChange={(e) => setNewTask({ ...newTask, status: e.target.value as TaskStatus })}
               >
-                <MenuItem value="TODO">Потрібно зробити</MenuItem>
-                <MenuItem value="IN_PROGRESS">В процесі</MenuItem>
-                <MenuItem value="COMPLETED">Завершено</MenuItem>
+                <MenuItem value="TODO">To Do</MenuItem>
+                <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+                <MenuItem value="COMPLETED">Completed</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -743,14 +743,14 @@ export default function TasksPage() {
             setDialogOpen(false);
             setValidationErrors({});
           }}>
-            Скасувати
+            Cancel
           </Button>
           <Button
             onClick={editingTask ? handleUpdateTask : handleCreateTask}
             variant="contained"
             disabled={!newTask.title || !newTask.projectId}
           >
-            {editingTask ? 'Оновити' : 'Створити'}
+            {editingTask ? 'Оновити' : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -758,12 +758,12 @@ export default function TasksPage() {
       {/* Manual Time Entry Dialog */}
       <Dialog open={timeEntryDialogOpen} onClose={() => setTimeEntryDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          Додати час для: {selectedTaskForTime?.title}
+          Add час для: {selectedTaskForTime?.title}
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
-              label="Опис роботи"
+              label="Description роботи"
               value={newTimeEntry.description}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, description: e.target.value })}
               fullWidth
@@ -771,18 +771,18 @@ export default function TasksPage() {
             />
             
             <TextField
-              label="Тривалість (хвилини) *"
+              label="Duration (minutesи) *"
               type="number"
               value={newTimeEntry.duration}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, duration: e.target.value })}
               required
               fullWidth
               inputProps={{ step: 1 }}
-              helperText="Додатні значення додають час, від'ємні - віднімають час від завдання"
+              helperText="Додатні значення додають час, від'ємні - віднімають час від task"
             />
             
             <TextField
-              label="Час початку"
+              label="Time початку"
               type="datetime-local"
               value={newTimeEntry.startTime}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, startTime: e.target.value })}
@@ -793,14 +793,14 @@ export default function TasksPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTimeEntryDialogOpen(false)}>
-            Скасувати
+            Cancel
           </Button>
           <Button
             onClick={handleCreateTimeEntry}
             variant="contained"
             disabled={!newTimeEntry.duration || createTimeEntry.isPending}
           >
-            Додати
+            Add
           </Button>
         </DialogActions>
       </Dialog>

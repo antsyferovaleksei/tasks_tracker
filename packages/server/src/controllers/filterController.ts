@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 // Схема для збереження фільтру
 const saveFilterSchema = z.object({
-  name: z.string().min(1, 'Назва фільтру обов\'язкова'),
+  name: z.string().min(1, 'Task name фільтру обов\'язкова'),
   filters: z.object({
     status: z.array(z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])).optional(),
     priority: z.array(z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])).optional(),
@@ -145,7 +145,7 @@ export const deleteFilter = async (req: AuthRequest, res: Response) => {
     console.error('Delete filter error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка видалення фільтру',
+      message: error.message || 'Deletion error фільтру',
     });
   }
 };
@@ -162,7 +162,7 @@ export const getQuickFilters = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Отримуємо кількість завдань для швидких фільтрів
+    // Отримуємо кількість tasks для швидких фільтрів
     const [
       todoCount,
       inProgressCount,
@@ -262,7 +262,7 @@ export const getQuickFilters = async (req: AuthRequest, res: Response) => {
       },
       {
         id: 'high_priority',
-        name: 'Високий пріоритет',
+        name: 'High пріоритет',
         count: highPriorityCount,
         filters: { priority: ['HIGH', 'URGENT'] },
       },

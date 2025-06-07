@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Tasks Tracker - Трекер завдань',
+                  name: 'Tasks Tracker',
         short_name: 'TasksTracker',
-        description: 'Сучасний веб-додаток для управління завданнями та відстеженням часу',
+        description: 'Modern web application for task management and time tracking',
         theme_color: '#1976d2',
         background_color: '#ffffff',
         display: 'standalone',

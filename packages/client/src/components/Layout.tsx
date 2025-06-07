@@ -75,19 +75,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const menuItems = [
     {
-      text: 'Завдання',
+      text: 'Tasks',
       icon: Assignment,
       path: '/tasks',
       color: theme.palette.secondary.main,
     },
     {
-      text: 'Проекти',
+      text: 'Projects',
       icon: Folder,
       path: '/projects',
       color: theme.palette.success.main,
     },
     {
-      text: 'Аналітика',
+      text: 'Analytics',
       icon: Analytics,
       path: '/analytics',
       color: theme.palette.warning.main,
@@ -143,11 +143,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <PlayArrow sx={{ fontSize: 16 }} />
                 <Typography variant="body2" fontWeight="bold">
-                  Активний таймер
+                  Active Timer
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                {activeTimer.task?.title || 'Без назви'}
+                {activeTimer.task?.title || 'No title'}
               </Typography>
               <Chip
                 label={formatDuration(timerDuration)}
@@ -260,7 +260,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Профіль">
+            <Tooltip title="Profile">
               <IconButton onClick={handleProfileMenuOpen}>
                 <Avatar sx={{ width: 32, height: 32 }}>
                   {user?.name?.charAt(0).toUpperCase()}
@@ -293,14 +293,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <ListItemIcon>
             <AccountCircle fontSize="small" />
           </ListItemIcon>
-          Профіль
+          Profile
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
-          Вийти
+          Logout
         </MenuItem>
       </Menu>
 

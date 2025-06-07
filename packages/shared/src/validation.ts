@@ -15,7 +15,7 @@ export const loginSchema = z.object({
 
 // Project validation schemas
 export const createProjectSchema = z.object({
-  name: z.string().min(1, 'Назва проекту обов\'язкова'),
+  name: z.string().min(1, 'Project name обов\'язкова'),
   description: z.string().optional(),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Некоректний колір').optional(),
   archived: z.boolean().optional(),
@@ -30,11 +30,11 @@ export const updateProjectSchema = z.object({
 
 // Task validation schemas
 export const createTaskSchema = z.object({
-  title: z.string().min(1, 'Назва завдання обов\'язкова'),
+  title: z.string().min(1, 'Task title обов\'язкова'),
   description: z.string().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   dueDate: z.string().datetime().optional().or(z.date().optional()),
-  projectId: z.string().min(1, 'Проект обов\'язковий'),
+  projectId: z.string().min(1, 'Project обов\'язковий'),
   tagIds: z.array(z.string()).optional(),
 });
 
@@ -51,7 +51,7 @@ export const updateTaskSchema = z.object({
 
 // Tag validation schemas
 export const createTagSchema = z.object({
-  name: z.string().min(1, 'Назва тегу обов\'язкова'),
+  name: z.string().min(1, 'Task name тегу обов\'язкова'),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Некоректний колір').optional(),
 });
 
@@ -62,7 +62,7 @@ export const updateTagSchema = z.object({
 
 // Time Entry validation schemas
 export const createTimeEntrySchema = z.object({
-  taskId: z.string().min(1, 'ID завдання обов\'язковий'),
+  taskId: z.string().min(1, 'ID task обов\'язковий'),
   description: z.string().optional(),
   startTime: z.string().datetime().optional().or(z.date().optional()),
   endTime: z.string().datetime().optional().or(z.date().optional()),

@@ -115,13 +115,13 @@ export const updateReminderSettings = async (req: AuthRequest, res: Response) =>
           ? JSON.parse(settings.customReminderTimes) 
           : [],
       },
-      message: 'Налаштування нагадувань оновлено',
+      message: 'Settings нагадувань оновлено',
     });
   } catch (error: any) {
     console.error('Update reminder settings error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка оновлення налаштувань нагадувань',
+      message: error.message || 'Update error налаштувань нагадувань',
     });
   }
 };
@@ -139,7 +139,7 @@ export const createScheduledReminder = async (req: AuthRequest, res: Response) =
       });
     }
 
-    // Перевіряємо, чи існує завдання (якщо вказано)
+    // Перевіряємо, чи існує task (якщо вказано)
     if (validatedData.taskId) {
       const task = await prisma.task.findFirst({
         where: {
@@ -151,7 +151,7 @@ export const createScheduledReminder = async (req: AuthRequest, res: Response) =
       if (!task) {
         return res.status(404).json({
           success: false,
-          message: 'Завдання не знайдено',
+          message: 'Tasks не знайдено',
         });
       }
     }
@@ -180,7 +180,7 @@ export const createScheduledReminder = async (req: AuthRequest, res: Response) =
     console.error('Create scheduled reminder error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка створення нагадування',
+      message: error.message || 'Creation error нагадування',
     });
   }
 };
@@ -266,13 +266,13 @@ export const sendEmailReminder = async (userId: string, taskId: string, reminder
         <h2>${reminder.title}</h2>
         <p>${reminder.message}</p>
         <hr>
-        <h3>Деталі завдання:</h3>
-        <p><strong>Назва:</strong> ${task.title}</p>
-        ${task.description ? `<p><strong>Опис:</strong> ${task.description}</p>` : ''}
-        <p><strong>Пріоритет:</strong> ${task.priority}</p>
-        <p><strong>Статус:</strong> ${task.status}</p>
+        <h3>Деталі task:</h3>
+        <p><strong>Task name:</strong> ${task.title}</p>
+        ${task.description ? `<p><strong>Description:</strong> ${task.description}</p>` : ''}
+        <p><strong>Priority:</strong> ${task.priority}</p>
+        <p><strong>Status:</strong> ${task.status}</p>
         ${task.dueDate ? `<p><strong>Дедлайн:</strong> ${new Date(task.dueDate).toLocaleDateString('uk-UA')}</p>` : ''}
-        ${task.project ? `<p><strong>Проект:</strong> ${task.project.name}</p>` : ''}
+        ${task.project ? `<p><strong>Project:</strong> ${task.project.name}</p>` : ''}
         <br>
         <p>З найкращими побажаннями,<br>Tasks Tracker</p>
       `,
@@ -286,7 +286,7 @@ export const sendEmailReminder = async (userId: string, taskId: string, reminder
   }
 };
 
-// Автоматичне створення нагадувань для завдань з дедлайнами
+// Автоматичне створення нагадувань для tasks з дедлайнами
 export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -311,7 +311,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
       });
     }
 
-    // Отримуємо завдання з дедлайнами
+    // Отримуємо task з дедлайнами
     const tasksWithDeadlines = await prisma.task.findMany({
       where: {
         userId,
@@ -329,7 +329,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
       const reminderDate = new Date(task.dueDate);
       reminderDate.setDate(reminderDate.getDate() - settings.daysBeforeDeadline);
 
-      // Перевіряємо, чи не існує вже нагадування для цього завдання
+      // Перевіряємо, чи не існує вже нагадування для цього task
       const existingReminder = await prisma.scheduledReminder.findFirst({
         where: {
           userId,
@@ -347,8 +347,8 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
           data: {
             type: 'EMAIL',
             scheduledFor: reminderDate,
-            title: `Нагадування: Дедлайн завдання "${task.title}"`,
-            message: `Завдання "${task.title}" має дедлайн ${task.dueDate.toLocaleDateString('uk-UA')}`,
+            title: `Нагадування: Дедлайн task "${task.title}"`,
+            message: `Tasks "${task.title}" має дедлайн ${task.dueDate.toLocaleDateString('uk-UA')}`,
             userId,
             taskId: task.id,
             metadata: JSON.stringify({ daysBeforeDeadline: settings.daysBeforeDeadline }),
@@ -362,7 +362,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
           data: {
             type: 'PUSH',
             scheduledFor: reminderDate,
-            title: `Дедлайн завдання`,
+            title: `Дедлайн task`,
             message: `"${task.title}" має дедлайн ${task.dueDate.toLocaleDateString('uk-UA')}`,
             userId,
             taskId: task.id,
@@ -376,7 +376,7 @@ export const scheduleDeadlineReminders = async (req: AuthRequest, res: Response)
     res.json({
       success: true,
       data: { created: createdReminders },
-      message: `Створено ${createdReminders} нагадувань для завдань з дедлайнами`,
+      message: `Створено ${createdReminders} нагадувань для tasks з дедлайнами`,
     });
   } catch (error: any) {
     console.error('Schedule deadline reminders error:', error);
@@ -467,12 +467,12 @@ export const deleteReminder = async (req: AuthRequest, res: Response) => {
     console.error('Delete reminder error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка видалення нагадування',
+      message: error.message || 'Deletion error нагадування',
     });
   }
 };
 
-// Запуск cron job для обробки нагадувань (кожні 5 хвилин)
+// Запуск cron job для обробки нагадувань (кожні 5 minutes)
 if (process.env.NODE_ENV !== 'test') {
   cron.schedule('*/5 * * * *', () => {
     console.log('Running reminder processing job...');

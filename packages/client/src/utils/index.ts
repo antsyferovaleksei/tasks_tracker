@@ -98,7 +98,7 @@ export const getTaskStatusLabel = (status: TaskStatus): string => {
   const labels: Record<TaskStatus, string> = {
     TODO: 'До виконання',
     IN_PROGRESS: 'В роботі',
-    COMPLETED: 'Завершено',
+    COMPLETED: 'Completed',
     CANCELLED: 'Скасовано',
   };
   return labels[status] || status;
@@ -106,10 +106,10 @@ export const getTaskStatusLabel = (status: TaskStatus): string => {
 
 export const getTaskPriorityLabel = (priority: TaskPriority): string => {
   const labels: Record<TaskPriority, string> = {
-    LOW: 'Низький',
-    MEDIUM: 'Середній',
-    HIGH: 'Високий',
-    URGENT: 'Терміновий',
+    LOW: 'Low',
+    MEDIUM: 'Medium',
+    HIGH: 'High',
+    URGENT: 'Urgent',
   };
   return labels[priority] || priority;
 };

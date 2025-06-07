@@ -28,8 +28,8 @@ export default function TaskDetailPage() {
   // Mock task data since hook might not work correctly
   const task = {
     id: id || '1',
-    title: 'Завдання ' + (id || '1'),
-    description: 'Опис завдання для демонстрації функціональності',
+    title: 'Tasks ' + (id || '1'),
+    description: 'Description task для демонстрації функціональності',
     status: 'IN_PROGRESS',
     priority: 'HIGH',
     createdAt: new Date().toISOString(),
@@ -51,14 +51,14 @@ export default function TaskDetailPage() {
     return (
       <Box p={3}>
         <Alert severity="error">
-          Завдання не знайдено або сталася помилка завантаження
+          Tasks не знайдено або сталася помилка завантаження
         </Alert>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/tasks')}
           sx={{ mt: 2 }}
         >
-          Повернутися до завдань
+          Повернутися до tasks
         </Button>
       </Box>
     );
@@ -108,7 +108,7 @@ export default function TaskDetailPage() {
           {task.description && (
             <Box mb={3}>
               <Typography variant="h6" mb={1}>
-                Опис
+                Description
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 {task.description}

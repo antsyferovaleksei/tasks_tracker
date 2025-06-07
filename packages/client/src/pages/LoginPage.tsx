@@ -259,7 +259,7 @@ const LoginPage: React.FC = () => {
         {/* Footer */}
         <Box sx={{ textAlign: 'center', mt: 3 }}>
           <Typography variant="body2" color="rgba(255,255,255,0.7)">
-            © 2025 Tasks Tracker. Сучасний трекер завдань.
+            © 2025 Tasks Tracker. Сучасний трекер tasks.
           </Typography>
         </Box>
       </Container>

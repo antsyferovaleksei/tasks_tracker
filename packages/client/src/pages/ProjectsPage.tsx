@@ -129,14 +129,14 @@ export default function ProjectsPage() {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Проекти
+          Projects
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setDialogOpen(true)}
         >
-          Додати проект
+          Add project
         </Button>
       </Box>
 
@@ -165,7 +165,7 @@ export default function ProjectsPage() {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenEditDialog(project)}
-                      title="Редагувати проект"
+                      title="Edit project"
                     >
                       <EditIcon />
                     </IconButton>
@@ -173,7 +173,7 @@ export default function ProjectsPage() {
                       size="small" 
                       color="error"
                       onClick={() => handleOpenDeleteDialog(project)}
-                      title="Видалити проект"
+                      title="Delete project"
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -188,7 +188,7 @@ export default function ProjectsPage() {
 
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Chip
-                    label={`${project._count?.tasks || 0} завдань`}
+                    label={`${project._count?.tasks || 0} tasks`}
                     size="small"
                     variant="outlined"
                   />
@@ -205,25 +205,25 @@ export default function ProjectsPage() {
       {projects.length === 0 && (
         <Box textAlign="center" py={4}>
           <Typography variant="h6" color="text.secondary">
-            Проекти не знайдено
+            Projects не знайдено
           </Typography>
         </Box>
       )}
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingProject ? 'Редагувати проект' : 'Створити проект'}</DialogTitle>
+        <DialogTitle>{editingProject ? 'Edit project' : 'Create project'}</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
-              label="Назва проекту"
+              label="Project name"
               value={newProject.name}
               onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
               required
               fullWidth
             />
             <TextField
-              label="Опис"
+              label="Description"
               value={newProject.description}
               onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
               multiline
@@ -231,7 +231,7 @@ export default function ProjectsPage() {
               fullWidth
             />
             <Box>
-              <Typography variant="subtitle2" mb={1}>Колір проекту</Typography>
+              <Typography variant="subtitle2" mb={1}>Project color</Typography>
               <input
                 type="color"
                 value={newProject.color}
@@ -246,7 +246,7 @@ export default function ProjectsPage() {
             onClick={handleCloseDialog}
             disabled={createProjectMutation.isPending || updateProjectMutation.isPending}
           >
-            Скасувати
+            Cancel
           </Button>
           <Button
             onClick={editingProject ? handleUpdateProject : handleCreateProject}
@@ -264,7 +264,7 @@ export default function ProjectsPage() {
             {editingProject ? (
               updateProjectMutation.isPending ? 'Оновлення...' : 'Оновити'
             ) : (
-              createProjectMutation.isPending ? 'Створення...' : 'Створити'
+              createProjectMutation.isPending ? 'Creating...' : 'Create'
             )}
           </Button>
         </DialogActions>
@@ -280,10 +280,10 @@ export default function ProjectsPage() {
         <DialogTitle>Підтвердження видалення</DialogTitle>
         <DialogContent>
           <Typography>
-            Ви впевнені, що хочете видалити проект <strong>"{projectToDelete?.name}"</strong>?
+            Are you sure you want to delete project <strong>"{projectToDelete?.name}"</strong>?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Ця дія незворотна. Всі завдання в цьому проекті також будуть видалені.
+            Ця дія незворотна. All task в цьому projectі також будуть видалені.
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -291,7 +291,7 @@ export default function ProjectsPage() {
             onClick={() => setDeleteDialogOpen(false)}
             disabled={deleteProjectMutation.isPending}
           >
-            Скасувати
+            Cancel
           </Button>
           <Button
             onClick={handleDeleteProject}
@@ -300,7 +300,7 @@ export default function ProjectsPage() {
             disabled={deleteProjectMutation.isPending}
             startIcon={deleteProjectMutation.isPending ? <CircularProgress size={20} /> : null}
           >
-            {deleteProjectMutation.isPending ? 'Видалення...' : 'Видалити'}
+            {deleteProjectMutation.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

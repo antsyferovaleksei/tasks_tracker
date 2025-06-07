@@ -30,13 +30,13 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       data: project,
-      message: 'Проект успішно створено',
+      message: 'Project успішно створено',
     });
   } catch (error: any) {
     console.error('Create project error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка створення проекту',
+      message: error.message || 'Error creating project',
     });
   }
 };
@@ -76,7 +76,7 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
     console.error('Get projects error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка отримання проектів',
+      message: 'Помилка отримання projectів',
     });
   }
 };
@@ -123,7 +123,7 @@ export const getProject = async (req: AuthRequest, res: Response) => {
     if (!project) {
       return res.status(404).json({
         success: false,
-        message: 'Проект не знайдено',
+        message: 'Project не знайдено',
       });
     }
 
@@ -135,7 +135,7 @@ export const getProject = async (req: AuthRequest, res: Response) => {
     console.error('Get project error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка отримання проекту',
+      message: 'Помилка отримання projectу',
     });
   }
 };
@@ -164,7 +164,7 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     if (!existingProject) {
       return res.status(404).json({
         success: false,
-        message: 'Проект не знайдено',
+        message: 'Project не знайдено',
       });
     }
 
@@ -181,13 +181,13 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     res.json({
       success: true,
       data: project,
-      message: 'Проект успішно оновлено',
+      message: 'Project успішно оновлено',
     });
   } catch (error: any) {
     console.error('Update project error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка оновлення проекту',
+      message: error.message || 'Error updating project',
     });
   }
 };
@@ -215,7 +215,7 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
     if (!existingProject) {
       return res.status(404).json({
         success: false,
-        message: 'Проект не знайдено',
+        message: 'Project не знайдено',
       });
     }
 
@@ -225,13 +225,13 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
 
     res.json({
       success: true,
-      message: 'Проект успішно видалено',
+      message: 'Project успішно видалено',
     });
   } catch (error) {
     console.error('Delete project error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка видалення проекту',
+      message: 'Error deleting project',
     });
   }
 }; 

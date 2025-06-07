@@ -14,7 +14,7 @@ const router = Router();
 // Middleware для всіх маршрутів
 router.use(authenticateToken);
 
-// Налаштування нагадувань
+// Settings нагадувань
 router.get('/settings', getReminderSettings);
 router.put('/settings', updateReminderSettings);
 

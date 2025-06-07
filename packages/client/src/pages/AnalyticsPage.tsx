@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Аналітика
+          Analytics
         </Typography>
         
         {/* Export Button */}
@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
           onClick={handleExport}
           disabled={isExporting || !dashboardData?.data}
         >
-          {isExporting ? 'Експортується...' : 'Експорт у CSV'}
+          {isExporting ? 'Експортується...' : 'Export into CSV'}
         </Button>
       </Box>
 
@@ -79,7 +79,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Всього завдань
+                All tasks
               </Typography>
               <Typography variant="h4">
                 {metrics?.totalTasks || 0}
@@ -91,7 +91,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Завершено
+                Completed
               </Typography>
               <Typography variant="h4">
                 {metrics?.completedTasks || 0}
@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                В процесі
+                In Progress
               </Typography>
               <Typography variant="h4">
                 {metrics?.inProgressTasks || 0}
@@ -119,7 +119,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                Статистика за днями
+                Dailly statistic
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={charts?.dailyStats || []}>
@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="created" fill="#8884d8" name="Створено" />
-                  <Bar dataKey="completed" fill="#82ca9d" name="Завершено" />
+                  <Bar dataKey="completed" fill="#82ca9d" name="Completed" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -138,7 +138,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                За пріоритетом
+                By prioirity
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>

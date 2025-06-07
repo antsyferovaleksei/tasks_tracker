@@ -75,7 +75,7 @@ export default function RegisterPage() {
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Підтвердження паролю обов\'язкове';
+      newErrors.confirmPassword = 'Confirm Password обов\'язкове';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Паролі не співпадають';
     }
@@ -148,10 +148,10 @@ export default function RegisterPage() {
                 </IconButton>
               </Box>
               <Typography variant="h4" component="h2" gutterBottom fontWeight="600">
-                Ласкаво просимо! 🚀
+                Welcome! 🚀
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Створіть обліковий запис для початку роботи
+                Create an account to get started
               </Typography>
             </Box>
 
@@ -280,7 +280,7 @@ export default function RegisterPage() {
                   },
                 }}
               >
-                {isRegistering ? 'Реєстрація...' : 'Зареєструватися'}
+                {isRegistering ? 'Registration...' : 'Зареєструватися'}
               </Button>
 
               <Divider sx={{ my: 2 }}>
@@ -315,7 +315,7 @@ export default function RegisterPage() {
         {/* Footer */}
         <Box sx={{ textAlign: 'center', mt: 3 }}>
           <Typography variant="body2" color="rgba(255,255,255,0.7)">
-            © 2025 Tasks Tracker. Сучасний трекер завдань.
+                            © 2025 Tasks Tracker. Modern task tracker.
           </Typography>
         </Box>
       </Container>

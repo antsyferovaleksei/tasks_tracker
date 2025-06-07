@@ -20,8 +20,8 @@ export default function TestPage() {
     password: 'admin123'
   });
   const [projectData, setProjectData] = useState({
-    name: 'Тестовий проект з UI',
-    description: 'Опис проекту створеного з UI',
+    name: 'Test Project з UI',
+    description: 'Project description створеного з UI',
     color: '#2196f3',
     archived: false
   });
@@ -52,11 +52,11 @@ export default function TestPage() {
     try {
       const response = await apiClient.createProject(projectData);
       if (response.success) {
-        setSuccess('Проект створено успішно!');
+        setSuccess('Project створено успішно!');
         loadProjects();
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Помилка створення проекту');
+      setError(err.response?.data?.message || 'Error creating project');
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export default function TestPage() {
         setProjects(response.data);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Помилка завантаження проектів');
+      setError(err.response?.data?.message || 'Loading error projectів');
     }
   };
 
@@ -126,16 +126,16 @@ export default function TestPage() {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                2. Створити проект
+                2. Create project
               </Typography>
               <Box display="flex" flexDirection="column" gap={2}>
                 <TextField
-                  label="Назва проекту"
+                  label="Project name"
                   value={projectData.name}
                   onChange={(e) => setProjectData({ ...projectData, name: e.target.value })}
                 />
                 <TextField
-                  label="Опис"
+                  label="Description"
                   value={projectData.description}
                   onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
                   multiline
@@ -153,7 +153,7 @@ export default function TestPage() {
                   disabled={loading || !projectData.name}
                   startIcon={loading ? <CircularProgress size={20} /> : null}
                 >
-                  {loading ? 'Створення...' : 'Створити проект'}
+                  {loading ? 'Creating...' : 'Create project'}
                 </Button>
               </Box>
             </CardContent>
@@ -162,7 +162,7 @@ export default function TestPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                3. Існуючі проекти
+                3. Існуючі projectи
               </Typography>
               <Button onClick={loadProjects} variant="outlined" sx={{ mb: 2 }}>
                 Оновити список
@@ -180,7 +180,7 @@ export default function TestPage() {
                   </Box>
                 ))
               ) : (
-                <Typography color="text.secondary">Проекти не знайдено</Typography>
+                <Typography color="text.secondary">Projects не знайдено</Typography>
               )}
             </CardContent>
           </Card>

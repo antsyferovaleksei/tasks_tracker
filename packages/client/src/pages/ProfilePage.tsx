@@ -66,12 +66,12 @@ export default function ProfilePage() {
 
   const metrics = dashboardData?.data?.summary;
 
-  // Розрахуємо середній час на завдання
+  // Розрахуємо середній час на task
   const averageTimePerTask = metrics && metrics.completedTasks > 0 
     ? Math.floor(metrics.totalTimeSpent / metrics.completedTasks)
     : 0;
 
-  // Розрахуємо завдання на тиждень (приблизно)
+  // Розрахуємо task на тиждень (approximately)
   const tasksPerWeek = Math.ceil((metrics?.completedTasks || 0) / 4) || 0;
 
   const handleUpdateProfile = () => {
@@ -95,12 +95,12 @@ export default function ProfilePage() {
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      alert('Новий пароль та підтвердження не співпадають');
+      alert('New Password та підтвердження не співпадають');
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      alert('Новий пароль повинен містити принаймні 6 символів');
+      alert('New Password повинен містити принаймні 6 символів');
       return;
     }
 
@@ -124,7 +124,7 @@ export default function ProfilePage() {
   return (
     <Box p={3}>
       <Typography variant="h4" component="h1" mb={3}>
-        Профіль користувача
+        User Profile
       </Typography>
 
       <Grid container spacing={3}>
@@ -147,7 +147,7 @@ export default function ProfilePage() {
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
                 <CalendarIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
-                Реєстрація: {user?.createdAt ? formatDate(user.createdAt) : 'Невідомо'}
+                Registration: {user?.createdAt ? formatDate(user.createdAt) : 'Невідомо'}
               </Typography>
               
               <Button
@@ -162,7 +162,7 @@ export default function ProfilePage() {
                 }}
                 sx={{ mb: 1, width: '100%' }}
               >
-                Редагувати профіль
+                Edit profile
               </Button>
               
               <Button
@@ -171,7 +171,7 @@ export default function ProfilePage() {
                 onClick={() => setChangePasswordOpen(true)}
                 sx={{ width: '100%' }}
               >
-                Змінити пароль
+                Change Password
               </Button>
             </CardContent>
           </Card>
@@ -189,7 +189,7 @@ export default function ProfilePage() {
                     {metrics?.totalTasks || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Всього завдань
+                    All tasks
                   </Typography>
                 </CardContent>
               </Card>
@@ -202,7 +202,7 @@ export default function ProfilePage() {
                     {metrics?.completedTasks || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Завершено
+                    Completed
                   </Typography>
                 </CardContent>
               </Card>
@@ -215,7 +215,7 @@ export default function ProfilePage() {
                     {metrics?.inProgressTasks || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    В процесі
+                    In Progress
                   </Typography>
                 </CardContent>
               </Card>
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                     {formatDuration(metrics?.totalTimeSpent || 0)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Загальний час
+                    Total time
                   </Typography>
                 </CardContent>
               </Card>
@@ -241,13 +241,13 @@ export default function ProfilePage() {
                 <CardContent>
                   <Typography variant="h6" mb={2}>
                     <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Детальна статистика
+                    Detailed statistic
                   </Typography>
                   
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="body2" mb={1}>
-                        Прогрес виконання завдань
+                        Tasks progress
                       </Typography>
                       <LinearProgress 
                         variant="determinate" 
@@ -255,19 +255,19 @@ export default function ProfilePage() {
                         sx={{ mb: 1 }}
                       />
                       <Typography variant="body2" color="text.secondary">
-                        {Math.round(parseFloat(metrics?.completionRate || '0'))}% завершено
+                        {Math.round(parseFloat(metrics?.completionRate || '0'))}% completed
                       </Typography>
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
                       <Typography variant="body2">
-                        📊 Середній час на завдання: {formatDuration(averageTimePerTask)}
+                        📊 Medium time for a task: {formatDuration(averageTimePerTask)}
                       </Typography>
                       <Typography variant="body2">
-                        📅 Завдань на тиждень: ~{tasksPerWeek}
+                        📅 Tasks durng the week: ~{tasksPerWeek}
                       </Typography>
                       <Typography variant="body2">
-                        🏢 Проектів: {metrics?.projectsCount || 0}
+                        🏢 Projects: {metrics?.projectsCount || 0}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                   {metrics && metrics.overdueTasks > 0 && (
                     <Box mt={2}>
                       <Typography variant="body2" color="error">
-                        ⚠️ Прострочено завдань: {metrics.overdueTasks}
+                        ⚠️ Прострочено tasks: {metrics.overdueTasks}
                       </Typography>
                     </Box>
                   )}
@@ -290,7 +290,7 @@ export default function ProfilePage() {
 
       {/* Edit Profile Dialog */}
       <Dialog open={editProfileOpen} onClose={() => setEditProfileOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Редагувати профіль</DialogTitle>
+        <DialogTitle>Edit profile</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -313,25 +313,25 @@ export default function ProfilePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditProfileOpen(false)}>Скасувати</Button>
+          <Button onClick={() => setEditProfileOpen(false)}>Cancel</Button>
           <Button 
             onClick={handleUpdateProfile}
             variant="contained"
             disabled={updateProfileMutation.isPending}
           >
-            {updateProfileMutation.isPending ? 'Збереження...' : 'Зберегти'}
+            {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Change Password Dialog */}
       <Dialog open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Змінити пароль</DialogTitle>
+        <DialogTitle>Change Password</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Поточний пароль"
+            label="Current Password"
             type="password"
             fullWidth
             variant="outlined"
@@ -341,7 +341,7 @@ export default function ProfilePage() {
           />
           <TextField
             margin="dense"
-            label="Новий пароль"
+            label="New Password"
             type="password"
             fullWidth
             variant="outlined"
@@ -360,13 +360,13 @@ export default function ProfilePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setChangePasswordOpen(false)}>Скасувати</Button>
+          <Button onClick={() => setChangePasswordOpen(false)}>Cancel</Button>
           <Button 
             onClick={handleChangePassword}
             variant="contained"
             disabled={changePasswordMutation.isPending}
           >
-            {changePasswordMutation.isPending ? 'Зміна...' : 'Змінити пароль'}
+            {changePasswordMutation.isPending ? 'Зміна...' : 'Change Password'}
           </Button>
         </DialogActions>
       </Dialog>

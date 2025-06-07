@@ -196,11 +196,11 @@ export const useUpdateProfile = () => {
       if (response.success && response.data) {
         updateUser(response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile });
-        toast.success('Профіль успішно оновлено!');
+        toast.success('Profile успішно оновлено!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка оновлення профілю');
+      toast.error(error.response?.data?.message || 'Update error профілю');
     },
   });
 };
@@ -280,11 +280,11 @@ export const useCreateTask = () => {
       if (response.success && response.data) {
         addTask(response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        toast.success('Завдання створено!');
+        toast.success('Tasks створено!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка створення завдання');
+      toast.error(error.response?.data?.message || 'Creation error task');
     },
   });
 };
@@ -300,11 +300,11 @@ export const useUpdateTask = () => {
       if (response.success && response.data) {
         updateTask(variables.id, response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        toast.success('Завдання оновлено!');
+        toast.success('Tasks оновлено!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка оновлення завдання');
+      toast.error(error.response?.data?.message || 'Update error task');
     },
   });
 };
@@ -318,10 +318,10 @@ export const useDeleteTask = () => {
     onSuccess: (_, id) => {
       deleteTask(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-      toast.success('Завдання видалено!');
+      toast.success('Tasks видалено!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка видалення завдання');
+      toast.error(error.response?.data?.message || 'Deletion error task');
     },
   });
 };
@@ -369,11 +369,11 @@ export const useCreateProject = () => {
       if (response.success && response.data) {
         addProject(response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-        toast.success('Проект створено!');
+        toast.success('Project created!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка створення проекту');
+      toast.error(error.response?.data?.message || 'Error creating project');
     },
   });
 };
@@ -389,11 +389,11 @@ export const useUpdateProject = () => {
       if (response.success && response.data) {
         updateProject(variables.id, response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-        toast.success('Проект оновлено!');
+        toast.success('Project updated!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка оновлення проекту');
+      toast.error(error.response?.data?.message || 'Error updating project');
     },
   });
 };
@@ -407,10 +407,10 @@ export const useDeleteProject = () => {
     onSuccess: (_, id) => {
       deleteProject(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-      toast.success('Проект видалено!');
+      toast.success('Project deleted!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка видалення проекту');
+      toast.error(error.response?.data?.message || 'Error deleting project');
     },
   });
 };
@@ -527,7 +527,7 @@ export const useCreateTimeEntry = () => {
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка створення запису часу');
+      toast.error(error.response?.data?.message || 'Creation error запису часу');
     },
   });
 };
@@ -551,7 +551,7 @@ export const useUpdateTimeEntry = () => {
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка оновлення запису часу');
+      toast.error(error.response?.data?.message || 'Update error запису часу');
     },
   });
 };
@@ -572,7 +572,7 @@ export const useDeleteTimeEntry = () => {
       toast.success('Запис часу видалено!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка видалення запису часу');
+      toast.error(error.response?.data?.message || 'Deletion error запису часу');
     },
   });
 };
@@ -804,7 +804,7 @@ export const useUserSettings = () => {
     },
     onSuccess: (newSettings) => {
       queryClient.setQueryData(['userSettings'], newSettings);
-      toast.success('Налаштування збережено успішно!');
+      toast.success('Settings збережено успішно!');
     },
     onError: (error: any) => {
       console.error('Error saving settings:', error);

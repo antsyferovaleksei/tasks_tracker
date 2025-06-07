@@ -16,7 +16,7 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує завдання і чи воно належить користувачу
+    // Перевіряємо, чи існує task і чи воно належить користувачу
     const task = await prisma.task.findFirst({
       where: {
         id: validatedData.taskId,
@@ -27,7 +27,7 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 
@@ -49,7 +49,7 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при додаванні часу
+    // Автоматично змінюємо статус task з TODO на IN_PROGRESS when adding time
     if (task.status === 'TODO' && (validatedData.duration || 0) > 0) {
       await prisma.task.update({
         where: { id: validatedData.taskId },
@@ -66,12 +66,12 @@ export const createTimeEntry = async (req: AuthRequest, res: Response) => {
     console.error('Create time entry error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка створення запису часу',
+      message: error.message || 'Creation error запису часу',
     });
   }
 };
 
-// Запуск таймера для завдання
+// Запуск таймера для task
 export const startTimer = async (req: AuthRequest, res: Response) => {
   try {
     const { taskId } = req.params;
@@ -85,7 +85,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує завдання і чи воно належить користувачу
+    // Перевіряємо, чи існує task і чи воно належить користувачу
     const task = await prisma.task.findFirst({
       where: {
         id: taskId,
@@ -96,7 +96,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 
@@ -149,7 +149,7 @@ export const startTimer = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при першому запуску таймера
+    // Автоматично змінюємо статус task з TODO на IN_PROGRESS on first timer start
     if (task.status === 'TODO') {
       await prisma.task.update({
         where: { id: taskId },
@@ -184,7 +184,7 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Знаходимо активний запис часу з інформацією про завдання
+    // Знаходимо активний запис часу з інформацією про task
     const timeEntry = await prisma.timeEntry.findFirst({
       where: {
         id,
@@ -199,14 +199,14 @@ export const stopTimer = async (req: AuthRequest, res: Response) => {
     if (!timeEntry) {
       return res.status(404).json({
         success: false,
-        message: 'Активний таймер не знайдено',
+        message: 'Active Timer не знайдено',
       });
     }
 
     const endTime = new Date();
     const duration = Math.floor((endTime.getTime() - timeEntry.startTime.getTime()) / 1000);
 
-    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при зупинці таймера з витраченим часом
+    // Автоматично змінюємо статус task з TODO на IN_PROGRESS when stopping timer with spent time
     if (timeEntry.task.status === 'TODO' && duration > 0) {
       await prisma.task.update({
         where: { id: timeEntry.taskId },
@@ -432,7 +432,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Автоматично змінюємо статус завдання з TODO на IN_PROGRESS при оновленні часу
+    // Автоматично змінюємо статус task з TODO на IN_PROGRESS when updating time
     if (timeEntry.task.status === 'TODO' && (timeEntry.duration || 0) > 0) {
       await prisma.task.update({
         where: { id: timeEntry.taskId },
@@ -449,7 +449,7 @@ export const updateTimeEntry = async (req: AuthRequest, res: Response) => {
     console.error('Update time entry error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка оновлення запису часу',
+      message: error.message || 'Update error запису часу',
     });
   }
 };
@@ -494,12 +494,12 @@ export const deleteTimeEntry = async (req: AuthRequest, res: Response) => {
     console.error('Delete time entry error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка видалення запису часу',
+      message: error.message || 'Deletion error запису часу',
     });
   }
 };
 
-// Отримання статистики часу для завдання
+// Отримання статистики часу для task
 export const getTaskTimeStats = async (req: AuthRequest, res: Response) => {
   try {
     const { taskId } = req.params;
@@ -512,7 +512,7 @@ export const getTaskTimeStats = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Перевіряємо, чи існує завдання і чи воно належить користувачу
+    // Перевіряємо, чи існує task і чи воно належить користувачу
     const task = await prisma.task.findFirst({
       where: {
         id: taskId,
@@ -523,7 +523,7 @@ export const getTaskTimeStats = async (req: AuthRequest, res: Response) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 

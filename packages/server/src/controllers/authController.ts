@@ -204,7 +204,7 @@ export const changePassword = async (req: Request, res: Response) => {
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'Новий пароль повинен містити принаймні 6 символів',
+        message: 'New Password повинен містити принаймні 6 символів',
       });
     }
 
@@ -337,13 +337,13 @@ export const updateProfile = async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: updatedUser,
-      message: 'Профіль успішно оновлено',
+      message: 'Profile успішно оновлено',
     });
   } catch (error: any) {
     console.error('Update profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка оновлення профілю',
+      message: 'Update error профілю',
     });
   }
 }; 

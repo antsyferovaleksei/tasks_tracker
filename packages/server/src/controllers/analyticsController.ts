@@ -41,19 +41,19 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       totalTimeSpent,
       projectsCount,
     ] = await Promise.all([
-      // Загальна кількість завдань
+      // Загальна кількість tasks
       prisma.task.count({
         where: { userId, archived: false },
       }),
-      // Виконані завдання
+      // Виконані task
       prisma.task.count({
         where: { userId, status: 'COMPLETED', archived: false },
       }),
-      // Завдання в роботі
+      // Tasks в роботі
       prisma.task.count({
         where: { userId, status: 'IN_PROGRESS', archived: false },
       }),
-      // Прострочені завдання
+      // Прострочені task
       prisma.task.count({
         where: {
           userId,
@@ -62,7 +62,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
           archived: false,
         },
       }),
-      // Загальний час
+      // Total time
       prisma.timeEntry.aggregate({
         where: {
           userId,
@@ -70,13 +70,13 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
         },
         _sum: { duration: true },
       }),
-      // Кількість проектів
+      // Number of projects
       prisma.project.count({
         where: { userId, archived: false },
       }),
     ]);
 
-    // Статистика за завданнями по дням (спрощена версія)
+    // Статистика за taskми по дням (simplified version)
     const recentTasks = await prisma.task.findMany({
       where: {
         userId,
@@ -107,21 +107,21 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 30);
 
-    // Розподіл завдань за пріоритетом
+    // Розподіл tasks By prioirity
     const priorityStats = await prisma.task.groupBy({
       by: ['priority'],
       where: { userId, archived: false },
       _count: { priority: true },
     });
 
-    // Розподіл завдань за статусом
+    // Розподіл tasks за статусом
     const statusStats = await prisma.task.groupBy({
       by: ['status'],
       where: { userId, archived: false },
       _count: { status: true },
     });
 
-    // Час по проектах (спрощена версія)
+    // Time по projectах (simplified version)
     const timeEntries = await prisma.timeEntry.findMany({
       where: {
         userId,
@@ -138,7 +138,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
 
     const projectTimeMap = new Map();
     timeEntries.forEach(entry => {
-      const projectName = entry.task.project?.name || 'Без проекту';
+      const projectName = entry.task.project?.name || 'No project';
       if (!projectTimeMap.has(projectName)) {
         projectTimeMap.set(projectName, { project_name: projectName, total_time: 0, tasks_count: new Set() });
       }
@@ -155,7 +155,7 @@ export const getDashboardMetrics = async (req: AuthRequest, res: Response) => {
       .sort((a, b) => b.total_time - a.total_time)
       .slice(0, 10);
 
-    // Продуктивність по дням тижня (спрощена версія)
+    // Продуктивність по дням тижня (simplified version)
     const weekdayMap = new Map();
     const weekdays = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота'];
     
@@ -302,7 +302,7 @@ export const getTimeChartData = async (req: AuthRequest, res: Response) => {
       case 'project':
         const projectMap = new Map();
         timeEntries.forEach(entry => {
-          const period = entry.task.project?.name || 'Без проекту';
+          const period = entry.task.project?.name || 'No project';
           if (!projectMap.has(period)) {
             projectMap.set(period, { period, total_time: 0, tasks_count: new Set() });
           }
@@ -340,7 +340,7 @@ export const getTimeChartData = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Звіт за проектами
+// Project report
 export const getProjectReport = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
@@ -358,7 +358,7 @@ export const getProjectReport = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо проекти з завданнями та записами часу
+    // Отримуємо projectи з taskми та записами часу
     const projects = await prisma.project.findMany({
       where: {
         userId,
@@ -422,7 +422,7 @@ export const getProjectReport = async (req: AuthRequest, res: Response) => {
     console.error('Get project report error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка отримання звіту за проектами',
+      message: error.message || 'Error getting project report',
     });
   }
 };
@@ -445,7 +445,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо всі завдання для експорту
+    // Отримуємо всі task для експорту
     const tasks = await prisma.task.findMany({
       where: {
         userId,
@@ -465,7 +465,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Отримуємо загальний час для кожного завдання
+    // Отримуємо загальний час для кожного task
     const tasksWithTime = await Promise.all(
       tasks.map(async (task) => {
         const timeStats = await prisma.timeEntry.aggregate({
@@ -486,27 +486,27 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
 
     // Створюємо Excel файл
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Звіт завдань');
+    const worksheet = workbook.addWorksheet('Звіт tasks');
 
     // Заголовки
     worksheet.addRow([
-      'Назва завдання',
-      'Статус',
-      'Пріоритет',
-      'Проект',
+      'Task title',
+      'Status',
+      'Priority',
+      'Project',
       'Дата створення',
       'Термін виконання',
-      'Загальний час (хв)',
+      'Total time (хв)',
       'Кількість записів часу',
-      'Опис',
+      'Description',
     ]);
 
     // Функція для перекладу статусу
     const translateStatus = (status: string) => {
       switch (status) {
         case 'TODO': return 'До виконання';
-        case 'IN_PROGRESS': return 'В процесі';
-        case 'COMPLETED': return 'Завершено';
+        case 'IN_PROGRESS': return 'In Progress';
+        case 'COMPLETED': return 'Completed';
         case 'CANCELLED': return 'Скасовано';
         default: return status;
       }
@@ -515,10 +515,10 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
     // Функція для перекладу пріоритету
     const translatePriority = (priority: string) => {
       switch (priority) {
-        case 'LOW': return 'Низький';
-        case 'MEDIUM': return 'Середній';
-        case 'HIGH': return 'Високий';
-        case 'URGENT': return 'Терміновий';
+        case 'LOW': return 'Low';
+        case 'MEDIUM': return 'Medium';
+        case 'HIGH': return 'High';
+        case 'URGENT': return 'Urgent';
         default: return priority;
       }
     };
@@ -529,7 +529,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
         task.title,
         translateStatus(task.status),
         translatePriority(task.priority),
-        task.project?.name || 'Без проекту',
+        task.project?.name || 'No project',
         task.createdAt.toLocaleDateString('uk-UA'),
         task.dueDate?.toLocaleDateString('uk-UA') || 'Не встановлено',
         Math.round(task.totalTime / 60),
@@ -538,7 +538,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
       ]);
     });
 
-    // Налаштування стилів
+    // Settings стилів
     worksheet.getRow(1).font = { bold: true };
     worksheet.columns.forEach(column => {
       column.width = 15;
@@ -638,9 +638,9 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
     // Загальна статистика
     doc.fontSize(14).text('Загальна статистика:');
     doc.fontSize(12);
-    doc.text(`Загальний час: ${Math.round((totalStats._sum.duration || 0) / 60)} хвилин`);
+    doc.text(`Total time: ${Math.round((totalStats._sum.duration || 0) / 60)} minutes`);
     doc.text(`Кількість записів: ${totalStats._count.id}`);
-    doc.text(`Середній час на запис: ${totalStats._count.id > 0 ? Math.round((totalStats._sum.duration || 0) / totalStats._count.id / 60) : 0} хвилин`);
+    doc.text(`Medium час на запис: ${totalStats._count.id > 0 ? Math.round((totalStats._sum.duration || 0) / totalStats._count.id / 60) : 0} minutes`);
     doc.moveDown();
 
     // Детальний список
@@ -658,10 +658,10 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
           entry.endTime?.toLocaleTimeString('uk-UA') || 'Активно'
         } (${Math.round((entry.duration || 0) / 60)} хв)`
       );
-      doc.text(`Завдання: ${entry.task.title}`);
-      doc.text(`Проект: ${entry.task.project?.name || 'Без проекту'}`);
+      doc.text(`Tasks: ${entry.task.title}`);
+      doc.text(`Project: ${entry.task.project?.name || 'No project'}`);
       if (entry.description) {
-        doc.text(`Опис: ${entry.description}`);
+        doc.text(`Description: ${entry.description}`);
       }
       doc.moveDown(0.5);
     });

@@ -26,8 +26,8 @@ export default function ProjectDetailPage() {
   // Mock project data
   const project = {
     id: id || '1',
-    name: 'Проект ' + (id || '1'),
-    description: 'Опис проекту для демонстрації функціональності',
+    name: 'Project ' + (id || '1'),
+    description: 'Project description для демонстрації функціональності',
     status: 'ACTIVE',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -50,14 +50,14 @@ export default function ProjectDetailPage() {
     return (
       <Box p={3}>
         <Alert severity="error">
-          Проект не знайдено або сталася помилка завантаження
+          Project не знайдено або сталася помилка завантаження
         </Alert>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/projects')}
           sx={{ mt: 2 }}
         >
-          Повернутися до проектів
+          Back to Projects
         </Button>
       </Box>
     );
@@ -106,7 +106,7 @@ export default function ProjectDetailPage() {
               {project.description && (
                 <Box mb={3}>
                   <Typography variant="h6" mb={1}>
-                    Опис
+                    Description
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
                     {project.description}
@@ -143,7 +143,7 @@ export default function ProjectDetailPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                Статистика проекту
+                Project Statistics
               </Typography>
               
               <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -158,7 +158,7 @@ export default function ProjectDetailPage() {
                   Виконано: {project.completedTasks} з {project.tasksCount}
                 </Typography>
                 <Typography variant="h6" color="primary">
-                  {completionRate}% завершено
+                  {completionRate}% completed
                 </Typography>
               </Box>
 
@@ -169,7 +169,7 @@ export default function ProjectDetailPage() {
                 onClick={() => navigate(`/projects/${project.id}/tasks`)}
                 sx={{ mt: 2 }}
               >
-                Переглянути завдання
+                Переглянути task
               </Button>
             </CardContent>
           </Card>

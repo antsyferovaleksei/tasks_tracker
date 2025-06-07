@@ -13,7 +13,7 @@ import {
 
 const router = Router();
 
-// Всі маршрути потребують аутентифікації
+// All маршрути потребують аутентифікації
 router.use(authenticateToken);
 
 // Управління записами часу

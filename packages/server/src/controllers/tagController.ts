@@ -32,7 +32,7 @@ export const createTag = async (req: AuthRequest, res: Response) => {
     console.error('Create tag error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка створення тегу',
+      message: error.message || 'Creation error тегу',
     });
   }
 };
@@ -131,7 +131,7 @@ export const updateTag = async (req: Request, res: Response) => {
     console.error('Update tag error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка оновлення тегу',
+      message: error.message || 'Update error тегу',
     });
   }
 };
@@ -164,7 +164,7 @@ export const deleteTag = async (req: Request, res: Response) => {
     console.error('Delete tag error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка видалення тегу',
+      message: 'Deletion error тегу',
     });
   }
 }; 

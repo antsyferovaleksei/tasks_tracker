@@ -56,13 +56,13 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       data: completeTask,
-      message: 'Завдання успішно створено',
+      message: 'Tasks успішно створено',
     });
   } catch (error: any) {
     console.error('Create task error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка створення завдання',
+      message: error.message || 'Creation error task',
     });
   }
 };
@@ -180,7 +180,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
     console.error('Get tasks error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка отримання завдань',
+      message: error.message || 'Помилка отримання tasks',
     });
   }
 };
@@ -223,7 +223,7 @@ export const getTask = async (req: AuthRequest, res: Response) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 
@@ -235,7 +235,7 @@ export const getTask = async (req: AuthRequest, res: Response) => {
     console.error('Get task error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка отримання завдання',
+      message: 'Помилка отримання task',
     });
   }
 };
@@ -264,7 +264,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     if (!existingTask) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 
@@ -321,13 +321,13 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     res.json({
       success: true,
       data: completeTask,
-      message: 'Завдання успішно оновлено',
+      message: 'Tasks успішно оновлено',
     });
   } catch (error: any) {
     console.error('Update task error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Помилка оновлення завдання',
+      message: error.message || 'Update error task',
     });
   }
 };
@@ -355,7 +355,7 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
     if (!existingTask) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 
@@ -365,13 +365,13 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
 
     res.json({
       success: true,
-      message: 'Завдання успішно видалено',
+      message: 'Tasks успішно видалено',
     });
   } catch (error) {
     console.error('Delete task error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка видалення завдання',
+      message: 'Deletion error task',
     });
   }
 };
@@ -406,7 +406,7 @@ export const duplicateTask = async (req: AuthRequest, res: Response) => {
     if (!originalTask) {
       return res.status(404).json({
         success: false,
-        message: 'Завдання не знайдено',
+        message: 'Tasks не знайдено',
       });
     }
 
@@ -452,13 +452,13 @@ export const duplicateTask = async (req: AuthRequest, res: Response) => {
     res.status(201).json({
       success: true,
       data: completeTask,
-      message: 'Завдання успішно дубльовано',
+      message: 'Tasks успішно дубльовано',
     });
   } catch (error) {
     console.error('Duplicate task error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка дублювання завдання',
+      message: 'Помилка дублювання task',
     });
   }
 }; 
