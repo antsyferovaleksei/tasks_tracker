@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -6,7 +6,11 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Button,
 } from '@mui/material';
+import {
+  TableChart,
+} from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -19,12 +23,26 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { useDashboard } from '../hooks';
+import { useDashboard, useExportReport } from '../hooks';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function AnalyticsPage() {
   const { data: dashboardData, isLoading } = useDashboard(30);
+  const { mutate: exportReport, isPending: isExporting } = useExportReport();
+  
+
+
+  const handleExport = () => {
+    const params = {
+      period: 30,
+      summary: dashboardData?.data?.summary,
+      charts: dashboardData?.data?.charts,
+      type: 'analytics'
+    };
+    
+    exportReport({ format: 'csv', params });
+  };
 
   if (isLoading) {
     return (
@@ -39,13 +57,25 @@ export default function AnalyticsPage() {
 
   return (
     <Box p={3}>
-      <Typography variant="h4" component="h1" mb={3}>
-        Аналітика
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" component="h1">
+          Аналітика
+        </Typography>
+        
+        {/* Export Button */}
+        <Button
+          variant="contained"
+          startIcon={<TableChart />}
+          onClick={handleExport}
+          disabled={isExporting || !dashboardData?.data}
+        >
+          {isExporting ? 'Експортується...' : 'Експорт у CSV'}
+        </Button>
+      </Box>
 
       {/* Summary Cards */}
       <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -57,7 +87,7 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -69,7 +99,7 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -77,18 +107,6 @@ export default function AnalyticsPage() {
               </Typography>
               <Typography variant="h4">
                 {metrics?.inProgressTasks || 0}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Прострочено
-              </Typography>
-              <Typography variant="h4">
-                {metrics?.overdueTasks || 0}
               </Typography>
             </CardContent>
           </Card>

@@ -445,50 +445,96 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
     const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = endDate ? new Date(endDate) : new Date();
 
-    // Отримуємо дані для експорту
-    const timeEntries = await prisma.timeEntry.findMany({
+    // Отримуємо всі завдання для експорту
+    const tasks = await prisma.task.findMany({
       where: {
         userId,
-        startTime: { gte: start, lte: end },
-        ...(projectId && { task: { projectId } }),
+        ...(projectId && { projectId }),
+        archived: false,
       },
       include: {
-        task: {
-          include: {
-            project: true,
+        project: true,
+        _count: {
+          select: {
+            timeEntries: true,
           },
         },
       },
       orderBy: {
-        startTime: 'desc',
+        createdAt: 'desc',
       },
     });
 
+    // Отримуємо загальний час для кожного завдання
+    const tasksWithTime = await Promise.all(
+      tasks.map(async (task) => {
+        const timeStats = await prisma.timeEntry.aggregate({
+          where: {
+            taskId: task.id,
+          },
+          _sum: {
+            duration: true,
+          },
+        });
+
+        return {
+          ...task,
+          totalTime: timeStats._sum.duration || 0,
+        };
+      })
+    );
+
     // Створюємо Excel файл
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Звіт часу');
+    const worksheet = workbook.addWorksheet('Звіт завдань');
 
     // Заголовки
     worksheet.addRow([
-      'Дата',
-      'Час початку',
-      'Час закінчення',
-      'Тривалість (хв)',
-      'Завдання',
+      'Назва завдання',
+      'Статус',
+      'Пріоритет',
       'Проект',
+      'Дата створення',
+      'Термін виконання',
+      'Загальний час (хв)',
+      'Кількість записів часу',
       'Опис',
     ]);
 
+    // Функція для перекладу статусу
+    const translateStatus = (status: string) => {
+      switch (status) {
+        case 'TODO': return 'До виконання';
+        case 'IN_PROGRESS': return 'В процесі';
+        case 'COMPLETED': return 'Завершено';
+        case 'CANCELLED': return 'Скасовано';
+        default: return status;
+      }
+    };
+
+    // Функція для перекладу пріоритету
+    const translatePriority = (priority: string) => {
+      switch (priority) {
+        case 'LOW': return 'Низький';
+        case 'MEDIUM': return 'Середній';
+        case 'HIGH': return 'Високий';
+        case 'URGENT': return 'Терміновий';
+        default: return priority;
+      }
+    };
+
     // Дані
-    timeEntries.forEach(entry => {
+    tasksWithTime.forEach(task => {
       worksheet.addRow([
-        entry.startTime.toLocaleDateString('uk-UA'),
-        entry.startTime.toLocaleTimeString('uk-UA'),
-        entry.endTime?.toLocaleTimeString('uk-UA') || 'Активно',
-        Math.round((entry.duration || 0) / 60),
-        entry.task.title,
-        entry.task.project?.name || 'Без проекту',
-        entry.description || '',
+        task.title,
+        translateStatus(task.status),
+        translatePriority(task.priority),
+        task.project?.name || 'Без проекту',
+        task.createdAt.toLocaleDateString('uk-UA'),
+        task.dueDate?.toLocaleDateString('uk-UA') || 'Не встановлено',
+        Math.round(task.totalTime / 60),
+        task._count.timeEntries,
+        task.description || '',
       ]);
     });
 
@@ -505,7 +551,7 @@ export const exportReportCSV = async (req: AuthRequest, res: Response) => {
     );
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename=time-report-${start.toISOString().split('T')[0]}-${end.toISOString().split('T')[0]}.xlsx`
+      `attachment; filename=tasks-report-${new Date().toISOString().split('T')[0]}.xlsx`
     );
 
     await workbook.xlsx.write(res);
@@ -610,7 +656,7 @@ export const exportReportPDF = async (req: AuthRequest, res: Response) => {
       doc.text(
         `${entry.startTime.toLocaleDateString('uk-UA')} ${entry.startTime.toLocaleTimeString('uk-UA')} - ${
           entry.endTime?.toLocaleTimeString('uk-UA') || 'Активно'
-        } (${Math.round(entry.duration / 60)} хв)`
+        } (${Math.round((entry.duration || 0) / 60)} хв)`
       );
       doc.text(`Завдання: ${entry.task.title}`);
       doc.text(`Проект: ${entry.task.project?.name || 'Без проекту'}`);

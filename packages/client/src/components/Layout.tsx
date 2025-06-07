@@ -16,7 +16,6 @@ import {
   Avatar,
   Menu,
   MenuItem,
-  Badge,
   Tooltip,
   useTheme,
   useMediaQuery,
@@ -24,24 +23,20 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-
   Assignment,
   Folder,
-  Timer,
   Analytics,
   Settings,
-  Notifications,
   AccountCircle,
   Logout,
   LightMode,
   DarkMode,
   PlayArrow,
-  Pause,
   TaskAlt,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth, useTheme as useAppTheme, useActiveTimer } from '../hooks';
-import { useAppSettingsStore, useNotificationsStore } from '../store';
+import { useAppSettingsStore } from '../store';
 import { formatDuration } from '../utils';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -61,7 +56,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { currentTheme, setTheme } = useAppTheme();
   const { activeTimer } = useActiveTimer();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useAppSettingsStore();
-  const { unreadCount } = useNotificationsStore();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [timerDuration, setTimerDuration] = useState(0);
@@ -269,14 +263,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Tooltip title="Перемкнути тему">
               <IconButton onClick={toggleTheme}>
                 {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title="Сповіщення">
-              <IconButton>
-                <Badge badgeContent={unreadCount} color="error">
-                  <Notifications />
-                </Badge>
               </IconButton>
             </Tooltip>
 

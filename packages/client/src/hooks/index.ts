@@ -539,11 +539,18 @@ export const useExportReport = () => {
     mutationFn: ({ format, params }: { format: 'csv' | 'pdf'; params?: any }) =>
       apiClient.exportReport(format, params),
     onSuccess: (blob, variables) => {
+      // Create unique filename with current date and time
+      const now = new Date();
+      const dateTimeString = now.toISOString()
+        .replace(/T/, '-')
+        .replace(/:/g, '-')
+        .split('.')[0]; // Remove milliseconds
+      
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `report.${variables.format}`;
+      a.download = `analytic-report-${dateTimeString}.${variables.format}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -682,5 +689,61 @@ export const useTheme = () => {
     currentTheme,
     setTheme,
     isDark: currentTheme === 'dark',
+  };
+};
+
+// User Settings Hook
+export const useUserSettings = () => {
+  const queryClient = useQueryClient();
+
+  // Load settings from localStorage (тільки загальні налаштування)
+  const loadLocalSettings = () => {
+    try {
+      const saved = localStorage.getItem('userSettings');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  // Save settings to localStorage
+  const saveLocalSettings = (settings: any) => {
+    try {
+      localStorage.setItem('userSettings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save settings to localStorage:', error);
+    }
+  };
+
+  const query = useQuery({
+    queryKey: ['userSettings'],
+    queryFn: loadLocalSettings,
+    staleTime: Infinity, // Never refetch
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (settings: any) => {
+      // TODO: Add real API call
+      // await apiClient.updateUserSettings(settings);
+      
+      // For now, just save to localStorage
+      saveLocalSettings(settings);
+      return settings;
+    },
+    onSuccess: (newSettings) => {
+      queryClient.setQueryData(['userSettings'], newSettings);
+      toast.success('Налаштування збережено успішно!');
+    },
+    onError: (error: any) => {
+      console.error('Error saving settings:', error);
+      toast.error('Помилка збереження налаштувань');
+    },
+  });
+
+  return {
+    settings: query.data,
+    isLoading: query.isLoading,
+    updateSettings: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
   };
 }; 
