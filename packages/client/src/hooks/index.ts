@@ -119,12 +119,12 @@ export const useAuth = () => {
           accessToken: response.data.accessToken,
           refreshToken: response.data.refreshToken,
         });
-        toast.success('Успішний вхід!');
+        toast.success('Success login!');
         queryClient.invalidateQueries();
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка входу');
+      toast.error(error.response?.data?.message || 'Login error');
     },
   });
 
@@ -141,7 +141,7 @@ export const useAuth = () => {
           accessToken: response.data.accessToken,
           refreshToken: response.data.refreshToken,
         });
-        toast.success('Успішна реєстрація!');
+        toast.success('Success registration!');
         queryClient.invalidateQueries();
       } else {
         console.log('⚠️ useAuth: Registration response missing success or data');
@@ -149,7 +149,7 @@ export const useAuth = () => {
     },
     onError: (error: any) => {
       console.error('❌ useAuth: Registration API call failed', error);
-      toast.error(error.response?.data?.message || 'Помилка реєстрації');
+      toast.error(error.response?.data?.message || 'Registration error');
     },
   });
 
@@ -158,7 +158,7 @@ export const useAuth = () => {
     onSuccess: () => {
       logout();
       queryClient.clear();
-      toast.success('Ви вийшли з системи');
+      toast.success('Success logout');
     },
   });
 
@@ -196,11 +196,11 @@ export const useUpdateProfile = () => {
       if (response.success && response.data) {
         updateUser(response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.auth.profile });
-        toast.success('Profile успішно оновлено!');
+        toast.success('Profile successfully updated!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Update error профілю');
+      toast.error(error.response?.data?.message || 'Update error profile');
     },
   });
 };
@@ -211,11 +211,11 @@ export const useChangePassword = () => {
       apiClient.changePassword(data),
     onSuccess: (response: any) => {
       if (response.success) {
-        toast.success('Password успішно змінено!');
+        toast.success('Password successfully changed!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка зміни паролю');
+      toast.error(error.response?.data?.message || 'Change password error');
     },
   });
 };
@@ -280,7 +280,7 @@ export const useCreateTask = () => {
       if (response.success && response.data) {
         addTask(response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        toast.success('Tasks створено!');
+        toast.success('Tasks created!');
       }
     },
     onError: (error: any) => {
@@ -300,7 +300,7 @@ export const useUpdateTask = () => {
       if (response.success && response.data) {
         updateTask(variables.id, response.data);
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        toast.success('Tasks оновлено!');
+        toast.success('Tasks updated!');
       }
     },
     onError: (error: any) => {
@@ -318,7 +318,7 @@ export const useDeleteTask = () => {
     onSuccess: (_, id) => {
       deleteTask(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-      toast.success('Tasks видалено!');
+      toast.success('Tasks deleted!');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Deletion error task');
@@ -456,11 +456,11 @@ export const useStartTimer = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        toast.success('Таймер запущено!');
+        toast.success('Timer started!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка запуску таймера');
+      toast.error(error.response?.data?.message || 'Timer start error');
     },
   });
 };
@@ -483,11 +483,11 @@ export const useStopTimer = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
         // Also invalidate time stats for all tasks as status might have changed
         queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
-        toast.success('Таймер зупинено!');
+        toast.success('Timer stopped!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка зупинки таймера');
+      toast.error(error.response?.data?.message || 'Timer stop error');
     },
   });
 };
@@ -523,11 +523,11 @@ export const useCreateTimeEntry = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        toast.success('Запис часу створено!');
+        toast.success('Time entry created!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Creation error запису часу');
+      toast.error(error.response?.data?.message || 'Creation error time entry');
     },
   });
 };
@@ -547,11 +547,11 @@ export const useUpdateTimeEntry = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        toast.success('Запис часу оновлено!');
+        toast.success('Time entry updated!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Update error запису часу');
+      toast.error(error.response?.data?.message || 'Update error time entry');
     },
   });
 };
@@ -569,10 +569,10 @@ export const useDeleteTimeEntry = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
       queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
-      toast.success('Запис часу видалено!');
+      toast.success('Time entry deleted!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Deletion error запису часу');
+      toast.error(error.response?.data?.message || 'Deletion error time entry');
     },
   });
 };
@@ -627,10 +627,10 @@ export const useExportReport = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success('Звіт завантажено!');
+      toast.success('Report downloaded!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Помилка експорту звіту');
+      toast.error(error.response?.data?.message || 'Report export error');
     },
   });
 };
@@ -715,7 +715,7 @@ export const usePWA = () => {
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === 'accepted') {
-      toast.success('Додаток встановлено!');
+      toast.success('App installed!');
     }
     
     setDeferredPrompt(null);
@@ -804,11 +804,11 @@ export const useUserSettings = () => {
     },
     onSuccess: (newSettings) => {
       queryClient.setQueryData(['userSettings'], newSettings);
-      toast.success('Settings збережено успішно!');
+      toast.success('Settings saved successfully!');
     },
     onError: (error: any) => {
       console.error('Error saving settings:', error);
-      toast.error('Помилка збереження налаштувань');
+      toast.error('Error saving settings');
     },
   });
 

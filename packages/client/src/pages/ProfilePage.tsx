@@ -95,12 +95,12 @@ export default function ProfilePage() {
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      alert('New Password та підтвердження не співпадають');
+      alert('New Password and confirmation are not the same');
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      alert('New Password повинен містити принаймні 6 символів');
+      alert('New Password must have at least 6 characters');
       return;
     }
 
@@ -366,7 +366,7 @@ export default function ProfilePage() {
             variant="contained"
             disabled={changePasswordMutation.isPending}
           >
-            {changePasswordMutation.isPending ? 'Зміна...' : 'Change Password'}
+            {changePasswordMutation.isPending ? 'Change...' : 'Change Password'}
           </Button>
         </DialogActions>
       </Dialog>

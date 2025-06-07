@@ -601,7 +601,7 @@ export default function TasksPage() {
                             {/* Time management buttons */}
                             <Box display="flex" gap={1} mt={2}>
                               {isActiveTimer ? (
-                                <Tooltip title="Зупинити таймер">
+                                <Tooltip title="Stop timer">
                                   <IconButton
                                     color="error"
                                     onClick={handleStopTimer}
@@ -611,7 +611,7 @@ export default function TasksPage() {
                                   </IconButton>
                                 </Tooltip>
                               ) : (
-                                <Tooltip title="Запустити таймер">
+                                <Tooltip title="Start timer">
                                   <IconButton
                                     color="primary"
                                     onClick={() => handleStartTimer(task)}
@@ -622,7 +622,7 @@ export default function TasksPage() {
                                 </Tooltip>
                               )}
                               
-                              <Tooltip title="Add час вручну">
+                              <Tooltip title="Add time manually">
                                 <IconButton
                                   color="secondary"
                                   onClick={() => handleAddTimeEntry(task)}
@@ -750,7 +750,7 @@ export default function TasksPage() {
             variant="contained"
             disabled={!newTask.title || !newTask.projectId}
           >
-            {editingTask ? 'Оновити' : 'Create'}
+            {editingTask ? 'Update' : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -763,26 +763,26 @@ export default function TasksPage() {
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
-              label="Description роботи"
+              label="Description of work"
               value={newTimeEntry.description}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, description: e.target.value })}
               fullWidth
-              placeholder="Що ви робили..."
+              placeholder="What did you do..."
             />
             
             <TextField
-              label="Duration (minutesи) *"
+              label="Duration (minutes) *"
               type="number"
               value={newTimeEntry.duration}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, duration: e.target.value })}
               required
               fullWidth
               inputProps={{ step: 1 }}
-              helperText="Додатні значення додають час, від'ємні - віднімають час від task"
+              helperText="Positive values add time, negative values subtract time from task"
             />
             
             <TextField
-              label="Time початку"
+              label="Time start"
               type="datetime-local"
               value={newTimeEntry.startTime}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, startTime: e.target.value })}

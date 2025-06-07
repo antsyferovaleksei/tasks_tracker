@@ -57,15 +57,15 @@ const LoginPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email обов\'язковий';
+      newErrors.email = 'Email is required';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Невірний формат email';
+      newErrors.email = 'Invalid email format';
     }
 
     if (!formData.password) {
       newErrors.password = 'Password обов\'язковий';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password повинен містити принаймні 6 символів';
+      newErrors.password = 'Password must have at least 6 characters';
     }
 
     setErrors(newErrors);
@@ -146,7 +146,7 @@ const LoginPage: React.FC = () => {
             {/* Demo credentials alert */}
             <Alert severity="info" sx={{ mb: 3 }}>
               <Typography variant="body2">
-                <strong>Демо акаунт:</strong><br />
+                <strong>Demo account:</strong><br />
                 Email: demo@example.com<br />
                 Password: demo123
               </Typography>
@@ -235,7 +235,7 @@ const LoginPage: React.FC = () => {
 
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Ще немає акаунту?{' '}
+                  No account yet?{' '}
                   <Link
                     component={RouterLink}
                     to="/register"
@@ -248,7 +248,7 @@ const LoginPage: React.FC = () => {
                       },
                     }}
                   >
-                    Зареєструватися
+                    Register
                   </Link>
                 </Typography>
               </Box>

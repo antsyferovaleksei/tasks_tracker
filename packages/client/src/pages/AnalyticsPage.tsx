@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
           onClick={handleExport}
           disabled={isExporting || !dashboardData?.data}
         >
-          {isExporting ? 'Експортується...' : 'Export into CSV'}
+          {isExporting ? 'Exporting...' : 'Export into CSV'}
         </Button>
       </Box>
 

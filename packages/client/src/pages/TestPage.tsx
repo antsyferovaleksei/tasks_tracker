@@ -21,7 +21,7 @@ export default function TestPage() {
   });
   const [projectData, setProjectData] = useState({
     name: 'Test Project з UI',
-    description: 'Project description створеного з UI',
+    description: 'Project description created with UI',
     color: '#2196f3',
     archived: false
   });
@@ -37,10 +37,10 @@ export default function TestPage() {
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('refreshToken', response.data.refreshToken);
         setIsLoggedIn(true);
-        setSuccess('Успішний вхід!');
+        setSuccess('Success login!');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Помилка входу');
+      setError(err.response?.data?.message || 'Login error');
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export default function TestPage() {
     try {
       const response = await apiClient.createProject(projectData);
       if (response.success) {
-        setSuccess('Project створено успішно!');
+        setSuccess('Project created successfully!');
         loadProjects();
       }
     } catch (err: any) {
@@ -69,7 +69,7 @@ export default function TestPage() {
         setProjects(response.data);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Loading error projectів');
+      setError(err.response?.data?.message || 'Loading error projects');
     }
   };
 
@@ -116,7 +116,7 @@ export default function TestPage() {
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : null}
               >
-                {loading ? 'Входження...' : 'Увійти'}
+                {loading ? 'Login...' : 'Login'}
               </Button>
             </Box>
           </CardContent>
@@ -142,7 +142,7 @@ export default function TestPage() {
                   rows={3}
                 />
                 <TextField
-                  label="Колір"
+                  label="Color"
                   type="color"
                   value={projectData.color}
                   onChange={(e) => setProjectData({ ...projectData, color: e.target.value })}

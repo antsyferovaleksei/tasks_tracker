@@ -57,27 +57,27 @@ export default function RegisterPage() {
     const newErrors: {[key: string]: string} = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Ім'я обов'язкове";
+      newErrors.name = "Name is required";
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Ім'я повинно містити мінімум 2 символи";
+      newErrors.name = "Name must have at least 2 characters";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email обов\'язковий';
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Невірний формат email';
+      newErrors.email = 'Invalid email format';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password обов\'язковий';
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password повинен містити мінімум 6 символів';
+      newErrors.password = 'Password must have at least 6 characters';
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirm Password обов\'язкове';
+      newErrors.confirmPassword = 'Confirm Password is required';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Паролі не співпадають';
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     setErrors(newErrors);
@@ -280,7 +280,7 @@ export default function RegisterPage() {
                   },
                 }}
               >
-                {isRegistering ? 'Registration...' : 'Зареєструватися'}
+                {isRegistering ? 'Registration...' : 'Register'}
               </Button>
 
               <Divider sx={{ my: 2 }}>
@@ -315,7 +315,7 @@ export default function RegisterPage() {
         {/* Footer */}
         <Box sx={{ textAlign: 'center', mt: 3 }}>
           <Typography variant="body2" color="rgba(255,255,255,0.7)">
-                            © 2025 Tasks Tracker. Modern task tracker.
+                            © 2025 Tasks Tracker. 
           </Typography>
         </Box>
       </Container>
