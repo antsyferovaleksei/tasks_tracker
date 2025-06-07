@@ -9,7 +9,7 @@ export default defineConfig({
             registerType: 'autoUpdate',
             includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
             manifest: {
-                                  name: 'Tasks Tracker',
+                name: 'Tasks Tracker',
                 short_name: 'TasksTracker',
                 description: 'Modern web application for task management and time tracking',
                 theme_color: '#1976d2',
@@ -64,6 +64,9 @@ export default defineConfig({
                 changeOrigin: true,
             },
         },
+    },
+    define: {
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     },
     build: {
         target: 'esnext',

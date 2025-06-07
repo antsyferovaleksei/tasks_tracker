@@ -86,3 +86,4 @@ logs
 # Docker
 Dockerfile.dev
 docker-compose.override.yml 
+.vercel

@@ -224,7 +224,7 @@ const LoginPage: React.FC = () => {
                   },
                 }}
               >
-                {isLoggingIn ? 'Вхід...' : 'Увійти'}
+                {isLoggingIn ? 'Enter...' : 'Enter'}
               </Button>
 
               <Divider sx={{ my: 2 }}>

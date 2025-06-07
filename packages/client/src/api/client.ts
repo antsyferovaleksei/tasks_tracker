@@ -24,7 +24,7 @@ import {
 
 class ApiClient {
   private instance: AxiosInstance;
-  private baseURL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5001/api';
+  private baseURL = (import.meta as any).env?.VITE_API_URL || '/api';
 
   constructor() {
     this.instance = axios.create({
