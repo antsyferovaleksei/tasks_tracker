@@ -27,6 +27,21 @@ export default function TestPage() {
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
+  const [healthStatus, setHealthStatus] = useState<string>('');
+
+  const handleHealthCheck = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await apiClient.healthCheck();
+      setHealthStatus(`API працює! ${response.timestamp}`);
+      setSuccess('Health check пройшов успішно!');
+    } catch (err: any) {
+      setError('API недоступний: ' + (err.message || 'Невідома помилка'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     setLoading(true);
@@ -78,6 +93,28 @@ export default function TestPage() {
       <Typography variant="h4" mb={3}>
         Тестова сторінка API
       </Typography>
+
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" mb={2}>
+            0. Health Check API
+          </Typography>
+          <Button
+            variant="outlined"
+            onClick={handleHealthCheck}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} /> : null}
+            sx={{ mb: 2 }}
+          >
+            {loading ? 'Перевіряю...' : 'Перевірити API'}
+          </Button>
+          {healthStatus && (
+            <Typography variant="body2" color="success.main">
+              {healthStatus}
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
