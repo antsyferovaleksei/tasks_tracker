@@ -1,16 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cd packages/client && npm run build",
-  "outputDirectory": "packages/client/dist",
   "functions": {
     "api/**/*.js": {
       "runtime": "nodejs18.x"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/packages/client/dist/index.html"
-    }
-  ]
+  }
 } 

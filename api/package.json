@@ -1,13 +1,10 @@
 {
-  "name": "tasks-tracker-api",
+  "name": "api",
   "version": "1.0.0",
-  "description": "Tasks Tracker API for Vercel",
-  "main": "index.js",
+  "private": true,
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "pg": "^8.11.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "@supabase/supabase-js": "^2.50.0",
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2"
   }
 } 
