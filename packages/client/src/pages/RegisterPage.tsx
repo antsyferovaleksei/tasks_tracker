@@ -160,7 +160,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="name"
-                label="Повне ім'я"
+                label="Full name"
                 name="name"
                 autoComplete="name"
                 autoFocus
@@ -304,7 +304,7 @@ export default function RegisterPage() {
                       },
                     }}
                   >
-                    Увійти
+                    Enter
                   </Link>
                 </Typography>
               </Box>

@@ -143,14 +143,6 @@ const LoginPage: React.FC = () => {
               </Typography>
             </Box>
 
-            {/* Demo credentials alert */}
-            <Alert severity="info" sx={{ mb: 3 }}>
-              <Typography variant="body2">
-                <strong>Demo account:</strong><br />
-                Email: demo@example.com<br />
-                Password: demo123
-              </Typography>
-            </Alert>
 
             {/* Login Form */}
             <Box component="form" onSubmit={handleSubmit} noValidate>
