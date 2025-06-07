@@ -377,6 +377,18 @@ export default function TasksPage() {
     if (projects.length === 0) {
       return;
     }
+    
+    // Set the last created project as default
+    const sortedProjects = [...projects].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const latestProject = sortedProjects[0];
+    
+    setNewTask(prev => ({
+      ...prev,
+      projectId: latestProject?.id || ''
+    }));
+    
     setDialogOpen(true);
   };
 
@@ -762,6 +774,15 @@ export default function TasksPage() {
         <DialogActions>
           <Button onClick={() => {
             setDialogOpen(false);
+            setEditingTask(null);
+            setNewTask({
+              title: '',
+              description: '',
+              priority: 'MEDIUM' as TaskPriority,
+              status: 'TODO' as TaskStatus,
+              archived: false,
+              projectId: '',
+            });
             setValidationErrors({});
           }}>
             Cancel
