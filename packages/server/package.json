@@ -15,7 +15,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.6.0",
+    "@supabase/supabase-js": "^2.50.0",
     "@types/exceljs": "^0.5.3",
     "@types/node-cron": "^3.0.11",
     "@types/pdfkit": "^0.13.9",
@@ -44,7 +44,6 @@
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "eslint": "^8.53.0",
-    "prisma": "^5.6.0",
     "tsx": "^4.1.0",
     "typescript": "^5.2.2"
   }

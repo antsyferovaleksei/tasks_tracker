@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { prisma } from '../config/database';
+import { supabase, supabaseAdmin } from '../config/supabase';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { createUserSchema, loginSchema } from 'shared/src/validation';
 
@@ -10,11 +10,13 @@ export const register = async (req: Request, res: Response) => {
     const { email, name, password } = validatedData;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const { data: existingUser, error: checkError } = await supabaseAdmin
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single();
 
-    if (existingUser) {
+    if (existingUser && !checkError) {
       return res.status(400).json({
         success: false,
         message: 'User with this email already exists',
@@ -24,22 +26,26 @@ export const register = async (req: Request, res: Response) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    // Create user using admin client
+    const { data: user, error: createError } = await supabaseAdmin
+      .from('users')
+      .insert([
+        {
+          email,
+          name,
+          password: hashedPassword,
+        }
+      ])
+      .select('id, email, name, avatar, created_at, updated_at')
+      .single();
+
+    if (createError || !user) {
+      console.error('Create user error:', createError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create user',
+      });
+    }
 
     // Generate tokens
     const tokenPayload = { userId: user.id, email: user.email };
@@ -70,11 +76,13 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = validatedData;
 
     // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const { data: user, error: findError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    if (!user) {
+    if (findError || !user) {
       return res.status(401).json({
         success: false,
         message: 'Wrong email or password',
@@ -131,19 +139,13 @@ export const refreshToken = async (req: Request, res: Response) => {
     const decoded = verifyRefreshToken(refreshToken);
     
     // Check if user still exists
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const { data: user, error: findError } = await supabaseAdmin
+      .from('users')
+      .select('id, email, name, avatar, created_at, updated_at')
+      .eq('id', decoded.userId)
+      .single();
 
-    if (!user) {
+    if (findError || !user) {
       return res.status(401).json({
         success: false,
         message: 'User not found',
@@ -174,8 +176,6 @@ export const refreshToken = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    // For JWT tokens, logout is typically handled on the client side
-    // by removing the tokens from storage. Here we just return success.
     res.json({
       success: true,
       message: 'Success logout',
@@ -201,19 +201,14 @@ export const changePassword = async (req: Request, res: Response) => {
       });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New Password must have at least 6 characters',
-      });
-    }
-
     // Find user with password
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const { data: user, error: findError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (!user) {
+    if (findError || !user) {
       return res.status(404).json({
         success: false,
         message: 'User not found',
@@ -224,9 +219,9 @@ export const changePassword = async (req: Request, res: Response) => {
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
     if (!isCurrentPasswordValid) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        message: 'Wrong current password',
+        message: 'Current password is incorrect',
       });
     }
 
@@ -234,13 +229,24 @@ export const changePassword = async (req: Request, res: Response) => {
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
     // Update password
-    await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedNewPassword },
-    });
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({ password: hashedNewPassword })
+      .eq('id', userId)
+      .select('id, email, name, avatar, created_at, updated_at')
+      .single();
+
+    if (updateError) {
+      console.error('Change password error:', updateError);
+      return res.status(500).json({
+        success: false,
+        message: 'Change password error',
+      });
+    }
 
     res.json({
       success: true,
+      data: updatedUser,
       message: 'Password successfully changed',
     });
   } catch (error: any) {
@@ -256,19 +262,13 @@ export const getProfile = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const { data: user, error: findError } = await supabaseAdmin
+      .from('users')
+      .select('id, email, name, avatar, created_at, updated_at')
+      .eq('id', userId)
+      .single();
 
-    if (!user) {
+    if (findError || !user) {
       return res.status(404).json({
         success: false,
         message: 'User not found',
@@ -279,60 +279,57 @@ export const getProfile = async (req: Request, res: Response) => {
       success: true,
       data: user,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Get profile error',
+      message: 'Error getting profile',
     });
   }
 };
 
 export const updateProfile = async (req: Request, res: Response) => {
   try {
+    const { name, email, avatar } = req.body;
     const userId = (req as any).user?.userId;
-    const { name, email } = req.body;
-
-    if (!name && !email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Надайте дані для оновлення',
-      });
-    }
 
     // Check if email is not taken by another user
     if (email) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          email,
-          NOT: { id: userId },
-        },
-      });
+      const { data: existingUser, error: checkError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .neq('id', userId)
+        .single();
 
-      if (existingUser) {
+      if (existingUser && !checkError) {
         return res.status(400).json({
           success: false,
-          message: 'User with this email already exists',
+          message: 'Email is already taken',
         });
       }
     }
 
+    // Prepare update data
     const updateData: any = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
+    if (avatar !== undefined) updateData.avatar = avatar;
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select('id, email, name, avatar, created_at, updated_at')
+      .single();
+
+    if (updateError) {
+      console.error('Update profile error:', updateError);
+      return res.status(500).json({
+        success: false,
+        message: 'Update profile error',
+      });
+    }
 
     res.json({
       success: true,
@@ -343,7 +340,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     console.error('Update profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Update error profile',
+      message: 'Update profile error',
     });
   }
 }; 

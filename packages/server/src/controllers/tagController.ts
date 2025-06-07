@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prisma } from '../config/database';
+import { supabaseAdmin } from '../config/supabase';
 import { createTagSchema, updateTagSchema } from 'shared/src/validation';
 import { AuthRequest } from '../middleware/auth';
 
@@ -7,69 +7,76 @@ export const createTag = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = createTagSchema.parse(req.body);
 
-    // Check if tag with this name already exists
-    const existingTag = await prisma.tag.findUnique({
-      where: { name: validatedData.name },
-    });
+    const { data: tag, error } = await supabaseAdmin
+      .from('tags')
+      .insert([validatedData])
+      .select('*')
+      .single();
 
-    if (existingTag) {
-      return res.status(400).json({
+    if (error) {
+      console.error('Create tag error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Тег з такою назвою вже існує',
+        message: 'Error creating tag',
       });
     }
-
-    const tag = await prisma.tag.create({
-      data: validatedData,
-    });
 
     res.status(201).json({
       success: true,
       data: tag,
-      message: 'Тег успішно створено',
+      message: 'Tag успішно створено',
     });
   } catch (error: any) {
     console.error('Create tag error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Creation error тегу',
+      message: error.message || 'Error creating tag',
     });
   }
 };
 
-export const getTags = async (req: Request, res: Response) => {
+export const getTags = async (req: AuthRequest, res: Response) => {
   try {
-    const tags = await prisma.tag.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-    });
+    const { data: tags, error } = await supabaseAdmin
+      .from('tags')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Get tags error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Помилка отримання tags',
+      });
+    }
 
     res.json({
       success: true,
-      data: tags,
+      data: tags || [],
     });
   } catch (error) {
     console.error('Get tags error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка отримання тегів',
+      message: 'Помилка отримання tags',
     });
   }
 };
 
-export const getTag = async (req: Request, res: Response) => {
+export const getTag = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
-    const tag = await prisma.tag.findUnique({
-      where: { id },
-    });
+    const { data: tag, error } = await supabaseAdmin
+      .from('tags')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (!tag) {
+    if (error || !tag) {
       return res.status(404).json({
         success: false,
-        message: 'Тег не знайдено',
+        message: 'Tag не знайдено',
       });
     }
 
@@ -81,90 +88,70 @@ export const getTag = async (req: Request, res: Response) => {
     console.error('Get tag error:', error);
     res.status(500).json({
       success: false,
-      message: 'Помилка отримання тегу',
+      message: 'Помилка отримання tag',
     });
   }
 };
 
-export const updateTag = async (req: Request, res: Response) => {
+export const updateTag = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const validatedData = updateTagSchema.parse(req.body);
 
-    // Check if tag exists
-    const existingTag = await prisma.tag.findUnique({
-      where: { id },
-    });
+    const { data: tag, error } = await supabaseAdmin
+      .from('tags')
+      .update(validatedData)
+      .eq('id', id)
+      .select('*')
+      .single();
 
-    if (!existingTag) {
+    if (error || !tag) {
       return res.status(404).json({
         success: false,
-        message: 'Тег не знайдено',
+        message: 'Tag не знайдено',
       });
     }
-
-    // Check if new name already exists (if name is being changed)
-    if (validatedData.name && validatedData.name !== existingTag.name) {
-      const nameExists = await prisma.tag.findUnique({
-        where: { name: validatedData.name },
-      });
-
-      if (nameExists) {
-        return res.status(400).json({
-          success: false,
-          message: 'Тег з такою назвою вже існує',
-        });
-      }
-    }
-
-    const tag = await prisma.tag.update({
-      where: { id },
-      data: validatedData,
-    });
 
     res.json({
       success: true,
       data: tag,
-      message: 'Тег успішно оновлено',
+      message: 'Tag успішно оновлено',
     });
   } catch (error: any) {
     console.error('Update tag error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Update error тегу',
+      message: error.message || 'Error updating tag',
     });
   }
 };
 
-export const deleteTag = async (req: Request, res: Response) => {
+export const deleteTag = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
-    // Check if tag exists
-    const existingTag = await prisma.tag.findUnique({
-      where: { id },
-    });
+    const { error } = await supabaseAdmin
+      .from('tags')
+      .delete()
+      .eq('id', id);
 
-    if (!existingTag) {
-      return res.status(404).json({
+    if (error) {
+      console.error('Delete tag error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Тег не знайдено',
+        message: 'Error deleting tag',
       });
     }
 
-    await prisma.tag.delete({
-      where: { id },
-    });
-
     res.json({
       success: true,
-      message: 'Тег успішно видалено',
+      message: 'Tag успішно видалено',
     });
   } catch (error) {
     console.error('Delete tag error:', error);
     res.status(500).json({
       success: false,
-      message: 'Deletion error тегу',
+      message: 'Помилка видалення tag',
     });
   }
 }; 
