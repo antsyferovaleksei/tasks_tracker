@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { createClient } = require('@supabase/supabase-js');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
 
 // Ініціалізація Supabase
 const supabaseUrl = 'https://gwkyqchyuihmgpvqosvk.supabase.co';
@@ -8,7 +8,7 @@ const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -106,4 +106,4 @@ module.exports = async function handler(req, res) {
       message: 'Internal server error. Please try again later.'
     });
   }
-}; 
+} 
