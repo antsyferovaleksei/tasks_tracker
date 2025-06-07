@@ -16,10 +16,22 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  res.status(200).json({
-    success: true,
-    message: 'API is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+  try {
+    res.status(200).json({
+      success: true,
+      message: 'API is working!',
+      timestamp: new Date().toISOString(),
+      environment: {
+        nodeVersion: process.version,
+        supabaseConfigured: !!process.env.SUPABASE_KEY,
+        jwtConfigured: !!process.env.JWT_SECRET
+      }
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
 }; 
