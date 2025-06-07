@@ -1,21 +1,16 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, GlobalStyles } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 
 import { useAuth, useTheme, useDeviceDetection } from './hooks';
-import { isDevelopment } from './utils';
-import ErrorBoundary from './components/ErrorBoundary';
-import LoadingSpinner from './components/LoadingSpinner';
-import Layout from './components/Layout';
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
-
+const Layout = lazy(() => import('./components/Layout'));
 const TasksPage = lazy(() => import('./pages/TasksPage'));
 const TaskDetailPage = lazy(() => import('./pages/TaskDetailPage'));
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
@@ -25,6 +20,9 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const TestPage = lazy(() => import('./pages/TestPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const LoadingSpinner = lazy(() => import('./components/LoadingSpinner'));
+const ErrorBoundary = lazy(() => import('./components/ErrorBoundary'));
+
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -363,8 +361,7 @@ const App: React.FC = () => {
           }}
         />
 
-        {/* React Query DevTools (only in development) */}
-        {isDevelopment() && <ReactQueryDevtools initialIsOpen={false} />}
+
       </ThemeProvider>
     </QueryClientProvider>
   );
