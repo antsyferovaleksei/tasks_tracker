@@ -287,7 +287,7 @@ export default function ProjectsPage() {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>{t('projects.deleteConfirm')}</DialogTitle>
+        <DialogTitle>{t('common.confirm')}</DialogTitle>
         <DialogContent>
           <Typography>
             {t('projects.deleteConfirm')} <strong>"{projectToDelete?.name}"</strong>?

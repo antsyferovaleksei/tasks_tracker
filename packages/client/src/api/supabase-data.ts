@@ -102,12 +102,24 @@ export const projectsService = {
 
     const { data, error } = await supabase
       .from('projects')
-      .select('*')
+      .select(`
+        *,
+        tasks(count)
+      `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Перетворюємо відповідь, щоб включити _count
+    const projectsWithCount = (data || []).map(project => ({
+      ...project,
+      _count: {
+        tasks: project.tasks?.[0]?.count || 0
+      }
+    }));
+    
+    return projectsWithCount;
   },
 
   // Оновити проект

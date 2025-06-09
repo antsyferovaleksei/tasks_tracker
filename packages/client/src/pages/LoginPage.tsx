@@ -244,7 +244,7 @@ const LoginPage: React.FC = () => {
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  {t('common.or')}
+                  {t('auth.or')}
                 </Typography>
               </Divider>
 

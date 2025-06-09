@@ -110,7 +110,8 @@
     "deleteWarning": "This action is irreversible. All tasks in this project will also be deleted.",
     "creating": "Creating...",
     "updating": "Updating...",
-    "deleting": "Deleting..."
+    "deleting": "Deleting...",
+    "deleteConfirm": "Are you sure you want to delete project"
   },
   "analytics": {
     "title": "Analytics",

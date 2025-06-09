@@ -392,11 +392,9 @@ export const useCreateTask = () => {
       };
       addTask(clientTask);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-      toast.success('Task created!');
     },
     onError: (error: any) => {
       console.error('Create task error:', error);
-      toast.error(error.message || 'Creation error task');
     },
   });
 };
@@ -445,11 +443,9 @@ export const useUpdateTask = () => {
       };
       updateTask(variables.id, clientTask);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-      toast.success('Task updated!');
     },
     onError: (error: any) => {
       console.error('Update task error:', error);
-      toast.error(error.message || 'Update error task');
     },
   });
 };
@@ -463,11 +459,9 @@ export const useDeleteTask = () => {
     onSuccess: (_, id) => {
       deleteTask(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-      toast.success('Task deleted!');
     },
     onError: (error: any) => {
       console.error('Delete task error:', error);
-      toast.error(error.message || 'Deletion error task');
     },
   });
 };
@@ -515,12 +509,10 @@ export const useCreateProject = () => {
       if (data) {
         addProject(data);
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-        toast.success('Project created!');
       }
     },
     onError: (error: any) => {
       console.error('Project creation error:', error);
-      toast.error(error.message || 'Error creating project');
     },
   });
 };
@@ -536,12 +528,10 @@ export const useUpdateProject = () => {
       if (data) {
         updateProject(variables.id, data);
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-        toast.success('Project updated!');
       }
     },
     onError: (error: any) => {
       console.error('Project update error:', error);
-      toast.error(error.message || 'Error updating project');
     },
   });
 };
@@ -555,11 +545,9 @@ export const useDeleteProject = () => {
     onSuccess: (_, id) => {
       deleteProject(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-      toast.success('Project deleted!');
     },
     onError: (error: any) => {
       console.error('Project deletion error:', error);
-      toast.error(error.message || 'Error deleting project');
     },
   });
 };
@@ -656,11 +644,9 @@ export const useStartTimer = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-      toast.success('Timer started!');
     },
     onError: (error: any) => {
       console.error('Start timer error:', error);
-      toast.error(error.message || 'Timer start error');
     },
   });
 };
@@ -682,11 +668,9 @@ export const useStopTimer = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
       // Also invalidate time stats for all tasks as status might have changed
       queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
-      toast.success('Timer stopped!');
     },
     onError: (error: any) => {
       console.error('Stop timer error:', error);
-      toast.error(error.message || 'Timer stop error');
     },
   });
 };
@@ -727,11 +711,9 @@ export const useCreateTimeEntry = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-      toast.success('Time entry created!');
     },
     onError: (error: any) => {
       console.error('Create time entry error:', error);
-      toast.error(error.message || 'Creation error time entry');
     },
   });
 };
@@ -751,11 +733,10 @@ export const useUpdateTimeEntry = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
         queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        toast.success('Time entry updated!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Update error time entry');
+      console.error('Update time entry error:', error);
     },
   });
 };
@@ -773,10 +754,9 @@ export const useDeleteTimeEntry = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
       queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
       queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
-      toast.success('Time entry deleted!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Deletion error time entry');
+      console.error('Delete time entry error:', error);
     },
   });
 };
