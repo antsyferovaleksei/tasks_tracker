@@ -9,6 +9,7 @@ import { useAuth, useTheme, useDeviceDetection } from './hooks';
 import { SupabaseAuthProvider, useSupabaseAuth } from './contexts/SupabaseAuthContext';
 
 // Lazy load pages for code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const Layout = lazy(() => import('./components/Layout'));
@@ -43,21 +44,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Root Route component (handles the main "/" path)
-const RootRoute: React.FC = () => {
-  const { user, loading } = useSupabaseAuth();
-  
-  if (loading) {
-    return <LoadingSpinner fullscreen message="Завантаження..." />;
-  }
-  
-  if (user) {
-    return <Navigate to="/tasks" replace />;
-  }
-  
-  return <Navigate to="/login" replace />;
-};
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -301,8 +287,15 @@ const App: React.FC = () => {
           <Router>
             <div className="App">
               <Routes>
-                {/* Root route */}
-                <Route path="/" element={<RootRoute />} />
+                {/* Root route - показує лендінг сторінку */}
+                <Route 
+                  path="/" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <HomePage />
+                    </Suspense>
+                  } 
+                />
                 
                 {/* Public routes */}
                 <Route
