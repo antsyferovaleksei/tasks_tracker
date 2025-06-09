@@ -40,6 +40,8 @@ import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useAppSettingsStore } from '../store';
 import { formatDuration } from '../utils';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageToggle from './LanguageToggle';
 
 const drawerWidth = 280;
 
@@ -52,6 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const { user, signOut } = useSupabaseAuth();
   const { currentTheme, setTheme } = useAppTheme();
@@ -76,19 +79,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const menuItems = [
     {
-      text: 'Tasks',
+      text: t('navigation.tasks'),
       icon: Assignment,
       path: '/tasks',
       color: theme.palette.secondary.main,
     },
     {
-      text: 'Projects',
+      text: t('navigation.projects'),
       icon: Folder,
       path: '/projects',
       color: theme.palette.success.main,
     },
     {
-      text: 'Analytics',
+      text: t('navigation.analytics'),
       icon: Analytics,
       path: '/analytics',
       color: theme.palette.warning.main,
@@ -144,7 +147,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <PlayArrow sx={{ fontSize: 16 }} />
                 <Typography variant="body2" fontWeight="bold">
-                  Active Timer
+                  {t('time.running')}
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ mb: 1 }}>
@@ -255,13 +258,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Header Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title="Перемкнути тему">
+            <Tooltip title={t('theme.toggleTheme')}>
               <IconButton onClick={toggleTheme}>
                 {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Profile">
+            <LanguageToggle />
+
+            <Tooltip title={t('profile.title')}>
               <IconButton onClick={handleProfileMenuOpen}>
                 <Avatar sx={{ width: 32, height: 32 }}>
                   {user?.email?.charAt(0).toUpperCase()}
@@ -294,14 +299,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <ListItemIcon>
             <AccountCircle fontSize="small" />
           </ListItemIcon>
-          Profile
+          {t('profile.title')}
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
-          Logout
+          {t('auth.logout')}
         </MenuItem>
       </Menu>
 

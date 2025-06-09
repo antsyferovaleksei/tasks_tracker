@@ -50,7 +50,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const { user, loading } = useSupabaseAuth();
   
   if (loading) {
-    return <LoadingSpinner fullscreen message="Перевірка авторизації..." />;
+    return <LoadingSpinner fullscreen message="Checking authorization..." />;
   }
   
   if (!user) {
@@ -65,7 +65,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useSupabaseAuth();
   
   if (loading) {
-    return <LoadingSpinner fullscreen message="Завантаження..." />;
+    return <LoadingSpinner fullscreen message="Loading..." />;
   }
   
   if (user) {

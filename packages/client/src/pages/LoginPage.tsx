@@ -25,10 +25,12 @@ import {
   DarkMode,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useTheme as useAppTheme } from '../hooks';
 import { validateEmail } from '../utils';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import LanguageToggle from '../components/LanguageToggle';
 
 const LoginPage: React.FC = () => {
   const theme = useTheme();
@@ -36,6 +38,7 @@ const LoginPage: React.FC = () => {
   const { currentTheme, setTheme } = useAppTheme();
   const { signIn, loading: authLoading } = useSupabaseAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -63,15 +66,15 @@ const LoginPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email обов\'язковий';
+      newErrors.email = t('validation.emailRequired');
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Невірний формат email';
+      newErrors.email = t('validation.emailInvalid');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Пароль обов\'язковий';
+      newErrors.password = t('validation.passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Пароль повинен містити мінімум 6 символів';
+      newErrors.password = t('validation.passwordTooShort');
     }
 
     setErrors(newErrors);
@@ -144,15 +147,18 @@ const LoginPage: React.FC = () => {
                     Tasks Tracker
                   </Typography>
                 </Box>
-                <IconButton onClick={toggleTheme} size="small">
-                  {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
-                </IconButton>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LanguageToggle />
+                  <IconButton onClick={toggleTheme} size="small">
+                    {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
+                  </IconButton>
+                </Box>
               </Box>
               <Typography variant="h4" component="h2" gutterBottom fontWeight="600">
-                Вітаємо! 👋
+                {t('welcome')} 👋
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Увійдіть в свій акаунт для продовження роботи.
+                {t('loginPage.welcomeMessage')}
               </Typography>
             </Box>
 
@@ -168,7 +174,7 @@ const LoginPage: React.FC = () => {
               <TextField
                 fullWidth
                 id="email"
-                label="Email"
+                label={t('auth.email')}
                 name="email"
                 autoComplete="email"
                 autoFocus
@@ -189,7 +195,7 @@ const LoginPage: React.FC = () => {
               <TextField
                 fullWidth
                 id="password"
-                label="Пароль"
+                label={t('auth.password')}
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
@@ -233,18 +239,18 @@ const LoginPage: React.FC = () => {
                   borderRadius: 2,
                 }}
               >
-                {isLoading ? 'Вхід...' : 'Увійти'}
+                {isLoading ? t('auth.loggingIn') : t('auth.login')}
               </Button>
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  або
+                  {t('common.or')}
                 </Typography>
               </Divider>
 
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Немає акаунту?{' '}
+                  {t('auth.dontHaveAccount')}{' '}
                   <Link
                     component={RouterLink}
                     to="/register"
@@ -256,7 +262,7 @@ const LoginPage: React.FC = () => {
                       },
                     }}
                   >
-                    Зареєструватися
+                    {t('auth.register')}
                   </Link>
                 </Typography>
               </Box>

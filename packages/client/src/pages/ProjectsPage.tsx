@@ -21,11 +21,13 @@ import {
   Delete as DeleteIcon,
   Folder as FolderIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '../hooks';
 import { Project } from '../types';
 import { formatDate } from '../utils';
 
 export default function ProjectsPage() {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -129,14 +131,14 @@ export default function ProjectsPage() {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Projects
+          {t('projects.title')}
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setDialogOpen(true)}
         >
-          Add project
+          {t('projects.addProject')}
         </Button>
       </Box>
 
@@ -165,7 +167,7 @@ export default function ProjectsPage() {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenEditDialog(project)}
-                      title="Edit project"
+                      title={t('projects.editProject')}
                     >
                       <EditIcon />
                     </IconButton>
@@ -173,7 +175,7 @@ export default function ProjectsPage() {
                       size="small" 
                       color="error"
                       onClick={() => handleOpenDeleteDialog(project)}
-                      title="Delete project"
+                      title={t('projects.deleteProject')}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -188,7 +190,7 @@ export default function ProjectsPage() {
 
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Chip
-                    label={`${project._count?.tasks || 0} tasks`}
+                    label={`${project._count?.tasks || 0} ${t('projects.tasksCount').toLowerCase()}`}
                     size="small"
                     variant="outlined"
                   />

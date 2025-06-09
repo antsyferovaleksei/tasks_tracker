@@ -28,6 +28,7 @@ import {
   Edit as EditIcon,
   Lock as LockIcon,
 } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useDashboard } from '../hooks';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { authService } from '../api/supabase-auth';
@@ -35,6 +36,7 @@ import { formatDate, formatDuration } from '../utils';
 import { toast } from 'react-hot-toast';
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, refreshUser } = useSupabaseAuth();
   const { data: dashboardData, isLoading } = useDashboard(30);
   
@@ -141,7 +143,7 @@ export default function ProfilePage() {
   return (
     <Box p={3}>
       <Typography variant="h4" component="h1" mb={3}>
-        User Profile
+        {t('profile.title')}
       </Typography>
 
       <Grid container spacing={3}>
@@ -163,7 +165,7 @@ export default function ProfilePage() {
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
                 <CalendarIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
-                Registration: {user?.created_at ? formatDate(user.created_at) : 'Невідомо'}
+                {t('auth.register')}: {user?.created_at ? formatDate(user.created_at) : t('tasks.noTimeSet')}
               </Typography>
               
               <Button
@@ -177,7 +179,7 @@ export default function ProfilePage() {
                 }}
                 sx={{ mb: 1, width: '100%' }}
               >
-                Edit profile
+                {t('profile.editProfile')}
               </Button>
               
               <Button
@@ -186,7 +188,7 @@ export default function ProfilePage() {
                 onClick={() => setChangePasswordOpen(true)}
                 sx={{ width: '100%' }}
               >
-                Change Password
+                {t('profile.changePassword')}
               </Button>
             </CardContent>
           </Card>

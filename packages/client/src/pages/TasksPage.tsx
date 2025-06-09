@@ -42,6 +42,7 @@ import {
   Clear as ClearIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   useTasks, 
   useCreateTask, 
@@ -58,7 +59,7 @@ import { Task, TaskStatus, TaskPriority, TaskFilters, Project, TimeEntry } from 
 import { formatDate, getTaskStatusColor, getTaskPriorityColor } from '../utils';
 
 // Function for formatting time in seconds
-const formatDuration = (seconds: number): string => {
+const formatDuration = (seconds: number, t: any): string => {
   if (!seconds) return '0m';
   
   const hours = Math.floor(seconds / 3600);
@@ -66,17 +67,18 @@ const formatDuration = (seconds: number): string => {
   const secs = seconds % 60;
   
   if (hours > 0) {
-    return `${hours}h ${minutes}m`;
+    return `${hours}${t('tasks.hours').charAt(0)} ${minutes}${t('tasks.minutes').charAt(0)}`;
   } else if (minutes > 0) {
-    return `${minutes}m ${secs}s`;
+    return `${minutes}${t('tasks.minutes').charAt(0)} ${secs}${t('tasks.seconds').charAt(0)}`;
   } else {
-    return `${secs}s`;
+    return `${secs}${t('tasks.seconds').charAt(0)}`;
   }
 };
 
 // Component for displaying current active timer
 const ActiveTimerDisplay = ({ onStopTimer }: { onStopTimer?: () => void }) => {
   const { activeTimer } = useActiveTimer();
+  const { t } = useTranslation();
   const stopTimer = useStopTimer();
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -123,7 +125,7 @@ const ActiveTimerDisplay = ({ onStopTimer }: { onStopTimer?: () => void }) => {
             {activeTimer.task?.title}
           </Typography>
           <Typography variant="h5" fontWeight="bold">
-            {formatDuration(currentTime)}
+            {formatDuration(currentTime, t)}
           </Typography>
         </Box>
       </Box>
@@ -134,7 +136,7 @@ const ActiveTimerDisplay = ({ onStopTimer }: { onStopTimer?: () => void }) => {
         onClick={handleStopClick}
         disabled={stopTimer.isPending}
       >
-        Stop
+        {t('tasks.stopTimer')}
       </Button>
     </Paper>
   );
@@ -143,6 +145,7 @@ const ActiveTimerDisplay = ({ onStopTimer }: { onStopTimer?: () => void }) => {
   // Component for displaying task time statistics
 const TaskTimeStats = ({ taskId }: { taskId: string }) => {
   const { data: timeStats, refetch } = useTimeStats(taskId);
+  const { t } = useTranslation();
   
   // Update stats every 5 seconds to show real-time changes
   React.useEffect(() => {
@@ -162,21 +165,21 @@ const TaskTimeStats = ({ taskId }: { taskId: string }) => {
   
   let timeDisplay = '';
   if (hours > 0) {
-    timeDisplay = `${hours}г ${minutes}хв ${seconds}с`;
+    timeDisplay = `${hours}${t('tasks.hours').charAt(0)} ${minutes}${t('tasks.minutes').charAt(0)} ${seconds}${t('tasks.seconds').charAt(0)}`;
   } else if (minutes > 0) {
-    timeDisplay = `${minutes}хв ${seconds}с`;
+    timeDisplay = `${minutes}${t('tasks.minutes').charAt(0)} ${seconds}${t('tasks.seconds').charAt(0)}`;
   } else {
-    timeDisplay = `${seconds}с`;
+    timeDisplay = `${seconds}${t('tasks.seconds').charAt(0)}`;
   }
 
   return (
     <Box display="flex" alignItems="center" gap={1} mt={1}>
       <TimeIcon fontSize="small" color="action" />
       <Typography variant="caption" color="text.secondary">
-        Витрачено: {timeDisplay}
+        {t('tasks.timeSpent')}: {timeDisplay}
         {timeStats.hasActiveTimer && (
           <Chip 
-            label="Активний таймер" 
+            label={t('time.running')} 
             size="small" 
             color="primary" 
             sx={{ ml: 1, fontSize: '0.7rem', height: '20px' }}
@@ -189,6 +192,7 @@ const TaskTimeStats = ({ taskId }: { taskId: string }) => {
 
 export default function TasksPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<TaskFilters>({
     status: undefined,
     priority: undefined,
@@ -484,14 +488,14 @@ export default function TasksPage() {
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Tasks
+          {t('tasks.title')}
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpenDialog}
         >
-          Add Task
+          {t('tasks.addTask')}
         </Button>
       </Box>
 
@@ -506,11 +510,11 @@ export default function TasksPage() {
               size="small" 
               onClick={() => navigate('/projects')}
             >
-              Create Project
+              {t('projects.addProject')}
             </Button>
           }
         >
-          To create tasks, you need to create at least one project first. 
+          {t('projects.createProjectFirst')} 
         </Alert>
       )}
 
@@ -531,11 +535,11 @@ export default function TasksPage() {
           >
             <Box display="flex" alignItems="center" gap={1}>
               <Typography variant="h6">
-                Filters
+                {t('tasks.filters')}
               </Typography>
               {hasActiveFilters() && (
                 <Chip 
-                  label="Active" 
+                  label={t('tasks.active')} 
                   size="small" 
                   color="primary"
                   variant="outlined"
@@ -546,7 +550,7 @@ export default function TasksPage() {
           <AccordionDetails>
             <Box display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
               <TextField
-                placeholder="Search tasks..."
+                placeholder={t('common.search') + "..."}
                 value={searchInput}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -564,12 +568,12 @@ export default function TasksPage() {
                 sx={{ minWidth: 200 }}
               />
               <FormControl sx={{ minWidth: 120 }}>
-                <InputLabel>Project</InputLabel>
+                <InputLabel>{t('tasks.project')}</InputLabel>
                 <Select
                   value={filter.projectId || ''}
                   onChange={(e) => setFilter({ ...filter, projectId: e.target.value || undefined })}
                 >
-                  <MenuItem value="">All projects</MenuItem>
+                  <MenuItem value="">{t('tasks.allTasks')}</MenuItem>
                   {projects.map((project) => (
                     <MenuItem key={project.id} value={project.id}>
                       {project.name}
@@ -578,7 +582,7 @@ export default function TasksPage() {
                 </Select>
               </FormControl>
               <FormControl sx={{ minWidth: 120 }}>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>{t('tasks.status')}</InputLabel>
                 <Select
                   value={Array.isArray(filter.status) ? filter.status[0] || '' : filter.status || ''}
                   onChange={(e) => {
@@ -589,14 +593,14 @@ export default function TasksPage() {
                     });
                   }}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="TODO">To Do</MenuItem>
-                  <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-                  <MenuItem value="COMPLETED">Completed</MenuItem>
+                  <MenuItem value="">{t('tasks.allTasks')}</MenuItem>
+                  <MenuItem value="TODO">{t('tasks.todo')}</MenuItem>
+                  <MenuItem value="IN_PROGRESS">{t('tasks.inProgress')}</MenuItem>
+                  <MenuItem value="COMPLETED">{t('tasks.completed')}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ minWidth: 120 }}>
-                <InputLabel>Priority</InputLabel>
+                <InputLabel>{t('tasks.priority')}</InputLabel>
                 <Select
                   value={Array.isArray(filter.priority) ? filter.priority[0] || '' : filter.priority || ''}
                   onChange={(e) => {
@@ -607,10 +611,10 @@ export default function TasksPage() {
                     });
                   }}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="LOW">Low</MenuItem>
-                  <MenuItem value="MEDIUM">Medium</MenuItem>
-                  <MenuItem value="HIGH">High</MenuItem>
+                  <MenuItem value="">{t('tasks.allTasks')}</MenuItem>
+                  <MenuItem value="LOW">{t('tasks.low')}</MenuItem>
+                  <MenuItem value="MEDIUM">{t('tasks.medium')}</MenuItem>
+                  <MenuItem value="HIGH">{t('tasks.high')}</MenuItem>
                 </Select>
               </FormControl>
               {hasActiveFilters() && (
@@ -620,7 +624,7 @@ export default function TasksPage() {
                   onClick={handleClearFilters}
                   sx={{ height: '56px' }}
                 >
-                  Clear filters
+                  {t('common.clearAll')}
                 </Button>
               )}
             </Box>
@@ -651,10 +655,10 @@ export default function TasksPage() {
                 <Box display="flex" alignItems="center" gap={1}>
                   <FolderIcon sx={{ color: project?.color || 'text.secondary' }} />
                   <Typography variant="h6">
-                    {project?.name || 'No project'}
+                    {project?.name || t('projects.noProject')}
                   </Typography>
                   <Chip 
-                    label={`${projectTasks.length} tasks`} 
+                    label={`${projectTasks.length} ${t('tasks.title').toLowerCase()}`} 
                     size="small" 
                     variant="outlined"
                   />
@@ -714,7 +718,7 @@ export default function TasksPage() {
                             {/* Time management buttons */}
                             <Box display="flex" gap={1} mt={2}>
                               {isActiveTimer ? (
-                                <Tooltip title="Stop timer">
+                                <Tooltip title={t('tasks.stopTimer')}>
                                   <IconButton
                                     color="error"
                                     onClick={handleStopTimer}
@@ -724,7 +728,7 @@ export default function TasksPage() {
                                   </IconButton>
                                 </Tooltip>
                               ) : (
-                                <Tooltip title="Start timer">
+                                <Tooltip title={t('tasks.startTimer')}>
                                   <IconButton
                                     color="primary"
                                     onClick={() => handleStartTimer(task)}
@@ -735,7 +739,7 @@ export default function TasksPage() {
                                 </Tooltip>
                               )}
                               
-                              <Tooltip title="Add time manually">
+                              <Tooltip title={t('tasks.addTimeManually')}>
                                 <IconButton
                                   color="secondary"
                                   onClick={() => handleAddTimeEntry(task)}
@@ -747,7 +751,7 @@ export default function TasksPage() {
 
                             {task.createdAt && (
                               <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                                Створено: {formatDate(task.createdAt)}
+                                {t('common.created')}: {formatDate(task.createdAt)}
                               </Typography>
                             )}
                           </CardContent>
@@ -765,13 +769,13 @@ export default function TasksPage() {
       {/* Create/Edit Task Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingTask ? 'Edit task' : 'Create task'}
+          {editingTask ? t('tasks.editTask') : t('tasks.addTask')}
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             {/* Required project selection */}
             <FormControl fullWidth error={!!validationErrors.projectId}>
-              <InputLabel>Project *</InputLabel>
+              <InputLabel>{t('tasks.project')} *</InputLabel>
               <Select
                 value={newTask.projectId}
                 onChange={(e) => {
@@ -802,7 +806,7 @@ export default function TasksPage() {
             </FormControl>
 
             <TextField
-              label="Task name *"
+              label={t('tasks.taskTitle') + " *"}
               value={newTask.title}
               onChange={(e) => {
                 setNewTask({ ...newTask, title: e.target.value });
@@ -817,7 +821,7 @@ export default function TasksPage() {
             />
             
             <TextField
-              label="Description"
+              label={t('tasks.description')}
               value={newTask.description}
               onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
               multiline
@@ -826,27 +830,27 @@ export default function TasksPage() {
             />
             
             <FormControl fullWidth>
-              <InputLabel>Priority</InputLabel>
+              <InputLabel>{t('tasks.priority')}</InputLabel>
               <Select
                 value={newTask.priority}
                 onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as TaskPriority })}
               >
-                <MenuItem value="LOW">Low</MenuItem>
-                <MenuItem value="MEDIUM">Medium</MenuItem>
-                <MenuItem value="HIGH">High</MenuItem>
-                <MenuItem value="URGENT">Urgent</MenuItem>
+                <MenuItem value="LOW">{t('tasks.low')}</MenuItem>
+                <MenuItem value="MEDIUM">{t('tasks.medium')}</MenuItem>
+                <MenuItem value="HIGH">{t('tasks.high')}</MenuItem>
+                <MenuItem value="URGENT">{t('tasks.urgent')}</MenuItem>
               </Select>
             </FormControl>
             
             <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
+              <InputLabel>{t('tasks.status')}</InputLabel>
               <Select
                 value={newTask.status}
                 onChange={(e) => setNewTask({ ...newTask, status: e.target.value as TaskStatus })}
               >
-                <MenuItem value="TODO">To Do</MenuItem>
-                <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-                <MenuItem value="COMPLETED">Completed</MenuItem>
+                <MenuItem value="TODO">{t('tasks.todo')}</MenuItem>
+                <MenuItem value="IN_PROGRESS">{t('tasks.inProgress')}</MenuItem>
+                <MenuItem value="COMPLETED">{t('tasks.completed')}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -865,14 +869,14 @@ export default function TasksPage() {
             });
             setValidationErrors({});
           }}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={editingTask ? handleUpdateTask : handleCreateTask}
             variant="contained"
             disabled={!newTask.title || !newTask.projectId}
           >
-            {editingTask ? 'Update' : 'Create'}
+            {editingTask ? t('common.update') : t('common.create')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -880,32 +884,32 @@ export default function TasksPage() {
       {/* Manual Time Entry Dialog */}
       <Dialog open={timeEntryDialogOpen} onClose={() => setTimeEntryDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          Add час для: {selectedTaskForTime?.title}
+          {t('time.addTime')} {t('common.for')}: {selectedTaskForTime?.title}
         </DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
-              label="Duration (minutes) *"
+              label={t('time.duration') + " (" + t('tasks.minutes') + ") *"}
               type="number"
               value={newTimeEntry.duration}
               onChange={(e) => setNewTimeEntry({ ...newTimeEntry, duration: e.target.value })}
               required
               fullWidth
               inputProps={{ step: 1 }}
-              helperText="Positive values add time, negative values subtract time from task"
+              helperText={t('time.durationHelp')}
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTimeEntryDialogOpen(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleCreateTimeEntry}
             variant="contained"
             disabled={!newTimeEntry.duration || createTimeEntry.isPending}
           >
-            Add
+            {t('common.add')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -917,13 +921,13 @@ export default function TasksPage() {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Підтвердження видалення</DialogTitle>
+        <DialogTitle>{t('tasks.confirmDelete')}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this task <strong>"{taskToDelete?.title}"</strong>?
+            {t('tasks.deleteMessage')} <strong>"{taskToDelete?.title}"</strong>?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Ця дія незворотна. Всі дані про час, витрачений на це завдання, також будуть видалені.
+            {t('tasks.deleteWarning')}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -931,7 +935,7 @@ export default function TasksPage() {
             onClick={() => setDeleteDialogOpen(false)}
             disabled={deleteTaskMutation.isPending}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={confirmDeleteTask}
@@ -940,7 +944,7 @@ export default function TasksPage() {
             disabled={deleteTaskMutation.isPending}
             startIcon={deleteTaskMutation.isPending ? <CircularProgress size={20} /> : null}
           >
-            {deleteTaskMutation.isPending ? 'Deleting...' : 'Delete'}
+            {deleteTaskMutation.isPending ? t('common.loading') : t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

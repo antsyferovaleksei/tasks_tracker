@@ -23,11 +23,13 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { useDashboard } from '../hooks';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function AnalyticsPage() {
+  const { t } = useTranslation();
   const { data: dashboardData, isLoading } = useDashboard(30);
   const [isExporting, setIsExporting] = useState(false);
   
@@ -159,7 +161,7 @@ export default function AnalyticsPage() {
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          Analytics
+          {t('analytics.title')}
         </Typography>
         
         {/* Export Button */}
@@ -169,7 +171,7 @@ export default function AnalyticsPage() {
           onClick={handleExport}
           disabled={isExporting || !dashboardData}
         >
-          {isExporting ? 'Exporting...' : 'Export into CSV'}
+          {isExporting ? t('common.loading') : t('analytics.exportCSV')}
         </Button>
       </Box>
 
@@ -179,7 +181,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                All tasks
+                {t('dashboard.totalTasks')}
               </Typography>
               <Typography variant="h4">
                 {metrics?.totalTasks || 0}
@@ -191,7 +193,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                Completed
+                {t('dashboard.completedTasks')}
               </Typography>
               <Typography variant="h4">
                 {metrics?.completedTasks || 0}
