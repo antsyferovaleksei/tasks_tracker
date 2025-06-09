@@ -88,10 +88,17 @@ export default function TestPage() {
     try {
       const result = await authService.signIn(loginData.email, loginData.password);
       setIsLoggedIn(true);
-      setSuccess('Вхід через Supabase Auth успішний!');
+      setSuccess(`✅ Вхід успішний! Вітаємо, ${result.user?.email}!`);
       console.log('Supabase login result:', result);
     } catch (err: any) {
-      setError('Помилка входу: ' + (err.message || 'Невідома помилка'));
+      console.error('Login error:', err);
+      if (err.message.includes('Email not confirmed')) {
+        setError('📧 Email не підтверджений. Перевірте пошту або вимкніть підтвердження email в Supabase Dashboard → Auth → Settings.');
+      } else if (err.message.includes('Invalid login credentials')) {
+        setError('❌ Невірні дані для входу. Спочатку зареєструйтеся або перевірте email/пароль.');
+      } else {
+        setError('Помилка входу: ' + (err.message || 'Невідома помилка'));
+      }
     } finally {
       setLoading(false);
     }
