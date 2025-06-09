@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOpti
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import apiClient from '../api/client';
-import { projectsService } from '../api/supabase-data';
+import { projectsService, tasksService } from '../api/supabase-data';
 import {
   User,
   Task,
@@ -229,37 +229,71 @@ export const useTasks = (filters?: TaskFilters, page = 1, limit = 20) => {
 
   const query = useQuery({
     queryKey: queryKeys.tasks.list(filters, page),
-    queryFn: () => apiClient.getTasks({ page, limit, filters }),
+    queryFn: () => {
+      // Використовуємо tasksService замість apiClient
+      return tasksService.getTasks(filters?.projectId, page, limit);
+    },
     staleTime: 10 * 1000, // 10 seconds
     refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
   });
 
   useEffect(() => {
-    if (query.data?.success && query.data.data?.data) {
-      setTasks(query.data.data.data);
-      // The pagination info is in query.data.data, not query.data.pagination
+    if (query.data) {
+      // Перетворюємо дані з Supabase формату до клієнтського
+      const clientTasks = query.data.map((task: any) => ({
+        ...task,
+        projectId: task.project_id,
+        userId: task.user_id,
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+        dueDate: task.due_date,
+        // Перетворюємо статуси і пріоритети назад
+        status: task.status === 'todo' ? 'TODO' : 
+                task.status === 'in_progress' ? 'IN_PROGRESS' : 
+                task.status === 'done' ? 'COMPLETED' : 'TODO',
+        priority: task.priority === 'low' ? 'LOW' :
+                  task.priority === 'medium' ? 'MEDIUM' :
+                  task.priority === 'high' ? 'HIGH' : 'MEDIUM'
+      }));
+      
+      setTasks(clientTasks);
+      
+      // Простіша пагінація для Supabase
       const paginationInfo = {
-        page: query.data.data.page,
-        limit: query.data.data.limit,
-        total: query.data.data.total,
-        totalPages: query.data.data.totalPages,
-        hasNext: query.data.data.page < query.data.data.totalPages,
-        hasPrev: query.data.data.page > 1,
+        page,
+        limit,
+        total: query.data.length,
+        totalPages: Math.ceil(query.data.length / limit),
+        hasNext: query.data.length === limit,
+        hasPrev: page > 1,
       };
       setPagination(paginationInfo);
     }
-  }, [query.data, setTasks, setPagination]);
+  }, [query.data, setTasks, setPagination, page, limit]);
 
   return {
     ...query,
-    tasks: query.data?.data?.data || [],
-    pagination: query.data?.data ? {
-      page: query.data.data.page,
-      limit: query.data.data.limit,
-      total: query.data.data.total,
-      totalPages: query.data.data.totalPages,
-      hasNext: query.data.data.page < query.data.data.totalPages,
-      hasPrev: query.data.data.page > 1,
+    tasks: query.data ? query.data.map((task: any) => ({
+      ...task,
+      projectId: task.project_id,
+      userId: task.user_id,
+      createdAt: task.created_at,
+      updatedAt: task.updated_at,
+      dueDate: task.due_date,
+      status: task.status === 'todo' ? 'TODO' : 
+              task.status === 'in_progress' ? 'IN_PROGRESS' : 
+              task.status === 'done' ? 'COMPLETED' : 'TODO',
+      priority: task.priority === 'low' ? 'LOW' :
+                task.priority === 'medium' ? 'MEDIUM' :
+                task.priority === 'high' ? 'HIGH' : 'MEDIUM'
+    })) : [],
+    pagination: query.data ? {
+      page,
+      limit,
+      total: query.data.length,
+      totalPages: Math.ceil(query.data.length / limit),
+      hasNext: query.data.length === limit,
+      hasPrev: page > 1,
     } : undefined,
   };
 };
@@ -277,17 +311,50 @@ export const useCreateTask = () => {
   const { addTask } = useTasksStore();
 
   return useMutation({
-    mutationFn: (data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) =>
-      apiClient.createTask(data),
+    mutationFn: (data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+      // Перетворюємо типи для Supabase
+      const statusMapping: Record<TaskStatus, string> = {
+        'TODO': 'todo',
+        'IN_PROGRESS': 'in_progress', 
+        'COMPLETED': 'done',
+        'CANCELLED': 'todo'
+      };
+      
+      const priorityMapping: Record<TaskPriority, string> = {
+        'LOW': 'low',
+        'MEDIUM': 'medium',
+        'HIGH': 'high',
+        'URGENT': 'high'
+      };
+      
+      const supabaseData = {
+        title: data.title,
+        description: data.description,
+        status: statusMapping[data.status] as 'todo' | 'in_progress' | 'done',
+        priority: priorityMapping[data.priority] as 'low' | 'medium' | 'high',
+        project_id: data.projectId || '',
+        archived: data.archived || false,
+        due_date: data.dueDate || null,
+      };
+      return tasksService.createTask(supabaseData);
+    },
     onSuccess: (response) => {
-      if (response.success && response.data) {
-        addTask(response.data);
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        toast.success('Tasks created!');
-      }
+      // Перетворюємо відповідь до формату клієнта
+      const clientTask = {
+        ...response,
+        projectId: response.project_id,
+        userId: response.user_id,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at,
+        dueDate: response.due_date,
+      };
+      addTask(clientTask);
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      toast.success('Task created!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Creation error task');
+      console.error('Create task error:', error);
+      toast.error(error.message || 'Creation error task');
     },
   });
 };
@@ -297,17 +364,50 @@ export const useUpdateTask = () => {
   const { updateTask } = useTasksStore();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Task> }) =>
-      apiClient.updateTask(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Task> }) => {
+      // Перетворюємо типи для Supabase
+      const statusMapping: Record<TaskStatus, string> = {
+        'TODO': 'todo',
+        'IN_PROGRESS': 'in_progress', 
+        'COMPLETED': 'done',
+        'CANCELLED': 'todo'
+      };
+      
+      const priorityMapping: Record<TaskPriority, string> = {
+        'LOW': 'low',
+        'MEDIUM': 'medium',
+        'HIGH': 'high',
+        'URGENT': 'high'
+      };
+
+      const supabaseData: any = {};
+      if (data.title !== undefined) supabaseData.title = data.title;
+      if (data.description !== undefined) supabaseData.description = data.description;
+      if (data.status !== undefined) supabaseData.status = statusMapping[data.status];
+      if (data.priority !== undefined) supabaseData.priority = priorityMapping[data.priority];
+      if (data.projectId !== undefined) supabaseData.project_id = data.projectId;
+      if (data.archived !== undefined) supabaseData.archived = data.archived;
+      if (data.dueDate !== undefined) supabaseData.due_date = data.dueDate;
+
+      return tasksService.updateTask(id, supabaseData);
+    },
     onSuccess: (response, variables) => {
-      if (response.success && response.data) {
-        updateTask(variables.id, response.data);
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        toast.success('Tasks updated!');
-      }
+      // Перетворюємо відповідь до формату клієнта
+      const clientTask = {
+        ...response,
+        projectId: response.project_id,
+        userId: response.user_id,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at,
+        dueDate: response.due_date,
+      };
+      updateTask(variables.id, clientTask);
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      toast.success('Task updated!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Update error task');
+      console.error('Update task error:', error);
+      toast.error(error.message || 'Update error task');
     },
   });
 };
@@ -317,14 +417,15 @@ export const useDeleteTask = () => {
   const { deleteTask } = useTasksStore();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.deleteTask(id),
+    mutationFn: (id: string) => tasksService.deleteTask(id),
     onSuccess: (_, id) => {
       deleteTask(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-      toast.success('Tasks deleted!');
+      toast.success('Task deleted!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Deletion error task');
+      console.error('Delete task error:', error);
+      toast.error(error.message || 'Deletion error task');
     },
   });
 };

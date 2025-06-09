@@ -35,7 +35,8 @@ import {
   TaskAlt,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth, useTheme as useAppTheme, useActiveTimer } from '../hooks';
+import { useTheme as useAppTheme, useActiveTimer } from '../hooks';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { useAppSettingsStore } from '../store';
 import { formatDuration } from '../utils';
 import { Link as RouterLink } from 'react-router-dom';
@@ -52,7 +53,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const { user, logout } = useAuth();
+  const { user, signOut } = useSupabaseAuth();
   const { currentTheme, setTheme } = useAppTheme();
   const { activeTimer } = useActiveTimer();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useAppSettingsStore();
@@ -103,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const handleLogout = () => {
-    logout();
+    signOut();
     handleProfileMenuClose();
   };
 
@@ -204,14 +205,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Divider sx={{ mb: 2 }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar sx={{ width: 40, height: 40 }}>
-            {user?.name?.charAt(0).toUpperCase()}
+            {user?.email?.charAt(0).toUpperCase()}
           </Avatar>
           <Box sx={{ flex: 1 }}>
             <Typography variant="body2" fontWeight="bold">
-              {user?.name}
+              {user?.email}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {user?.email}
+              User
             </Typography>
           </Box>
         </Box>
@@ -263,7 +264,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Tooltip title="Profile">
               <IconButton onClick={handleProfileMenuOpen}>
                 <Avatar sx={{ width: 32, height: 32 }}>
-                  {user?.name?.charAt(0).toUpperCase()}
+                  {user?.email?.charAt(0).toUpperCase()}
                 </Avatar>
               </IconButton>
             </Tooltip>
