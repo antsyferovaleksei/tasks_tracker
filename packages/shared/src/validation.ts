@@ -1,11 +1,17 @@
 import { z } from 'zod';
 import { TaskStatus, TaskPriority, NotificationType } from './types';
 
-// User validation schemas
+// User validation schemas для Supabase Auth
 export const createUserSchema = z.object({
   email: z.string().email('Invalid email'),
   name: z.string().min(2, 'Name must contain at least 2 characters'),
+  // password тепер валідується в Supabase Auth
+});
+
+export const supabaseAuthSignUpSchema = z.object({
+  email: z.string().email('Invalid email'),
   password: z.string().min(6, 'Password must contain at least 6 characters'),
+  name: z.string().min(2, 'Name must contain at least 2 characters'),
 });
 
 export const loginSchema = z.object({

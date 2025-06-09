@@ -32,7 +32,7 @@ export interface User {
 export interface CreateUserDto {
   email: string;
   name: string;
-  password: string;
+  // password тепер обробляється через Supabase Auth, не в нашій БД
 }
 
 export interface LoginDto {

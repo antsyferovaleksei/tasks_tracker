@@ -44,6 +44,21 @@ const queryClient = new QueryClient({
   },
 });
 
+// Root Route component (handles the main "/" path)
+const RootRoute: React.FC = () => {
+  const { user, loading } = useSupabaseAuth();
+  
+  if (loading) {
+    return <LoadingSpinner fullscreen message="Завантаження..." />;
+  }
+  
+  if (user) {
+    return <Navigate to="/tasks" replace />;
+  }
+  
+  return <Navigate to="/login" replace />;
+};
+
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useSupabaseAuth();
@@ -286,6 +301,9 @@ const App: React.FC = () => {
           <Router>
             <div className="App">
               <Routes>
+                {/* Root route */}
+                <Route path="/" element={<RootRoute />} />
+                
                 {/* Public routes */}
                 <Route
                   path="/login"
@@ -318,26 +336,86 @@ const App: React.FC = () => {
 
                 {/* Protected routes with layout */}
                 <Route
-                  path="/*"
+                  path="/tasks"
                   element={
                     <ProtectedRoute>
                       <Layout>
                         <Suspense fallback={<LoadingSpinner />}>
-                          <Routes>
-                            <Route path="/" element={<Navigate to="/tasks" replace />} />
-                            <Route path="/tasks" element={<TasksPage />} />
-                            <Route path="/tasks/:id" element={<TaskDetailPage />} />
-                            <Route path="/projects" element={<ProjectsPage />} />
-                            <Route path="/projects/:id" element={<ProjectDetailPage />} />
-                            <Route path="/analytics" element={<AnalyticsPage />} />
-      
-                            <Route path="/profile" element={<ProfilePage />} />
-                            <Route path="*" element={<NotFoundPage />} />
-                          </Routes>
+                          <TasksPage />
                         </Suspense>
                       </Layout>
                     </ProtectedRoute>
                   }
+                />
+                <Route
+                  path="/tasks/:id"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <TaskDetailPage />
+                        </Suspense>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <ProjectsPage />
+                        </Suspense>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects/:id"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <ProjectDetailPage />
+                        </Suspense>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <AnalyticsPage />
+                        </Suspense>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <ProfilePage />
+                        </Suspense>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                {/* 404 route */}
+                <Route 
+                  path="*" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <NotFoundPage />
+                    </Suspense>
+                  } 
                 />
               </Routes>
             </div>
