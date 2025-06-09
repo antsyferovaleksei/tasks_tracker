@@ -28,34 +28,41 @@ async function ensureUserExists() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Користувач не авторизований');
 
-  // Перевіряємо чи існує користувач в таблиці users
-  const { data: existingUser, error: checkError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('id', user.id)
-    .single();
-
-  if (checkError && checkError.code !== 'PGRST116') {
-    // PGRST116 = row not found, це нормально
-    throw checkError;
-  }
-
-  // Якщо користувача немає, створюємо його
-  if (!existingUser) {
-    const { error: insertError } = await supabase
+  try {
+    // Перевіряємо чи існує користувач в таблиці users
+    const { data: existingUser, error: checkError } = await supabase
       .from('users')
-      .insert([{
-        id: user.id,
-        email: user.email || '',
-        name: user.user_metadata?.name || 'User',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }]);
+      .select('id')
+      .eq('id', user.id)
+      .single();
 
-    if (insertError) {
-      console.error('Error creating user:', insertError);
-      // Не кидаємо помилку, можливо користувач вже існує (race condition)
+    // Якщо користувач не знайдений, створюємо його
+    if (checkError && checkError.code === 'PGRST116') {
+      console.log('Creating user in users table:', user.email);
+      
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert([{
+          id: user.id,
+          email: user.email || '',
+                      name: user.user_metadata?.name || (user as any).raw_user_meta_data?.name || 'User',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+
+      if (insertError) {
+        console.error('Error creating user in users table:', insertError);
+        // Не кидаємо помилку, продовжуємо роботу
+      } else {
+        console.log('User created successfully in users table');
+      }
+    } else if (checkError) {
+      console.error('Error checking user existence:', checkError);
+      // Не кидаємо помилку, продовжуємо роботу
     }
+  } catch (error) {
+    console.error('ensureUserExists error:', error);
+    // Не кидаємо помилку, щоб не зламати основну функціональність
   }
 
   return user;
@@ -64,7 +71,11 @@ async function ensureUserExists() {
 export const projectsService = {
   // Створити проект
   async createProject(projectData: Omit<Project, 'id' | 'user_id' | 'created_at' | 'updated_at'>) {
-    const user = await ensureUserExists();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    // Спочатку створюємо користувача в таблиці users якщо його немає
+    await ensureUserExists();
 
     const { data, error } = await supabase
       .from('projects')
@@ -83,7 +94,11 @@ export const projectsService = {
 
   // Отримати всі проекти користувача
   async getProjects() {
-    const user = await ensureUserExists();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    // Спочатку створюємо користувача в таблиці users якщо його немає
+    await ensureUserExists();
 
     const { data, error } = await supabase
       .from('projects')
