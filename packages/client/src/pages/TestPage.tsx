@@ -12,11 +12,13 @@ import {
 import apiClient from '../api/client';
 import { authService } from '../api/supabase-auth';
 import { projectsService } from '../api/supabase-data';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 export default function TestPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { user, signOut } = useSupabaseAuth();
   const [loginData, setLoginData] = useState({
     email: 'user@gmail.com',
     password: 'password123456'
@@ -159,6 +161,20 @@ export default function TestPage() {
       <Typography variant="h4" mb={3}>
         Тестова сторінка API
       </Typography>
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <strong>Поточний користувач:</strong> {user ? user.email : 'Не авторизований'}
+        {user && (
+          <Button 
+            size="small" 
+            onClick={signOut} 
+            sx={{ ml: 2 }}
+            variant="outlined"
+          >
+            Вийти
+          </Button>
+        )}
+      </Alert>
 
       <Card sx={{ mb: 3 }}>
         <CardContent>

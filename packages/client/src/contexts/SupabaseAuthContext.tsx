@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { authService } from '../api/supabase-auth';
+import { authService, supabase } from '../api/supabase-auth';
 
 interface SupabaseAuthContextType {
   user: User | null;
@@ -30,11 +30,18 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Отримуємо поточну сесію
     const initAuth = async () => {
       try {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
+        // Використовуємо getSession замість getCurrentUser для більш точної перевірки
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session error:', error);
+        }
+        setSession(session);
+        setUser(session?.user || null);
         setLoading(false);
       } catch (error) {
         console.error('Auth initialization error:', error);
+        setUser(null);
+        setSession(null);
         setLoading(false);
       }
     };
