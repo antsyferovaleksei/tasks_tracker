@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '../hooks';
 import { Project } from '../types';
 import { formatDate } from '../utils';
+import { toast } from 'react-hot-toast';
 
 export default function ProjectsPage() {
   const { t } = useTranslation();
@@ -56,9 +57,10 @@ export default function ProjectsPage() {
       const result = await createProjectMutation.mutateAsync(newProject);
       console.log('Project created successfully:', result);
       handleCloseDialog();
-    } catch (error) {
+      toast.success(t('messages.projectCreated'));
+    } catch (error: any) {
       console.error('Failed to create project:', error);
-      // Error is handled by the mutation's onError
+      toast.error(error.message || t('messages.error'));
     }
   };
 
@@ -73,8 +75,10 @@ export default function ProjectsPage() {
         data: newProject,
       });
       handleCloseDialog();
-    } catch (error) {
+      toast.success(t('messages.projectUpdated'));
+    } catch (error: any) {
       console.error('Failed to update project:', error);
+      toast.error(error.message || t('messages.error'));
     }
   };
 
@@ -87,8 +91,10 @@ export default function ProjectsPage() {
       await deleteProjectMutation.mutateAsync(projectToDelete.id);
       setDeleteDialogOpen(false);
       setProjectToDelete(null);
-    } catch (error) {
+      toast.success(t('messages.projectDeleted'));
+    } catch (error: any) {
       console.error('Failed to delete project:', error);
+      toast.error(error.message || t('messages.error'));
     }
   };
 
@@ -209,25 +215,25 @@ export default function ProjectsPage() {
       {projects.length === 0 && (
         <Box textAlign="center" py={4}>
           <Typography variant="h6" color="text.secondary">
-            Projects не знайдено
+            {t('projects.noProjects')}
           </Typography>
         </Box>
       )}
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingProject ? 'Edit project' : 'Create project'}</DialogTitle>
+        <DialogTitle>{editingProject ? t('projects.editProject') : t('projects.createProject')}</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
-              label="Project name"
+              label={t('projects.projectName')}
               value={newProject.name}
               onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
               required
               fullWidth
             />
             <TextField
-              label="Description"
+              label={t('projects.projectDescription')}
               value={newProject.description}
               onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
               multiline
@@ -235,7 +241,7 @@ export default function ProjectsPage() {
               fullWidth
             />
             <Box>
-              <Typography variant="subtitle2" mb={1}>Project color</Typography>
+              <Typography variant="subtitle2" mb={1}>{t('projects.projectColor')}</Typography>
               <input
                 type="color"
                 value={newProject.color}
@@ -250,7 +256,7 @@ export default function ProjectsPage() {
             onClick={handleCloseDialog}
             disabled={createProjectMutation.isPending || updateProjectMutation.isPending}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={editingProject ? handleUpdateProject : handleCreateProject}
@@ -266,9 +272,9 @@ export default function ProjectsPage() {
             }
           >
             {editingProject ? (
-              updateProjectMutation.isPending ? 'Оновлення...' : 'Оновити'
+              updateProjectMutation.isPending ? t('projects.updating') : t('common.update')
             ) : (
-              createProjectMutation.isPending ? 'Creating...' : 'Create'
+              createProjectMutation.isPending ? t('projects.creating') : t('common.create')
             )}
           </Button>
         </DialogActions>
@@ -281,13 +287,13 @@ export default function ProjectsPage() {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Підтвердження видалення</DialogTitle>
+        <DialogTitle>{t('projects.deleteConfirm')}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete project <strong>"{projectToDelete?.name}"</strong>?
+            {t('projects.deleteConfirm')} <strong>"{projectToDelete?.name}"</strong>?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Ця дія незворотна. All task в цьому projectі також будуть видалені.
+            {t('projects.deleteWarning')}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -295,7 +301,7 @@ export default function ProjectsPage() {
             onClick={() => setDeleteDialogOpen(false)}
             disabled={deleteProjectMutation.isPending}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleDeleteProject}
@@ -304,7 +310,7 @@ export default function ProjectsPage() {
             disabled={deleteProjectMutation.isPending}
             startIcon={deleteProjectMutation.isPending ? <CircularProgress size={20} /> : null}
           >
-            {deleteProjectMutation.isPending ? 'Deleting...' : 'Delete'}
+            {deleteProjectMutation.isPending ? t('projects.deleting') : t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

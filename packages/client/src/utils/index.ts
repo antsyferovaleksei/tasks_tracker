@@ -33,20 +33,36 @@ export const formatTime = (date: string | Date): string => {
 };
 
 // Duration formatting utilities
-export const formatDuration = (seconds: number): string => {
+export const formatDuration = (seconds: number, t?: (key: string) => string): string => {
   if (seconds < 60) {
-    return `${seconds}с`;
+    return t ? `${seconds} ${t('time.seconds')}` : `${seconds}с`;
   }
   
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   
   if (minutes < 60) {
+    if (t) {
+      return remainingSeconds > 0 
+        ? `${minutes} ${t('time.minutes')} ${remainingSeconds} ${t('time.seconds')}`
+        : `${minutes} ${t('time.minutes')}`;
+    }
     return remainingSeconds > 0 ? `${minutes}хв ${remainingSeconds}с` : `${minutes}хв`;
   }
   
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
+  
+  if (t) {
+    let result = `${hours} ${t('time.hours')}`;
+    if (remainingMinutes > 0) {
+      result += ` ${remainingMinutes} ${t('time.minutes')}`;
+    }
+    if (remainingSeconds > 0 && hours === 0) {
+      result += ` ${remainingSeconds} ${t('time.seconds')}`;
+    }
+    return result;
+  }
   
   let result = `${hours}г`;
   if (remainingMinutes > 0) {

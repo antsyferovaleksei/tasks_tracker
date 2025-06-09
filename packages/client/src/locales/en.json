@@ -14,7 +14,7 @@
     "title": "Dashboard",
     "totalTasks": "Total Tasks",
     "completedTasks": "Completed Tasks",
-    "projectsCount": "Projects",
+    "projectsCount": "Projects Count",
     "totalTime": "Total Time",
     "recentActivity": "Recent Activity",
     "todaysTasks": "Today's Tasks",
@@ -29,7 +29,7 @@
     "allTasks": "All Tasks",
     "completed": "Completed",
     "inProgress": "In Progress",
-    "todo": "To Do",
+    "todo": "To-Do",
     "addTask": "Add Task",
     "taskTitle": "Task Title",
     "description": "Description",
@@ -58,17 +58,39 @@
     "hours": "hours",
     "minutes": "minutes",
     "seconds": "seconds",
-    "noTimeSet": "Not Set"
+    "noTimeSet": "No time set",
+    "search": "Search...",
+    "allProjects": "All Projects",
+    "allStatuses": "All Statuses",
+    "allPriorities": "All Priorities",
+    "done": "Done",
+    "timeEntries": "Time Entries",
+    "duration": "Duration",
+    "date": "Date",
+    "notes": "Notes",
+    "markCompleted": "Mark as Completed",
+    "markTodo": "Mark as To-Do",
+    "markInProgress": "Mark as In Progress",
+    "noTasks": "No tasks found",
+    "deleteConfirm": "Are you sure you want to delete this task?",
+    "deleteTimeEntry": "Delete Time Entry",
+    "editTimeEntry": "Edit Time Entry",
+    "addTimeEntry": "Add Time Entry",
+    "timeDuration": "Duration (min)",
+    "timeDate": "Date",
+    "timeNotes": "Notes",
+    "duplicateTask": "Duplicate Task",
+    "exportTasks": "Export Tasks",
+    "importTasks": "Import Tasks",
+    "overdue": "Overdue"
   },
   "projects": {
     "title": "Projects",
     "addProject": "Add Project",
     "projectName": "Project Name",
-    "description": "Description",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "status": "Status",
-    "tasksCount": "Tasks Count",
+    "projectDescription": "Project Description",
+    "projectColor": "Project Color",
+    "tasksCount": "Tasks",
     "completedTasks": "Completed Tasks",
     "totalTime": "Total Time",
     "editProject": "Edit Project",
@@ -83,7 +105,12 @@
     "completed": "Completed",
     "cancelled": "Cancelled",
     "createProjectFirst": "To create tasks, you need to create at least one project first.",
-    "noProject": "No Project"
+    "noProject": "No Project",
+    "noProjects": "No projects found",
+    "deleteWarning": "This action is irreversible. All tasks in this project will also be deleted.",
+    "creating": "Creating...",
+    "updating": "Updating...",
+    "deleting": "Deleting..."
   },
   "analytics": {
     "title": "Analytics",
@@ -99,8 +126,14 @@
     "dailyProductivity": "Daily Productivity",
     "weeklyProductivity": "Weekly Productivity",
     "monthlyProductivity": "Monthly Productivity",
-    "exportCSV": "Export to CSV",
-    "noData": "No data to display"
+    "exportCSV": "Export CSV",
+    "noData": "No data to display",
+    "dailyStats": "Daily Statistics",
+    "priorityStats": "By Priority",
+    "created": "Created",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "averageTime": "Average Time"
   },
   "profile": {
     "title": "Profile",
@@ -119,7 +152,16 @@
     "totalTimeWorked": "Total Time Worked",
     "averageTaskTime": "Average Task Time",
     "mostProductiveDay": "Most Productive Day",
-    "taskCompletionRate": "Task Completion Rate"
+    "taskCompletionRate": "Task Completion Rate",
+    "registered": "Registered",
+    "allTasks": "All Tasks",
+    "completedTasks": "Completed",
+    "inProgressTasks": "In Progress",
+    "totalTime": "Total Time",
+    "averageTimePerTask": "Average Time per Task",
+    "tasksPerWeek": "Tasks per Week",
+    "productivity": "Productivity",
+    "updating": "Updating..."
   },
   "auth": {
     "login": "Login",
@@ -128,15 +170,21 @@
     "logout": "Logout",
     "email": "Email",
     "password": "Password",
-    "name": "Name",
+    "name": "Full Name",
     "confirmPassword": "Confirm Password",
-    "loginSuccess": "Login Successful",
-    "registerSuccess": "Registration Successful",
-    "loginError": "Login Error",
-    "registerError": "Registration Error",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful!",
+    "loginError": "Login error",
+    "registerError": "Registration error",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
-    "forgotPassword": "Forgot Password?"
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "welcome": "Welcome!",
+    "createAccount": "Create an account to get started",
+    "loginToAccount": "Login to your account",
+    "checkEmail": "Check your email to confirm your account",
+    "or": "or"
   },
   "common": {
     "save": "Save",
@@ -173,7 +221,16 @@
     "clearAll": "Clear All",
     "created": "Created",
     "for": "for",
-    "or": "or"
+    "open": "Open",
+    "remove": "Remove",
+    "select": "Select",
+    "clear": "Clear",
+    "reset": "Reset",
+    "apply": "Apply",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "done": "Done"
   },
   "time": {
     "timeEntry": "Time Entry",
@@ -190,7 +247,20 @@
     "running": "Running",
     "stopped": "Stopped",
     "paused": "Paused",
-    "durationHelp": "Positive values add time, negative values subtract time from task"
+    "durationHelp": "Positive values add time, negative values subtract time from task",
+    "seconds": "seconds",
+    "minutes": "minutes",
+    "hours": "hours",
+    "days": "days",
+    "weeks": "weeks",
+    "months": "months",
+    "years": "years",
+    "now": "now",
+    "today": "today",
+    "yesterday": "yesterday",
+    "tomorrow": "tomorrow",
+    "timeRemaining": "Time Remaining",
+    "timeTracking": "Time Tracking"
   },
   "theme": {
     "light": "Light Theme",
@@ -211,7 +281,16 @@
     "passwordsNotMatch": "Passwords do not match",
     "nameRequired": "Name is required",
     "titleRequired": "Title is required",
-    "projectRequired": "Please select a project"
+    "projectRequired": "Please select a project",
+    "email": "Enter a valid email",
+    "minLength": "Minimum length {min} characters",
+    "maxLength": "Maximum length {max} characters",
+    "passwordMismatch": "Passwords do not match",
+    "invalidDate": "Invalid date",
+    "invalidTime": "Invalid time",
+    "invalidNumber": "Invalid number",
+    "tooShort": "Too short",
+    "tooLong": "Too long"
   },
   "messages": {
     "checkingAuth": "Checking authorization...",
@@ -220,7 +299,21 @@
     "errorOccurred": "An error occurred",
     "operationSuccessful": "Operation completed successfully",
     "confirmAction": "Confirm action",
-    "actionCancelled": "Action cancelled"
+    "actionCancelled": "Action cancelled",
+    "taskCreated": "Task created successfully",
+    "taskUpdated": "Task updated successfully",
+    "taskDeleted": "Task deleted successfully",
+    "projectCreated": "Project created successfully",
+    "projectUpdated": "Project updated successfully",
+    "projectDeleted": "Project deleted successfully",
+    "profileUpdated": "Profile updated successfully",
+    "passwordChanged": "Password changed successfully",
+    "timeEntryAdded": "Time entry added successfully",
+    "timeEntryUpdated": "Time entry updated successfully",
+    "timeEntryDeleted": "Time entry deleted successfully",
+    "dataExported": "Data exported successfully",
+    "dataImported": "Data imported successfully",
+    "settingsSaved": "Settings saved successfully"
   },
   "buttons": {
     "submit": "Submit",
@@ -228,6 +321,58 @@
     "back": "Back",
     "next": "Next",
     "finish": "Finish",
-    "retry": "Retry"
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "add": "Add",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "close": "Close",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause",
+    "resume": "Resume",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload"
+  },
+  "home": {
+    "title": "Tasks Tracker",
+    "subtitle": "Manage your tasks effectively",
+    "description": "Modern tool for planning, tracking and analyzing your tasks",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "goToDashboard": "Go to Tasks",
+    "features": {
+      "taskManagement": {
+        "title": "Task Management",
+        "description": "Create, organize and track your tasks"
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Group tasks by projects and categories"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Get productivity and progress reports"
+      },
+      "timeTracking": {
+        "title": "Time Tracking",
+        "description": "Track time spent on tasks"
+      },
+      "performance": {
+        "title": "Fast Performance",
+        "description": "Optimized interface for maximum efficiency"
+      },
+      "security": {
+        "title": "Security",
+        "description": "Your data is protected with modern encryption methods"
+      }
+    }
   }
 } 

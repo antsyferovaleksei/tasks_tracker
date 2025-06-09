@@ -80,7 +80,7 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = async () => {
     if (!profileForm.name.trim()) {
-      toast.error('Name is required');
+      toast.error(t('validation.required'));
       return;
     }
     
@@ -94,10 +94,10 @@ export default function ProfilePage() {
       await refreshUser();
       
       setEditProfileOpen(false);
-      toast.success('Profile updated successfully!');
+      toast.success(t('messages.profileUpdated'));
     } catch (error: any) {
       console.error('Profile update error:', error);
-      toast.error(error.message || 'Error updating profile');
+      toast.error(error.message || t('common.error'));
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -105,17 +105,17 @@ export default function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (!passwordForm.newPassword) {
-      toast.error('New password is required');
+      toast.error(t('validation.required'));
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('New password and confirmation are not the same');
+      toast.error(t('validation.passwordMismatch'));
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      toast.error('New password must have at least 6 characters');
+      toast.error(t('validation.minLength').replace('{min}', '6'));
       return;
     }
 
@@ -129,10 +129,10 @@ export default function ProfilePage() {
         newPassword: '',
         confirmPassword: '',
       });
-      toast.success('Password changed successfully!');
+      toast.success(t('messages.passwordChanged'));
     } catch (error: any) {
       console.error('Password change error:', error);
-      toast.error(error.message || 'Error changing password');
+      toast.error(error.message || t('common.error'));
     } finally {
       setIsChangingPassword(false);
     }
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                 <PersonIcon sx={{ fontSize: 50 }} />
               </Avatar>
               <Typography variant="h5" mb={1}>
-                {user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Користувач'}
+                {user?.user_metadata?.display_name || user?.email?.split('@')[0] || t('auth.name')}
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={1}>
                 <EmailIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
@@ -165,7 +165,7 @@ export default function ProfilePage() {
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
                 <CalendarIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
-                {t('auth.register')}: {user?.created_at ? formatDate(user.created_at) : t('tasks.noTimeSet')}
+                {t('profile.registered')}: {user?.created_at ? formatDate(user.created_at) : t('tasks.noTimeSet')}
               </Typography>
               
               <Button
@@ -206,7 +206,7 @@ export default function ProfilePage() {
                     {metrics?.totalTasks || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    All tasks
+                    {t('profile.allTasks')}
                   </Typography>
                 </CardContent>
               </Card>
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                     {metrics?.completedTasks || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Completed
+                    {t('profile.completedTasks')}
                   </Typography>
                 </CardContent>
               </Card>
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                     {metrics?.inProgressTasks || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    In Progress
+                    {t('profile.inProgressTasks')}
                   </Typography>
                 </CardContent>
               </Card>
@@ -243,10 +243,10 @@ export default function ProfilePage() {
                 <CardContent>
                   <Typography variant="h6" color="warning.main">
                     <TimerIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    {formatDuration(metrics?.totalTimeSpent || 0)}
+                    {formatDuration(metrics?.totalTimeSpent || 0, t)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Total time
+                    {t('profile.totalTime')}
                   </Typography>
                 </CardContent>
               </Card>
@@ -258,13 +258,13 @@ export default function ProfilePage() {
                 <CardContent>
                   <Typography variant="h6" mb={2}>
                     <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Detailed statistic
+                    {t('profile.productivity')}
                   </Typography>
                   
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="body2" mb={1}>
-                        Tasks progress
+                        {t('dashboard.completedTasks')}
                       </Typography>
                       <LinearProgress 
                         variant="determinate" 
@@ -272,19 +272,19 @@ export default function ProfilePage() {
                         sx={{ mb: 1 }}
                       />
                       <Typography variant="body2" color="text.secondary">
-                        {Math.round(parseFloat(metrics?.completionRate || '0'))}% completed
+                        {Math.round(parseFloat(metrics?.completionRate || '0'))}% {t('tasks.done').toLowerCase()}
                       </Typography>
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
                       <Typography variant="body2">
-                        📊 Medium time for a task: {formatDuration(averageTimePerTask)}
+                        📊 {t('profile.averageTimePerTask')}: {formatDuration(averageTimePerTask, t)}
                       </Typography>
                       <Typography variant="body2">
-                        📅 Tasks durng the week: ~{tasksPerWeek}
+                        📅 {t('profile.tasksPerWeek')}: ~{tasksPerWeek}
                       </Typography>
                       <Typography variant="body2">
-                        🏢 Projects: {metrics?.projectsCount || 0}
+                        🏢 {t('dashboard.projectsCount')}: {metrics?.projectsCount || 0}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -292,7 +292,7 @@ export default function ProfilePage() {
                   {metrics && metrics.overdueTasks > 0 && (
                     <Box mt={2}>
                       <Typography variant="body2" color="error">
-                        ⚠️ Прострочено tasks: {metrics.overdueTasks}
+                        ⚠️ {t('tasks.overdue')}: {metrics.overdueTasks}
                       </Typography>
                     </Box>
                   )}
@@ -307,12 +307,12 @@ export default function ProfilePage() {
 
       {/* Edit Profile Dialog */}
       <Dialog open={editProfileOpen} onClose={() => setEditProfileOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit profile</DialogTitle>
+        <DialogTitle>{t('profile.editProfile')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Ім'я"
+            label={t('profile.name')}
             fullWidth
             variant="outlined"
             value={profileForm.name}
@@ -321,25 +321,25 @@ export default function ProfilePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditProfileOpen(false)}>Cancel</Button>
+          <Button onClick={() => setEditProfileOpen(false)}>{t('common.cancel')}</Button>
           <Button 
             onClick={handleUpdateProfile}
             variant="contained"
             disabled={isUpdatingProfile}
           >
-            {isUpdatingProfile ? 'Saving...' : 'Save'}
+            {isUpdatingProfile ? t('profile.updating') : t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Change Password Dialog */}
       <Dialog open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Change Password</DialogTitle>
+        <DialogTitle>{t('profile.changePassword')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Current Password"
+            label={t('auth.password')}
             type="password"
             fullWidth
             variant="outlined"
@@ -349,7 +349,7 @@ export default function ProfilePage() {
           />
           <TextField
             margin="dense"
-            label="New Password"
+            label={t('auth.password')}
             type="password"
             fullWidth
             variant="outlined"
@@ -359,7 +359,7 @@ export default function ProfilePage() {
           />
           <TextField
             margin="dense"
-            label="Confirm new password"
+            label={t('auth.confirmPassword')}
             type="password"
             fullWidth
             variant="outlined"
@@ -368,13 +368,13 @@ export default function ProfilePage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setChangePasswordOpen(false)}>Cancel</Button>
+          <Button onClick={() => setChangePasswordOpen(false)}>{t('common.cancel')}</Button>
           <Button 
             onClick={handleChangePassword}
             variant="contained"
             disabled={isChangingPassword}
           >
-            {isChangingPassword ? 'Change...' : 'Change Password'}
+            {isChangingPassword ? t('profile.updating') : t('profile.changePassword')}
           </Button>
         </DialogActions>
       </Dialog>

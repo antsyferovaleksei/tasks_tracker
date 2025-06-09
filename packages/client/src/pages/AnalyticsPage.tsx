@@ -205,7 +205,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
-                In Progress
+                {t('analytics.inProgress')}
               </Typography>
               <Typography variant="h4">
                 {metrics?.inProgressTasks || 0}
@@ -221,7 +221,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                Dailly statistic
+                {t('analytics.dailyStats')}
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={charts?.dailyStats || []}>
@@ -229,8 +229,8 @@ export default function AnalyticsPage() {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="created" fill="#8884d8" name="Створено" />
-                  <Bar dataKey="completed" fill="#82ca9d" name="Completed" />
+                  <Bar dataKey="created" fill="#8884d8" name={t('analytics.created')} />
+                  <Bar dataKey="completed" fill="#82ca9d" name={t('analytics.completed')} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -240,7 +240,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
-                By prioirity
+                {t('analytics.priorityStats')}
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>

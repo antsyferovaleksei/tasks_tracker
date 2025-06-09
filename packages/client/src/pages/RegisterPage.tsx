@@ -26,10 +26,13 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme as useAppTheme, useDeviceDetection } from '../hooks';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import LanguageToggle from '../components/LanguageToggle';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -64,27 +67,27 @@ export default function RegisterPage() {
     const newErrors: {[key: string]: string} = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Ім'я обов'язкове";
+      newErrors.name = t('validation.required');
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Ім'я повинно містити мінімум 2 символи";
+      newErrors.name = t('validation.minLength').replace('{min}', '2');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email обов\'язковий';
+      newErrors.email = t('validation.required');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Невірний формат email';
+      newErrors.email = t('validation.email');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Пароль обов\'язковий';
+      newErrors.password = t('validation.required');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Пароль повинен містити мінімум 6 символів';
+      newErrors.password = t('validation.minLength').replace('{min}', '6');
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Підтвердження паролю обов\'язкове';
+      newErrors.confirmPassword = t('validation.required');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Паролі не співпадають';
+      newErrors.confirmPassword = t('validation.passwordMismatch');
     }
 
     setErrors(newErrors);
@@ -111,15 +114,15 @@ export default function RegisterPage() {
       
       if (result.user) {
         // Користувач зареєстрований та підтверджений
-        setSuccessMessage('Реєстрація успішна! Перенаправляємо...');
+        setSuccessMessage(t('auth.registerSuccess'));
         setTimeout(() => navigate('/tasks'), 2000);
       } else {
         // Потрібне підтвердження email
-        setSuccessMessage('Реєстрація успішна! Перевірте email для підтвердження акаунту.');
+        setSuccessMessage(t('auth.checkEmail'));
       }
     } catch (error: any) {
       console.error('Помилка реєстрації:', error);
-      setRegisterError(error.message || 'Помилка реєстрації. Спробуйте ще раз.');
+      setRegisterError(error.message || t('auth.registerError'));
     } finally {
       setIsLoading(false);
     }
@@ -164,18 +167,21 @@ export default function RegisterPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <TaskAlt sx={{ fontSize: 32, color: 'primary.main' }} />
                   <Typography variant="h5" component="h1" fontWeight="bold">
-                    Tasks Tracker
+                    {t('home.title')}
                   </Typography>
                 </Box>
-                <IconButton onClick={toggleTheme} size="small">
-                  {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
-                </IconButton>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <LanguageToggle />
+                  <IconButton onClick={toggleTheme} size="small">
+                    {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
+                  </IconButton>
+                </Box>
               </Box>
               <Typography variant="h4" component="h2" gutterBottom fontWeight="600">
-                Вітаємо! 🚀
+                {t('auth.welcome')} 🚀
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Створіть акаунт для початку роботи
+                {t('auth.createAccount')}
               </Typography>
             </Box>
 
@@ -197,7 +203,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="name"
-                label="Повне ім'я"
+                label={t('auth.name')}
                 name="name"
                 autoComplete="name"
                 autoFocus
@@ -218,7 +224,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="email"
-                label="Email"
+                label={t('auth.email')}
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -239,7 +245,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="password"
-                label="Пароль"
+                label={t('auth.password')}
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
@@ -271,7 +277,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="confirmPassword"
-                label="Підтвердити пароль"
+                label={t('auth.confirmPassword')}
                 name="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 autoComplete="new-password"
@@ -318,22 +324,23 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Реєстрація...
+                    {t('auth.register')}
                   </>
                 ) : (
-                  'Зареєструватися'
+                  t('auth.register')
                 )}
               </Button>
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  або
+                  {t('auth.or')}
                 </Typography>
               </Divider>
 
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Вже маєте акаунт?{' '}
+                  {t('auth.alreadyHaveAccount')}
+                  {' '}
                   <Link
                     component={RouterLink}
                     to="/login"
@@ -345,7 +352,7 @@ export default function RegisterPage() {
                       },
                     }}
                   >
-                    Увійти
+                    {t('auth.login')}
                   </Link>
                 </Typography>
               </Box>

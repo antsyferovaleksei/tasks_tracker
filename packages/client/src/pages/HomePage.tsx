@@ -27,11 +27,14 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme as useAppTheme } from '../hooks';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import LanguageToggle from '../components/LanguageToggle';
 
 const HomePage: React.FC = () => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { currentTheme, setTheme } = useAppTheme();
   const { user, signOut } = useSupabaseAuth();
@@ -40,38 +43,38 @@ const HomePage: React.FC = () => {
   const features = [
     {
       icon: Assignment,
-      title: 'Управління завданнями',
-      description: 'Створюйте, організовуйте та відслідковуйте ваші завдання',
+      title: t('home.features.taskManagement.title'),
+      description: t('home.features.taskManagement.description'),
       color: theme.palette.primary.main,
     },
     {
       icon: Folder,
-      title: 'Проекти',
-      description: 'Групуйте завдання за проектами та категоріями',
+      title: t('home.features.projects.title'),
+      description: t('home.features.projects.description'),
       color: theme.palette.success.main,
     },
     {
       icon: Analytics,
-      title: 'Аналітика',
-      description: 'Отримуйте звіти про продуктивність та прогрес',
+      title: t('home.features.analytics.title'),
+      description: t('home.features.analytics.description'),
       color: theme.palette.warning.main,
     },
     {
       icon: Timeline,
-      title: 'Трекінг часу',
-      description: 'Відслідковуйте час, витрачений на завдання',
+      title: t('home.features.timeTracking.title'),
+      description: t('home.features.timeTracking.description'),
       color: theme.palette.secondary.main,
     },
     {
       icon: Speed,
-      title: 'Швидка робота',
-      description: 'Оптимізований інтерфейс для максимальної ефективності',
+      title: t('home.features.performance.title'),
+      description: t('home.features.performance.description'),
       color: theme.palette.info.main,
     },
     {
       icon: Security,
-      title: 'Безпека',
-      description: 'Ваші дані захищені сучасними методами шифрування',
+      title: t('home.features.security.title'),
+      description: t('home.features.security.description'),
       color: theme.palette.error.main,
     },
   ];
@@ -112,7 +115,7 @@ const HomePage: React.FC = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <TaskAlt sx={{ fontSize: 32, color: 'white' }} />
               <Typography variant="h5" component="h1" fontWeight="bold" color="white">
-                Tasks Tracker
+                {t('home.title')}
               </Typography>
             </Box>
             
@@ -124,6 +127,7 @@ const HomePage: React.FC = () => {
                   sx={{ color: 'white', borderColor: 'white' }}
                 />
               )}
+              <LanguageToggle />
               <IconButton onClick={toggleTheme} sx={{ color: 'white' }}>
                 {currentTheme === 'light' ? <DarkMode /> : <LightMode />}
               </IconButton>
@@ -151,9 +155,9 @@ const HomePage: React.FC = () => {
                 fontSize: { xs: '2.5rem', md: '3.5rem' },
               }}
             >
-              Керуйте завданнями{' '}
+              {t('home.subtitle')}{' '}
               <Box component="span" sx={{ color: theme.palette.primary.light }}>
-                ефективно
+                {t('home.subtitle').split(' ').slice(-1)[0]}
               </Box>
             </Typography>
             
@@ -162,7 +166,7 @@ const HomePage: React.FC = () => {
               color="rgba(255,255,255,0.8)"
               sx={{ mb: 4, fontSize: { xs: '1.2rem', md: '1.5rem' } }}
             >
-              Сучасний інструмент для планування, відслідковування та аналізу ваших завдань
+              {t('home.description')}
             </Typography>
 
             {user ? (
@@ -184,7 +188,7 @@ const HomePage: React.FC = () => {
                     }
                   }}
                 >
-                  Перейти до завдань
+                  {t('home.goToDashboard')}
                 </Button>
                 
                 <Button
@@ -204,7 +208,7 @@ const HomePage: React.FC = () => {
                     }
                   }}
                 >
-                  Вийти
+                  {t('auth.logout')}
                 </Button>
               </Box>
             ) : (
@@ -226,7 +230,7 @@ const HomePage: React.FC = () => {
                     }
                   }}
                 >
-                  Увійти
+                  {t('auth.login')}
                 </Button>
                 
                 <Button
@@ -246,7 +250,7 @@ const HomePage: React.FC = () => {
                     }
                   }}
                 >
-                  Реєстрація
+                  {t('auth.register')}
                 </Button>
               </Box>
             )}
