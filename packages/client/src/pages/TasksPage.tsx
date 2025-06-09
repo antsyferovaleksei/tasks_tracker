@@ -198,6 +198,7 @@ export default function TasksPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [timeEntryDialogOpen, setTimeEntryDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [filtersExpanded, setFiltersExpanded] = useState(false); // Filters hidden by default
   const [selectedTaskForTime, setSelectedTaskForTime] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
@@ -460,6 +461,13 @@ export default function TasksPage() {
     );
   };
 
+  // Auto-expand filters when there are active filters
+  React.useEffect(() => {
+    if (hasActiveFilters()) {
+      setFiltersExpanded(true);
+    }
+  }, [filter, searchInput]);
+
   if (isLoading || isLoadingProjects) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
@@ -507,86 +515,118 @@ export default function TasksPage() {
       )}
 
       {/* Filters */}
-      <Box mb={3} display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
-        <TextField
-          placeholder="Search tasks..."
-          value={searchInput}
-          onChange={(e) => {
-            const value = e.target.value;
-            setSearchInput(value);
-            // If field is cleared, automatically clear search
-            if (value === '' && filter.search) {
-              setFilter({ ...filter, search: '' });
-            }
-          }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSearch();
-            }
-          }}
-          sx={{ minWidth: 200 }}
-        />
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Project</InputLabel>
-          <Select
-            value={filter.projectId || ''}
-            onChange={(e) => setFilter({ ...filter, projectId: e.target.value || undefined })}
-          >
-            <MenuItem value="">All projects</MenuItem>
-            {projects.map((project) => (
-              <MenuItem key={project.id} value={project.id}>
-                {project.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={Array.isArray(filter.status) ? filter.status[0] || '' : filter.status || ''}
-            onChange={(e) => {
-              const value = e.target.value as TaskStatus;
-              setFilter({ 
-                ...filter, 
-                status: value ? [value] : undefined 
-              });
+      <Paper sx={{ mb: 3 }}>
+        <Accordion 
+          expanded={filtersExpanded} 
+          onChange={(event, isExpanded) => setFiltersExpanded(isExpanded)}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{ 
+              backgroundColor: 'action.hover',
+              '&:hover': { 
+                backgroundColor: 'action.selected' 
+              }
             }}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="TODO">To Do</MenuItem>
-            <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-            <MenuItem value="COMPLETED">Completed</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Priority</InputLabel>
-          <Select
-            value={Array.isArray(filter.priority) ? filter.priority[0] || '' : filter.priority || ''}
-            onChange={(e) => {
-              const value = e.target.value as TaskPriority;
-              setFilter({ 
-                ...filter, 
-                priority: value ? [value] : undefined 
-              });
-            }}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="LOW">Low</MenuItem>
-            <MenuItem value="MEDIUM">Medium</MenuItem>
-            <MenuItem value="HIGH">High</MenuItem>
-          </Select>
-        </FormControl>
-        {hasActiveFilters() && (
-          <Button
-            variant="outlined"
-            startIcon={<ClearIcon />}
-            onClick={handleClearFilters}
-            sx={{ height: '56px' }}
-          >
-                         Clear filters
-          </Button>
-        )}
-      </Box>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6">
+                Filters
+              </Typography>
+              {hasActiveFilters() && (
+                <Chip 
+                  label="Active" 
+                  size="small" 
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box display="flex" gap={2} flexWrap="wrap" alignItems="flex-end">
+              <TextField
+                placeholder="Search tasks..."
+                value={searchInput}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchInput(value);
+                  // If field is cleared, automatically clear search
+                  if (value === '' && filter.search) {
+                    setFilter({ ...filter, search: '' });
+                  }
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                sx={{ minWidth: 200 }}
+              />
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>Project</InputLabel>
+                <Select
+                  value={filter.projectId || ''}
+                  onChange={(e) => setFilter({ ...filter, projectId: e.target.value || undefined })}
+                >
+                  <MenuItem value="">All projects</MenuItem>
+                  {projects.map((project) => (
+                    <MenuItem key={project.id} value={project.id}>
+                      {project.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={Array.isArray(filter.status) ? filter.status[0] || '' : filter.status || ''}
+                  onChange={(e) => {
+                    const value = e.target.value as TaskStatus;
+                    setFilter({ 
+                      ...filter, 
+                      status: value ? [value] : undefined 
+                    });
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="TODO">To Do</MenuItem>
+                  <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+                  <MenuItem value="COMPLETED">Completed</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  value={Array.isArray(filter.priority) ? filter.priority[0] || '' : filter.priority || ''}
+                  onChange={(e) => {
+                    const value = e.target.value as TaskPriority;
+                    setFilter({ 
+                      ...filter, 
+                      priority: value ? [value] : undefined 
+                    });
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="LOW">Low</MenuItem>
+                  <MenuItem value="MEDIUM">Medium</MenuItem>
+                  <MenuItem value="HIGH">High</MenuItem>
+                </Select>
+              </FormControl>
+              {hasActiveFilters() && (
+                <Button
+                  variant="outlined"
+                  startIcon={<ClearIcon />}
+                  onClick={handleClearFilters}
+                  sx={{ height: '56px' }}
+                >
+                  Clear filters
+                </Button>
+              )}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      </Paper>
 
       {/* Group tasks by projects */}
       {Object.keys(groupedTasks).length === 0 ? (
