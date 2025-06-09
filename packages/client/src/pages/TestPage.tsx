@@ -17,13 +17,13 @@ export default function TestPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loginData, setLoginData] = useState({
-    email: 'test@example.com',
-    password: 'password123'
+    email: 'user@gmail.com',
+    password: 'password123456'
   });
   const [registerData, setRegisterData] = useState({
-    email: 'test@example.com',
-    password: 'password123',
-    name: 'Test User'
+    email: 'newuser@gmail.com',
+    password: 'password123456',
+    name: 'Новий Користувач'
   });
   const [projectData, setProjectData] = useState({
     name: 'Test Project з UI',
@@ -38,12 +38,15 @@ export default function TestPage() {
   const handleHealthCheck = async () => {
     setLoading(true);
     setError('');
+    setHealthStatus('');
     try {
       const response = await apiClient.healthCheck();
-      setHealthStatus(`API працює! ${response.timestamp}`);
+      setHealthStatus(`✅ API працює! ${response.timestamp}`);
       setSuccess('Health check пройшов успішно!');
     } catch (err: any) {
-      setError('API недоступний: ' + (err.message || 'Невідома помилка'));
+      console.error('Health check error:', err);
+      setHealthStatus('❌ API недоступний (очікувано на Vercel)');
+      setError('Кастомні API endpoints не працюють на Vercel Free tier. Використовуйте Supabase Auth нижче!');
     } finally {
       setLoading(false);
     }
@@ -58,9 +61,21 @@ export default function TestPage() {
         registerData.password, 
         { name: registerData.name }
       );
-      setSuccess('Реєстрація через Supabase Auth успішна!');
+      
+      if (result.user) {
+        setSuccess(`✅ Реєстрація успішна! Користувач: ${result.user.email}. Тепер можете увійти з тими ж даними.`);
+        // Автоматично копіюємо дані для входу
+        setLoginData({
+          email: registerData.email,
+          password: registerData.password
+        });
+      } else {
+        setSuccess('✅ Реєстрація відправлена! Перевірте email для підтвердження акаунту.');
+      }
+      
       console.log('Supabase registration result:', result);
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError('Помилка реєстрації: ' + (err.message || 'Невідома помилка'));
     } finally {
       setLoading(false);
@@ -148,7 +163,11 @@ export default function TestPage() {
             {loading ? 'Перевіряю...' : 'Перевірити API'}
           </Button>
           {healthStatus && (
-            <Typography variant="body2" color="success.main">
+            <Typography 
+              variant="body2" 
+              color={healthStatus.includes('✅') ? 'success.main' : 'warning.main'}
+              sx={{ mt: 1, fontWeight: 'bold' }}
+            >
               {healthStatus}
             </Typography>
           )}
@@ -160,6 +179,10 @@ export default function TestPage() {
           <Typography variant="h6" mb={2} color="primary">
             🚀 Supabase Auth (Рекомендовано)
           </Typography>
+          
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Спочатку зареєструйте нового користувача, потім увійдіть з тими ж даними.
+          </Alert>
           
           <Typography variant="subtitle2" gutterBottom>
             Реєстрація нового користувача
@@ -190,6 +213,18 @@ export default function TestPage() {
               startIcon={loading ? <CircularProgress size={20} /> : null}
             >
               {loading ? 'Реєструю...' : 'Зареєструватися через Supabase'}
+            </Button>
+            
+            <Button 
+              variant="outlined" 
+              size="small"
+              onClick={() => setLoginData({
+                email: registerData.email,
+                password: registerData.password
+              })}
+              sx={{ ml: 1 }}
+            >
+              📋 Копіювати дані для входу
             </Button>
           </Box>
 
