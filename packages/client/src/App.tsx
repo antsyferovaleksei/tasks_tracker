@@ -6,7 +6,7 @@ import { CssBaseline, GlobalStyles } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 
 import { useAuth, useTheme, useDeviceDetection } from './hooks';
-import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
+import { SupabaseAuthProvider, useSupabaseAuth } from './contexts/SupabaseAuthContext';
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -46,9 +46,13 @@ const queryClient = new QueryClient({
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { user, loading } = useSupabaseAuth();
   
-  if (!isAuthenticated) {
+  if (loading) {
+    return <LoadingSpinner fullscreen message="Перевірка авторизації..." />;
+  }
+  
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
   
@@ -57,9 +61,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Public Route component (redirect to dashboard if authenticated)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { user, loading } = useSupabaseAuth();
   
-  if (isAuthenticated) {
+  if (loading) {
+    return <LoadingSpinner fullscreen message="Завантаження..." />;
+  }
+  
+  if (user) {
     return <Navigate to="/tasks" replace />;
   }
   

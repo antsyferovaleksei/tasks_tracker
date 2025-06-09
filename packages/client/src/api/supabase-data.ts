@@ -23,11 +23,48 @@ export interface Task {
   updated_at: string;
 }
 
+// Допоміжна функція для забезпечення існування користувача в таблиці users
+async function ensureUserExists() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Користувач не авторизований');
+
+  // Перевіряємо чи існує користувач в таблиці users
+  const { data: existingUser, error: checkError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', user.id)
+    .single();
+
+  if (checkError && checkError.code !== 'PGRST116') {
+    // PGRST116 = row not found, це нормально
+    throw checkError;
+  }
+
+  // Якщо користувача немає, створюємо його
+  if (!existingUser) {
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert([{
+        id: user.id,
+        email: user.email || '',
+        name: user.user_metadata?.name || 'User',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }]);
+
+    if (insertError) {
+      console.error('Error creating user:', insertError);
+      // Не кидаємо помилку, можливо користувач вже існує (race condition)
+    }
+  }
+
+  return user;
+}
+
 export const projectsService = {
   // Створити проект
   async createProject(projectData: Omit<Project, 'id' | 'user_id' | 'created_at' | 'updated_at'>) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Користувач не авторизований');
+    const user = await ensureUserExists();
 
     const { data, error } = await supabase
       .from('projects')
@@ -46,8 +83,7 @@ export const projectsService = {
 
   // Отримати всі проекти користувача
   async getProjects() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Користувач не авторизований');
+    const user = await ensureUserExists();
 
     const { data, error } = await supabase
       .from('projects')
