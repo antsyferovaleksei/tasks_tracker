@@ -142,15 +142,46 @@ const ActiveTimerDisplay = ({ onStopTimer }: { onStopTimer?: () => void }) => {
 
   // Component for displaying task time statistics
 const TaskTimeStats = ({ taskId }: { taskId: string }) => {
-  const { data: timeStats } = useTimeStats(taskId);
+  const { data: timeStats, refetch } = useTimeStats(taskId);
   
-  if (!timeStats?.success || !timeStats.data?.totalTime) return null;
+  // Update stats every 5 seconds to show real-time changes
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [refetch]);
+  
+  if (!timeStats || !timeStats.totalTime) return null;
+
+  const totalSeconds = timeStats.totalTime;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  let timeDisplay = '';
+  if (hours > 0) {
+    timeDisplay = `${hours}г ${minutes}хв ${seconds}с`;
+  } else if (minutes > 0) {
+    timeDisplay = `${minutes}хв ${seconds}с`;
+  } else {
+    timeDisplay = `${seconds}с`;
+  }
 
   return (
     <Box display="flex" alignItems="center" gap={1} mt={1}>
       <TimeIcon fontSize="small" color="action" />
       <Typography variant="caption" color="text.secondary">
-        Spent: {formatDuration(timeStats.data.totalTime)}
+        Витрачено: {timeDisplay}
+        {timeStats.hasActiveTimer && (
+          <Chip 
+            label="Активний таймер" 
+            size="small" 
+            color="primary" 
+            sx={{ ml: 1, fontSize: '0.7rem', height: '20px' }}
+          />
+        )}
       </Typography>
     </Box>
   );

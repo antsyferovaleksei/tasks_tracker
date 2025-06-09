@@ -33,41 +33,72 @@ export default function AnalyticsPage() {
   
 
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!dashboardData) return;
     
     setIsExporting(true);
     
     try {
-      // Prepare CSV data
+      // Import services for data fetching
+      const { tasksService, projectsService, timeEntriesService } = await import('../api/supabase-data');
+      
+      // Fetch detailed data for CSV export
+      const [tasks, projects, timeEntries] = await Promise.all([
+        tasksService.getTasks(),
+        projectsService.getProjects(),
+        timeEntriesService.getTimeEntries({})
+      ]);
+      
+      // Prepare CSV data with task details
       const csvData = [];
       
-      // Header
-      csvData.push('Metric,Value');
+      // Headers matching the expected format
+      csvData.push('Task title,Status,Priority,Project,Дата створення,Total time (хв),Кількість записів часу,Description');
       
-      // Summary data
-      csvData.push(`Total Tasks,${dashboardData.summary?.totalTasks || 0}`);
-      csvData.push(`Completed Tasks,${dashboardData.summary?.completedTasks || 0}`);
-      csvData.push(`In Progress Tasks,${dashboardData.summary?.inProgressTasks || 0}`);
-      csvData.push(`Overdue Tasks,${dashboardData.summary?.overdueTasks || 0}`);
-      csvData.push(`Total Time Spent (hours),${Math.round((dashboardData.summary?.totalTimeSpent || 0) / 3600)}`);
-      
-      // Daily stats
-      if (dashboardData.charts?.dailyStats?.length) {
-        csvData.push('\nDaily Statistics');
-        csvData.push('Date,Tasks Created,Tasks Completed');
-        dashboardData.charts.dailyStats.forEach((stat: any) => {
-          csvData.push(`${stat.date},${stat.created},${stat.completed}`);
-        });
-      }
-      
-      // Priority stats
-      if (dashboardData.charts?.priorityStats?.length) {
-        csvData.push('\nPriority Statistics');
-        csvData.push('Priority,Count');
-        dashboardData.charts.priorityStats.forEach((stat: any) => {
-          csvData.push(`${stat.priority},${stat.count}`);
-        });
+      // Process each task
+      for (const task of tasks) {
+        const project = projects.find((p: any) => p.id === task.project_id);
+        const taskTimeEntries = timeEntries.filter((entry: any) => entry.task_id === task.id);
+        
+        // Calculate total time in minutes
+        const totalTimeSeconds = taskTimeEntries.reduce((sum: number, entry: any) => {
+          return sum + (entry.duration || 0);
+        }, 0);
+        const totalTimeMinutes = Math.round(totalTimeSeconds / 60);
+        
+        // Format date
+        const createdDate = new Date(task.created_at).toLocaleDateString('uk-UA');
+        
+        // Map status to Ukrainian
+        const statusMap: { [key: string]: string } = {
+          'todo': 'До виконання',
+          'in_progress': 'В роботі', 
+          'done': 'Завершено'
+        };
+        
+        // Map priority to Ukrainian
+        const priorityMap: { [key: string]: string } = {
+          'low': 'Низький',
+          'medium': 'Середній',
+          'high': 'Високий'
+        };
+        
+        const status = statusMap[task.status] || task.status;
+        const priority = priorityMap[task.priority] || task.priority;
+        const projectName = project?.name || 'Без проекту';
+        const description = task.description || '';
+        
+        // Add task row
+        csvData.push([
+          `"${task.title}"`,
+          status,
+          priority,
+          `"${projectName}"`,
+          createdDate,
+          totalTimeMinutes,
+          taskTimeEntries.length,
+          `"${description}"`
+        ].join(','));
       }
       
       // Create and download CSV
@@ -78,7 +109,7 @@ export default function AnalyticsPage() {
       if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `analytics-${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('download', `tasks-export-${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();

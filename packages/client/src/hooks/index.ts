@@ -784,10 +784,10 @@ export const useDeleteTimeEntry = () => {
 export const useTimeStats = (taskId: string) => {
   return useQuery({
     queryKey: queryKeys.timeEntries.stats(taskId),
-    queryFn: () => apiClient.getTimeStats(taskId),
+    queryFn: () => timeEntriesService.getTaskTimeStats(taskId),
     enabled: !!taskId,
-    staleTime: 10 * 1000, // 10 seconds
-    refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
+    staleTime: 5 * 1000, // 5 seconds for real-time updates
+    refetchInterval: 5 * 1000, // Auto-refetch every 5 seconds for real-time
   });
 };
 

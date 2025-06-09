@@ -192,9 +192,11 @@ export default function ProjectsPage() {
                     size="small"
                     variant="outlined"
                   />
-                  <Typography variant="caption" color="text.secondary">
-                    {formatDate(project.createdAt)}
-                  </Typography>
+                  {project.createdAt && (
+                    <Typography variant="caption" color="text.secondary">
+                      {formatDate(project.createdAt)}
+                    </Typography>
+                  )}
                 </Box>
               </CardContent>
             </Card>

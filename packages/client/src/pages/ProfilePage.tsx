@@ -49,7 +49,6 @@ export default function ProfilePage() {
   // Profile form state
   const [profileForm, setProfileForm] = useState({
     name: user?.email?.split('@')[0] || '',
-    email: user?.email || '',
   });
 
   // Password form state
@@ -87,7 +86,6 @@ export default function ProfilePage() {
     try {
       await authService.updateProfile({
         display_name: profileForm.name,
-        email: profileForm.email,
       });
       
       setEditProfileOpen(false);
@@ -171,7 +169,6 @@ export default function ProfilePage() {
                 onClick={() => {
                   setProfileForm({
                     name: user?.email?.split('@')[0] || '',
-                    email: user?.email || '',
                   });
                   setEditProfileOpen(true);
                 }}
@@ -316,15 +313,6 @@ export default function ProfilePage() {
             value={profileForm.name}
             onChange={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
             sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label="Email"
-            type="email"
-            fullWidth
-            variant="outlined"
-            value={profileForm.email}
-            onChange={(e) => setProfileForm(prev => ({ ...prev, email: e.target.value }))}
           />
         </DialogContent>
         <DialogActions>
