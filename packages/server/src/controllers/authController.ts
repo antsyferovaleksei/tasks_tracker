@@ -7,7 +7,8 @@ import { createUserSchema, loginSchema } from 'shared/src/validation';
 export const register = async (req: Request, res: Response) => {
   try {
     const validatedData = createUserSchema.parse(req.body);
-    const { email, name, password } = validatedData;
+    const { email, name } = validatedData;
+    const { password } = req.body; // Get password from req.body directly
 
     // Check if user already exists
     const { data: existingUser, error: checkError } = await supabaseAdmin

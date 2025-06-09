@@ -67,10 +67,6 @@ import authRoutes from './routes/authRoutes';
 import projectRoutes from './routes/projectRoutes';
 import taskRoutes from './routes/taskRoutes';
 import tagRoutes from './routes/tagRoutes';
-import timeEntryRoutes from './routes/timeEntryRoutes';
-import filterRoutes from './routes/filterRoutes';
-import reminderRoutes from './routes/reminderRoutes';
-import analyticsRoutes from './routes/analyticsRoutes';
 
 // API routes
 app.get('/api', (req, res) => {
@@ -83,12 +79,10 @@ app.get('/api', (req, res) => {
       projects: '/api/projects',
       tasks: '/api/tasks',
       tags: '/api/tags',
-      timeEntries: '/api/time-entries',
-      filters: '/api/filters',
     },
     features: {
-      timeTracking: 'Start/Stop таймери, ручне введення часу, статистика',
-      advancedFiltering: 'Збереження фільтрів, швидкі фільтри, повнотекстовий пошук',
+      supabaseIntegration: 'Direct Supabase integration for data management',
+      authentication: 'User auth via Supabase Auth',
     },
   });
 });
@@ -97,10 +91,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/tags', tagRoutes);
-app.use('/api/time-entries', timeEntryRoutes);
-app.use('/api/filters', filterRoutes);
-app.use('/api/reminders', reminderRoutes);
-app.use('/api/analytics', analyticsRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
