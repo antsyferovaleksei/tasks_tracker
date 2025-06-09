@@ -88,28 +88,48 @@ export default function AnalyticsPage() {
         const projectName = project?.name || 'Без проекту';
         const description = task.description || '';
         
-        // Add task row
+        // Add task row - properly escape values for CSV
+        const escapeCSV = (value: string | number) => {
+          if (typeof value === 'number') return value.toString();
+          const str = value.toString();
+          // Escape quotes by doubling them and wrap in quotes if contains comma, quote, or newline
+          if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        };
+        
         csvData.push([
-          `"${task.title}"`,
-          status,
-          priority,
-          `"${projectName}"`,
-          createdDate,
-          totalTimeMinutes,
-          taskTimeEntries.length,
-          `"${description}"`
+          escapeCSV(task.title),
+          escapeCSV(status),
+          escapeCSV(priority),
+          escapeCSV(projectName),
+          escapeCSV(createdDate),
+          escapeCSV(totalTimeMinutes),
+          escapeCSV(taskTimeEntries.length),
+          escapeCSV(description)
         ].join(','));
       }
       
-      // Create and download CSV
-      const csvContent = csvData.join('\n');
+      // Create and download CSV with proper encoding
+      const csvContent = '\uFEFF' + csvData.join('\n'); // Add BOM for proper UTF-8 encoding
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       
       if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `tasks-export-${new Date().toISOString().split('T')[0]}.csv`);
+        
+        // Generate filename with current date and time
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const filename = `analytic_report_${year}-${month}-${day}-${hours}${minutes}.csv`;
+        
+        link.setAttribute('download', filename);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
