@@ -155,7 +155,7 @@ const HomePage: React.FC = () => {
                 fontSize: { xs: '2.5rem', md: '3.5rem' },
               }}
             >
-              {t('home.subtitle')}{' '}
+              {t('home.subtitle').split(' ').slice(0, -1).join(' ')}{' '}
               <Box component="span" sx={{ color: theme.palette.primary.light }}>
                 {t('home.subtitle').split(' ').slice(-1)[0]}
               </Box>

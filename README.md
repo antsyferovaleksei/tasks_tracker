@@ -421,5 +421,3 @@ Current production deployment: **https://tasks-tracker-client.vercel.app**
 - ✅ Data export functionality
 
 ---
-
-**Built with ❤️ using modern web technologies**
