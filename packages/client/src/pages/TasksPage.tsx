@@ -197,8 +197,10 @@ export default function TasksPage() {
   const [searchInput, setSearchInput] = useState(filter.search || ''); // Local state for search field
   const [dialogOpen, setDialogOpen] = useState(false);
   const [timeEntryDialogOpen, setTimeEntryDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTaskForTime, setSelectedTaskForTime] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -326,9 +328,16 @@ export default function TasksPage() {
     }
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTaskMutation.mutate(taskId);
+  const handleDeleteTask = (task: Task) => {
+    setTaskToDelete(task);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteTask = () => {
+    if (taskToDelete) {
+      deleteTaskMutation.mutate(taskToDelete.id);
+      setDeleteDialogOpen(false);
+      setTaskToDelete(null);
     }
   };
 
@@ -630,7 +639,7 @@ export default function TasksPage() {
                                 </IconButton>
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleDeleteTask(task.id)}
+                                  onClick={() => handleDeleteTask(task)}
                                   color="error"
                                 >
                                   <DeleteIcon />
@@ -857,6 +866,99 @@ export default function TasksPage() {
             disabled={!newTimeEntry.duration || createTimeEntry.isPending}
           >
             Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Task Confirmation Dialog */}
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            p: 1
+          }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
+          <Box 
+            sx={{ 
+              p: 1, 
+              borderRadius: '50%', 
+              bgcolor: 'error.light', 
+              color: 'error.contrastText',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </Box>
+          Видалити завдання?
+        </DialogTitle>
+        
+        <DialogContent sx={{ py: 2 }}>
+          <Typography variant="body1" mb={2}>
+            Ви впевнені, що хочете видалити це завдання?
+          </Typography>
+          
+          {taskToDelete && (
+            <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
+              <Typography variant="subtitle2" color="text.primary" mb={1}>
+                <strong>{taskToDelete.title}</strong>
+              </Typography>
+              
+              {taskToDelete.description && (
+                <Typography variant="body2" color="text.secondary" mb={1}>
+                  {taskToDelete.description}
+                </Typography>
+              )}
+              
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Chip 
+                  label={taskToDelete.status === 'TODO' ? 'До виконання' : 
+                        taskToDelete.status === 'IN_PROGRESS' ? 'В роботі' : 'Завершено'} 
+                  size="small" 
+                  variant="outlined" 
+                />
+                <Chip 
+                  label={taskToDelete.priority === 'LOW' ? 'Низький' :
+                        taskToDelete.priority === 'MEDIUM' ? 'Середній' :
+                        taskToDelete.priority === 'HIGH' ? 'Високий' : 'Терміново'} 
+                  size="small" 
+                  variant="outlined" 
+                  color={taskToDelete.priority === 'URGENT' ? 'error' : 
+                         taskToDelete.priority === 'HIGH' ? 'warning' : 'default'}
+                />
+              </Box>
+            </Box>
+          )}
+          
+          <Typography variant="body2" color="error.main" mt={2}>
+            ⚠️ Цю дію не можна скасувати. Всі дані про час, витрачений на це завдання, також будуть видалені.
+          </Typography>
+        </DialogContent>
+        
+        <DialogActions sx={{ gap: 1, p: 2 }}>
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)}
+            variant="outlined"
+            sx={{ minWidth: 100 }}
+          >
+            Скасувати
+          </Button>
+          <Button
+            onClick={confirmDeleteTask}
+            variant="contained"
+            color="error"
+            disabled={deleteTaskMutation.isPending}
+            startIcon={deleteTaskMutation.isPending ? <CircularProgress size={16} /> : <DeleteIcon />}
+            sx={{ minWidth: 100 }}
+          >
+            {deleteTaskMutation.isPending ? 'Видалення...' : 'Видалити'}
           </Button>
         </DialogActions>
       </Dialog>

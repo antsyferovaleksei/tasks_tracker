@@ -9,6 +9,7 @@ interface SupabaseAuthContextType {
   signIn: (email: string, password: string) => Promise<{ user: User; session: Session }>;
   signUp: (email: string, password: string, userData: { name: string }) => Promise<any>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const SupabaseAuthContext = createContext<SupabaseAuthContextType | undefined>(undefined);
@@ -98,6 +99,19 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error refreshing user:', error);
+        return;
+      }
+      setUser(user);
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -105,6 +119,7 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     signIn,
     signUp,
     signOut,
+    refreshUser,
   };
 
   return (

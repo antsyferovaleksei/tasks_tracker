@@ -35,7 +35,7 @@ import { formatDate, formatDuration } from '../utils';
 import { toast } from 'react-hot-toast';
 
 export default function ProfilePage() {
-  const { user } = useSupabaseAuth();
+  const { user, refreshUser } = useSupabaseAuth();
   const { data: dashboardData, isLoading } = useDashboard(30);
   
   // Profile updating через Supabase Auth
@@ -48,7 +48,7 @@ export default function ProfilePage() {
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
-    name: user?.email?.split('@')[0] || '',
+    name: user?.user_metadata?.display_name || user?.email?.split('@')[0] || '',
   });
 
   // Password form state
@@ -87,6 +87,9 @@ export default function ProfilePage() {
       await authService.updateProfile({
         display_name: profileForm.name,
       });
+      
+      // Refresh user data to show updated name
+      await refreshUser();
       
       setEditProfileOpen(false);
       toast.success('Profile updated successfully!');
@@ -152,7 +155,7 @@ export default function ProfilePage() {
                 <PersonIcon sx={{ fontSize: 50 }} />
               </Avatar>
               <Typography variant="h5" mb={1}>
-                {user?.email?.split('@')[0] || 'Користувач'}
+                {user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Користувач'}
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={1}>
                 <EmailIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'middle' }} />
@@ -168,7 +171,7 @@ export default function ProfilePage() {
                 startIcon={<EditIcon />}
                 onClick={() => {
                   setProfileForm({
-                    name: user?.email?.split('@')[0] || '',
+                    name: user?.user_metadata?.display_name || user?.email?.split('@')[0] || '',
                   });
                   setEditProfileOpen(true);
                 }}

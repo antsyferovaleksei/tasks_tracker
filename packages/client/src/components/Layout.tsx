@@ -212,7 +212,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {user?.email}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              User
+              {user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'User'}
             </Typography>
           </Box>
         </Box>
