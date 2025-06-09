@@ -45,6 +45,29 @@ export const authService = {
     return user;
   },
 
+  // Оновлення профілю
+  async updateProfile(updates: { display_name?: string; email?: string }) {
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        display_name: updates.display_name
+      },
+      email: updates.email
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  // Зміна пароля
+  async changePassword(newPassword: string) {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+
   // Підписка на зміни авторизації
   onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange(callback);

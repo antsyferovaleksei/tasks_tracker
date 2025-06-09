@@ -303,6 +303,17 @@ export const timeEntriesService = {
       .eq('user_id', user.id)
       .eq('is_running', true);
 
+    // Змінюємо статус завдання на 'in_progress' якщо воно в статусі 'todo'
+    await supabase
+      .from('tasks')
+      .update({
+        status: 'in_progress',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', taskId)
+      .eq('user_id', user.id)
+      .eq('status', 'todo');
+
     // Створюємо новий активний таймер
     const { data, error } = await supabase
       .from('time_entries')

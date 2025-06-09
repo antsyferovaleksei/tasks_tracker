@@ -34,14 +34,62 @@ export default function AnalyticsPage() {
 
 
   const handleExport = () => {
-    // TODO: Реалізувати експорт через Supabase
-    console.log('Export data:', {
-      period: 30,
-      summary: dashboardData?.summary,
-      charts: dashboardData?.charts,
-      type: 'analytics'
-    });
-    alert('Export функціональність буде додана пізніше');
+    if (!dashboardData) return;
+    
+    setIsExporting(true);
+    
+    try {
+      // Prepare CSV data
+      const csvData = [];
+      
+      // Header
+      csvData.push('Metric,Value');
+      
+      // Summary data
+      csvData.push(`Total Tasks,${dashboardData.summary?.totalTasks || 0}`);
+      csvData.push(`Completed Tasks,${dashboardData.summary?.completedTasks || 0}`);
+      csvData.push(`In Progress Tasks,${dashboardData.summary?.inProgressTasks || 0}`);
+      csvData.push(`Overdue Tasks,${dashboardData.summary?.overdueTasks || 0}`);
+      csvData.push(`Total Time Spent (hours),${Math.round((dashboardData.summary?.totalTimeSpent || 0) / 3600)}`);
+      
+      // Daily stats
+      if (dashboardData.charts?.dailyStats?.length) {
+        csvData.push('\nDaily Statistics');
+        csvData.push('Date,Tasks Created,Tasks Completed');
+        dashboardData.charts.dailyStats.forEach((stat: any) => {
+          csvData.push(`${stat.date},${stat.created},${stat.completed}`);
+        });
+      }
+      
+      // Priority stats
+      if (dashboardData.charts?.priorityStats?.length) {
+        csvData.push('\nPriority Statistics');
+        csvData.push('Priority,Count');
+        dashboardData.charts.priorityStats.forEach((stat: any) => {
+          csvData.push(`${stat.priority},${stat.count}`);
+        });
+      }
+      
+      // Create and download CSV
+      const csvContent = csvData.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `analytics-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      alert('Помилка експорту CSV файлу');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (isLoading) {

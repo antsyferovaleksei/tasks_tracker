@@ -79,15 +79,19 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = async () => {
     if (!profileForm.name.trim()) {
+      toast.error('Name is required');
       return;
     }
     
     setIsUpdatingProfile(true);
     try {
-      // У Supabase auth профіль оновлюється через updateUser
-      // Але поки що просто закриваємо діалог
+      await authService.updateProfile({
+        display_name: profileForm.name,
+        email: profileForm.email,
+      });
+      
       setEditProfileOpen(false);
-      toast.success('Profile updated!');
+      toast.success('Profile updated successfully!');
     } catch (error: any) {
       console.error('Profile update error:', error);
       toast.error(error.message || 'Error updating profile');
@@ -97,25 +101,24 @@ export default function ProfilePage() {
   };
 
   const handleChangePassword = async () => {
-    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+    if (!passwordForm.newPassword) {
+      toast.error('New password is required');
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      alert('New Password and confirmation are not the same');
+      toast.error('New password and confirmation are not the same');
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      alert('New Password must have at least 6 characters');
+      toast.error('New password must have at least 6 characters');
       return;
     }
 
     setIsChangingPassword(true);
     try {
-      // Поки що просто симулюємо зміну пароля
-      // TODO: додати реальну зміну пароля через Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await authService.changePassword(passwordForm.newPassword);
       
       setChangePasswordOpen(false);
       setPasswordForm({

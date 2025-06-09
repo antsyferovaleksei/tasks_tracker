@@ -5,6 +5,7 @@ import { TaskStatus, TaskPriority } from '../types';
 // Date formatting utilities
 export const formatDate = (date: string | Date, formatStr = 'dd.MM.yyyy'): string => {
   try {
+    if (!date) return 'Не встановлено';
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     if (!isValid(dateObj)) return 'Невірна дата';
     return format(dateObj, formatStr, { locale: uk });

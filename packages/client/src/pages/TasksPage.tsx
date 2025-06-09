@@ -805,14 +805,6 @@ export default function TasksPage() {
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} pt={1}>
             <TextField
-              label="Description of work"
-              value={newTimeEntry.description}
-              onChange={(e) => setNewTimeEntry({ ...newTimeEntry, description: e.target.value })}
-              fullWidth
-              placeholder="What did you do..."
-            />
-            
-            <TextField
               label="Duration (minutes) *"
               type="number"
               value={newTimeEntry.duration}
@@ -821,15 +813,6 @@ export default function TasksPage() {
               fullWidth
               inputProps={{ step: 1 }}
               helperText="Positive values add time, negative values subtract time from task"
-            />
-            
-            <TextField
-              label="Time start"
-              type="datetime-local"
-              value={newTimeEntry.startTime}
-              onChange={(e) => setNewTimeEntry({ ...newTimeEntry, startTime: e.target.value })}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
             />
           </Box>
         </DialogContent>
