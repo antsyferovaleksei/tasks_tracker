@@ -23,25 +23,25 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { useDashboard, useExportReport } from '../hooks';
+import { useDashboard } from '../hooks';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function AnalyticsPage() {
   const { data: dashboardData, isLoading } = useDashboard(30);
-  const { mutate: exportReport, isPending: isExporting } = useExportReport();
+  const [isExporting, setIsExporting] = useState(false);
   
 
 
   const handleExport = () => {
-    const params = {
+    // TODO: Реалізувати експорт через Supabase
+    console.log('Export data:', {
       period: 30,
-      summary: dashboardData?.data?.summary,
-      charts: dashboardData?.data?.charts,
+      summary: dashboardData?.summary,
+      charts: dashboardData?.charts,
       type: 'analytics'
-    };
-    
-    exportReport({ format: 'csv', params });
+    });
+    alert('Export функціональність буде додана пізніше');
   };
 
   if (isLoading) {
@@ -52,8 +52,8 @@ export default function AnalyticsPage() {
     );
   }
 
-  const metrics = dashboardData?.data?.summary;
-  const charts = dashboardData?.data?.charts;
+  const metrics = dashboardData?.summary;
+  const charts = dashboardData?.charts;
 
   return (
     <Box p={3}>
@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
           variant="contained"
           startIcon={<TableChart />}
           onClick={handleExport}
-          disabled={isExporting || !dashboardData?.data}
+          disabled={isExporting || !dashboardData}
         >
           {isExporting ? 'Exporting...' : 'Export into CSV'}
         </Button>
@@ -152,7 +152,7 @@ export default function AnalyticsPage() {
                     fill="#8884d8"
                     dataKey="count"
                   >
-                    {(charts?.priorityStats || []).map((entry, index) => (
+                    {(charts?.priorityStats || []).map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
