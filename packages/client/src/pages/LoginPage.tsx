@@ -25,14 +25,14 @@ import {
   DarkMode,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { useAuth, useTheme as useAppTheme } from '../hooks';
+import { useTheme as useAppTheme } from '../hooks';
 import { validateEmail } from '../utils';
+import { authService } from '../api/supabase-auth';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const LoginPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { login, isLoggingIn } = useAuth();
   const { currentTheme, setTheme } = useAppTheme();
   const navigate = useNavigate();
 
@@ -42,6 +42,8 @@ const LoginPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -51,21 +53,24 @@ const LoginPage: React.FC = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+    if (loginError) {
+      setLoginError('');
+    }
   };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email обов\'язковий';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = 'Невірний формат email';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password обов\'язковий';
+      newErrors.password = 'Пароль обов\'язковий';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must have at least 6 characters';
+      newErrors.password = 'Пароль повинен містити мінімум 6 символів';
     }
 
     setErrors(newErrors);
@@ -77,11 +82,22 @@ const LoginPage: React.FC = () => {
     
     if (!validateForm()) return;
 
+    setIsLoading(true);
+    setLoginError('');
+
     try {
-      await login(formData);
+      const result = await authService.signIn(formData.email, formData.password);
+      console.log('Успішний вхід:', result);
+      
+      // Зберігаємо дані користувача в localStorage або контексті
+      localStorage.setItem('supabase-user', JSON.stringify(result.user));
+      
       navigate('/tasks');
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('Помилка входу:', error);
+      setLoginError(error.message || 'Помилка входу. Перевірте email та пароль.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,7 +105,7 @@ const LoginPage: React.FC = () => {
     setTheme(currentTheme === 'light' ? 'dark' : 'light');
   };
 
-  if (isLoggingIn) {
+  if (isLoading) {
     return <LoadingSpinner fullscreen message="Вхід в систему..." />;
   }
 
@@ -136,13 +152,19 @@ const LoginPage: React.FC = () => {
                 </IconButton>
               </Box>
               <Typography variant="h4" component="h2" gutterBottom fontWeight="600">
-                Hello! 👋
+                Вітаємо! 👋
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Log in to your account to continue working.
+                Увійдіть в свій акаунт для продовження роботи.
               </Typography>
             </Box>
 
+            {/* Error Alert */}
+            {loginError && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {loginError}
+              </Alert>
+            )}
 
             {/* Login Form */}
             <Box component="form" onSubmit={handleSubmit} noValidate>
@@ -170,7 +192,7 @@ const LoginPage: React.FC = () => {
               <TextField
                 fullWidth
                 id="password"
-                label="Password"
+                label="Пароль"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
@@ -204,56 +226,46 @@ const LoginPage: React.FC = () => {
                 fullWidth
                 variant="contained"
                 size="large"
-                disabled={isLoggingIn}
+                disabled={isLoading}
                 sx={{
                   mb: 2,
                   py: 1.5,
+                  textTransform: 'none',
                   fontSize: '1.1rem',
                   fontWeight: 600,
-                  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)',
-                  },
+                  borderRadius: 2,
                 }}
               >
-                {isLoggingIn ? 'Enter...' : 'Enter'}
+                {isLoading ? 'Вхід...' : 'Увійти'}
               </Button>
 
-              <Divider sx={{ my: 2 }}>
+              <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  or
+                  або
                 </Typography>
               </Divider>
 
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  No account yet?{' '}
+                  Немає акаунту?{' '}
                   <Link
                     component={RouterLink}
                     to="/register"
                     sx={{
-                      color: 'primary.main',
-                      textDecoration: 'none',
                       fontWeight: 600,
+                      textDecoration: 'none',
                       '&:hover': {
                         textDecoration: 'underline',
                       },
                     }}
                   >
-                    Register
+                    Зареєструватися
                   </Link>
                 </Typography>
               </Box>
             </Box>
           </Paper>
         </motion.div>
-
-        {/* Footer */}
-        <Box sx={{ textAlign: 'center', mt: 3 }}>
-          <Typography variant="body2" color="rgba(255,255,255,0.7)">
-            © 2025 Tasks Tracker.
-          </Typography>
-        </Box>
       </Container>
     </Box>
   );

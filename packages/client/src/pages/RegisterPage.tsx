@@ -26,7 +26,8 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuth, useTheme as useAppTheme, useDeviceDetection } from '../hooks';
+import { useTheme as useAppTheme, useDeviceDetection } from '../hooks';
+import { authService } from '../api/supabase-auth';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -38,12 +39,14 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [registerError, setRegisterError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   
   const theme = useTheme();
   const { currentTheme, setTheme } = useAppTheme();
   const { isMobile } = useDeviceDetection();
   const navigate = useNavigate();
-  const { register, isRegistering } = useAuth();
 
   const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [field]: event.target.value });
@@ -51,33 +54,36 @@ export default function RegisterPage() {
     if (errors[field]) {
       setErrors({ ...errors, [field]: '' });
     }
+    if (registerError) {
+      setRegisterError('');
+    }
   };
 
   const validateForm = (): boolean => {
     const newErrors: {[key: string]: string} = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = "Ім'я обов'язкове";
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must have at least 2 characters";
+      newErrors.name = "Ім'я повинно містити мінімум 2 символи";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email обов\'язковий';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = 'Невірний формат email';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Пароль обов\'язковий';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must have at least 6 characters';
+      newErrors.password = 'Пароль повинен містити мінімум 6 символів';
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirm Password is required';
+      newErrors.confirmPassword = 'Підтвердження паролю обов\'язкове';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Паролі не співпадають';
     }
 
     setErrors(newErrors);
@@ -89,15 +95,33 @@ export default function RegisterPage() {
     
     if (!validateForm()) return;
 
+    setIsLoading(true);
+    setRegisterError('');
+    setSuccessMessage('');
+
     try {
-      await register({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
-      });
-      navigate('/tasks');
+      const result = await authService.signUp(
+        formData.email.trim(),
+        formData.password,
+        { name: formData.name.trim() }
+      );
+      
+      console.log('Успішна реєстрація:', result);
+      
+      if (result.user) {
+        // Користувач зареєстрований та підтверджений
+        localStorage.setItem('supabase-user', JSON.stringify(result.user));
+        setSuccessMessage('Реєстрація успішна! Перенаправляємо...');
+        setTimeout(() => navigate('/tasks'), 2000);
+      } else {
+        // Потрібне підтвердження email
+        setSuccessMessage('Реєстрація успішна! Перевірте email для підтвердження акаунту.');
+      }
     } catch (error: any) {
-      console.error('Registration error:', error);
+      console.error('Помилка реєстрації:', error);
+      setRegisterError(error.message || 'Помилка реєстрації. Спробуйте ще раз.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -148,19 +172,32 @@ export default function RegisterPage() {
                 </IconButton>
               </Box>
               <Typography variant="h4" component="h2" gutterBottom fontWeight="600">
-                Welcome! 🚀
+                Вітаємо! 🚀
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Create an account to get started
+                Створіть акаунт для початку роботи
               </Typography>
             </Box>
+
+            {/* Error/Success Alerts */}
+            {registerError && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {registerError}
+              </Alert>
+            )}
+            
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 3 }}>
+                {successMessage}
+              </Alert>
+            )}
 
             {/* Registration Form */}
             <Box component="form" onSubmit={handleSubmit} noValidate>
               <TextField
                 fullWidth
                 id="name"
-                label="Full name"
+                label="Повне ім'я"
                 name="name"
                 autoComplete="name"
                 autoFocus
@@ -202,7 +239,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="password"
-                label="Password"
+                label="Пароль"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
@@ -234,7 +271,7 @@ export default function RegisterPage() {
               <TextField
                 fullWidth
                 id="confirmPassword"
-                label="Confirm password"
+                label="Підтвердити пароль"
                 name="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 autoComplete="new-password"
@@ -268,24 +305,29 @@ export default function RegisterPage() {
                 fullWidth
                 variant="contained"
                 size="large"
-                disabled={isRegistering}
+                disabled={isLoading}
                 sx={{
                   mb: 2,
                   py: 1.5,
+                  textTransform: 'none',
                   fontSize: '1.1rem',
                   fontWeight: 600,
-                  background: 'linear-gradient(45deg, #4CAF50 30%, #66BB6A 90%)',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #388E3C 30%, #4CAF50 90%)',
-                  },
+                  borderRadius: 2,
                 }}
               >
-                {isRegistering ? 'Registration...' : 'Register'}
+                {isLoading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Реєстрація...
+                  </>
+                ) : (
+                  'Зареєструватися'
+                )}
               </Button>
 
-              <Divider sx={{ my: 2 }}>
+              <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  or
+                  або
                 </Typography>
               </Divider>
 
@@ -296,28 +338,20 @@ export default function RegisterPage() {
                     component={RouterLink}
                     to="/login"
                     sx={{
-                      color: 'primary.main',
-                      textDecoration: 'none',
                       fontWeight: 600,
+                      textDecoration: 'none',
                       '&:hover': {
                         textDecoration: 'underline',
                       },
                     }}
                   >
-                    Enter
+                    Увійти
                   </Link>
                 </Typography>
               </Box>
             </Box>
           </Paper>
         </motion.div>
-
-        {/* Footer */}
-        <Box sx={{ textAlign: 'center', mt: 3 }}>
-          <Typography variant="body2" color="rgba(255,255,255,0.7)">
-                            © 2025 Tasks Tracker. 
-          </Typography>
-        </Box>
       </Container>
     </Box>
   );
