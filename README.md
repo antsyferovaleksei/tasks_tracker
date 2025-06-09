@@ -1,56 +1,93 @@
 # Tasks Tracker
 
-A modern, full-stack task management application built with React, TypeScript, Node.js, and PostgreSQL. Features real-time collaboration, time tracking, analytics, and project management capabilities.
+A modern, full-stack task management application built with React, TypeScript, Supabase, and PostgreSQL. Features real-time collaboration, time tracking, analytics, project management, and multi-language support.
 
 ## 🚀 Features
 
 - **Task Management**: Create, edit, delete, and organize tasks with priorities and statuses
-- **Time Tracking**: Start/stop timers for tasks with automatic completion on timer stop
-- **Project Organization**: Group tasks by projects with color coding
-- **Analytics Dashboard**: View productivity metrics, time spent, and task completion rates
-- **User Authentication**: Secure JWT-based authentication with refresh tokens
-- **Real-time Updates**: Live updates using React Query
-- **Responsive Design**: Mobile-friendly Material-UI interface
-- **Data Export**: Export reports to PDF and Excel formats
-- **Advanced Filtering**: Filter tasks by status, priority, project, and tags
+- **Time Tracking**: Start/stop timers for tasks with automatic time logging
+- **Project Organization**: Group tasks by projects with customizable color coding
+- **Analytics Dashboard**: View productivity metrics, time spent, and task completion rates with charts
+- **Multi-language Support**: Full localization in Ukrainian and English with dynamic language switching
+- **User Authentication**: Secure Supabase authentication with social login options
+- **Real-time Updates**: Live updates using React Query and Supabase real-time subscriptions
+- **Responsive Design**: Mobile-friendly Material-UI interface with dark/light theme support
+- **Data Export**: Export analytics and reports to CSV format
+- **Advanced Filtering**: Filter tasks by status, priority, project, and search
+- **PWA Support**: Progressive Web App capabilities for offline use
+
+## 🌐 Localization
+
+The application supports multiple languages with complete UI translation:
+
+- **Ukrainian (Default)**: Complete interface translation
+- **English**: Full English localization
+- **Dynamic Language Switching**: Change language without page reload
+- **Persistent Settings**: Language preference saved in localStorage
+- **Translated Content**: All UI elements, form validation, messages, and notifications
+
+### Language Features
+- Navigation menus and page titles
+- Form labels and validation messages
+- Task and project management interfaces
+- Analytics charts and labels
+- User profile and settings
+- Authentication pages (login/register)
+- Toast notifications and error messages
+- Date and time formatting
 
 ## 🛠 Tech Stack
 
 ### Frontend
 - **React 18** with TypeScript
 - **Material-UI (MUI)** for components and theming
-- **React Query** for state management and caching
+- **React Query (TanStack Query)** for state management and caching
 - **React Router** for navigation
 - **Zustand** for local state management
 - **Recharts** for data visualization
-- **Vite** for build tooling
+- **React i18next** for internationalization
+- **Framer Motion** for animations
+- **React Hot Toast** for notifications
+- **Vite** for build tooling and PWA support
 
-### Backend
-- **Node.js** with Express.js
-- **TypeScript** for type safety
-- **Prisma ORM** with PostgreSQL database
-- **JWT** for authentication
-- **Zod** for data validation
-- **Node-cron** for scheduled tasks
-- **ExcelJS & PDFKit** for report generation
+### Backend & Database
+- **Supabase** for backend-as-a-service
+  - PostgreSQL database with real-time subscriptions
+  - Built-in authentication and user management
+  - Row Level Security (RLS) for data protection
+  - Real-time APIs and webhooks
+- **Supabase JavaScript Client** for data operations
+- **TypeScript** for type safety throughout the stack
 
-### DevOps
-- **Docker** and Docker Compose for containerization
+### DevOps & Deployment
+- **Vercel** for frontend deployment with automatic CI/CD
+- **Supabase Cloud** for managed database and backend services
+- **Docker** support for local development
 - **ESLint** and Prettier for code quality
-- **Concurrently** for running multiple processes
+- **PWA** configuration for mobile app-like experience
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before you begin, ensure you have the following:
 
 - **Node.js** (v18.0.0 or higher)
 - **npm** (v9.0.0 or higher)
-- **PostgreSQL** (v13 or higher)
-- **Docker** and **Docker Compose** (optional, for containerized setup)
+- **Supabase Account** (free tier available at [supabase.com](https://supabase.com))
 
 ## 🚀 Quick Start
 
-### Option 1: Docker Setup (Recommended)
+### Supabase Setup
+
+1. **Create Supabase Project**
+   - Go to [supabase.com](https://supabase.com) and create a new project
+   - Wait for the project to be fully provisioned
+   - Navigate to Settings > API to get your keys
+
+2. **Database Setup**
+   - Go to the SQL Editor in your Supabase dashboard
+   - Create the required tables by running the SQL schema (see `SUPABASE_SETUP.md`)
+
+### Local Development
 
 1. **Clone the repository**
    ```bash
@@ -58,33 +95,9 @@ Before you begin, ensure you have the following installed:
    cd tasks_tracker
    ```
 
-2. **Start with Docker Compose**
+2. **Install dependencies**
    ```bash
-   docker-compose up -d
-   ```
-
-3. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
-   - PostgreSQL: localhost:5432
-   - Redis: localhost:6379
-
-### Option 2: Manual Setup
-
-1. **Clone and install dependencies**
-   ```bash
-   git clone <repository-url>
-   cd tasks_tracker
    npm install
-   ```
-
-2. **Set up PostgreSQL database**
-   ```bash
-   # Create database
-   createdb tasks_tracker
-   
-   # Or using psql
-   psql -U postgres -c "CREATE DATABASE tasks_tracker;"
    ```
 
 3. **Configure environment variables**
@@ -92,34 +105,19 @@ Before you begin, ensure you have the following installed:
    cp env.example .env
    ```
    
-   Edit `.env` with your database credentials:
+   Edit `.env` with your Supabase credentials:
    ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/tasks_tracker?schema=public"
-   JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
-   JWT_EXPIRES_IN="7d"
-   JWT_REFRESH_SECRET="your-super-secret-refresh-key-change-this-in-production"
-   JWT_REFRESH_EXPIRES_IN="30d"
-   PORT=5000
-   NODE_ENV=development
-   CLIENT_URL=http://localhost:3000
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_APP_URL=http://localhost:3000
    ```
 
-4. **Set up the database**
+4. **Start the development server**
    ```bash
-   cd packages/server
-   npm run db:generate
-   npm run db:push
-   ```
-
-5. **Start the development servers**
-   ```bash
-   # From root directory
    npm run dev
    ```
 
-   This will start:
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:5001
+   This will start the frontend at http://localhost:3000
 
 ## 📁 Project Structure
 
@@ -127,37 +125,42 @@ Before you begin, ensure you have the following installed:
 tasks_tracker/
 ├── packages/
 │   ├── client/                 # React frontend application
-│   │   ├── public/            # Static assets
+│   │   ├── public/            # Static assets and PWA manifests
 │   │   ├── src/
-│   │   │   ├── api/           # API client functions
+│   │   │   ├── api/           # Supabase client and API functions
 │   │   │   ├── components/    # Reusable UI components
+│   │   │   │   ├── LanguageToggle.tsx  # Language switcher
+│   │   │   │   └── ...        # Other components
+│   │   │   ├── contexts/      # React contexts
+│   │   │   │   ├── SupabaseAuthContext.tsx  # Auth provider
+│   │   │   │   └── ...        # Other contexts
 │   │   │   ├── hooks/         # Custom React hooks
+│   │   │   ├── i18n/          # Internationalization setup
+│   │   │   ├── locales/       # Translation files
+│   │   │   │   ├── ua.json    # Ukrainian translations
+│   │   │   │   └── en.json    # English translations
 │   │   │   ├── pages/         # Page components
-│   │   │   ├── store/         # State management
+│   │   │   │   ├── HomePage.tsx     # Landing page
+│   │   │   │   ├── TasksPage.tsx    # Task management
+│   │   │   │   ├── ProjectsPage.tsx # Project management
+│   │   │   │   ├── AnalyticsPage.tsx# Analytics dashboard
+│   │   │   │   ├── ProfilePage.tsx  # User profile
+│   │   │   │   ├── LoginPage.tsx    # Authentication
+│   │   │   │   └── RegisterPage.tsx # User registration
+│   │   │   ├── store/         # Zustand state management
 │   │   │   ├── types/         # TypeScript type definitions
 │   │   │   └── utils/         # Utility functions
 │   │   ├── package.json
 │   │   └── vite.config.ts
 │   │
-│   ├── server/                # Node.js backend application
-│   │   ├── prisma/           # Database schema and migrations
-│   │   ├── src/
-│   │   │   ├── config/       # Configuration files
-│   │   │   ├── controllers/  # Route controllers
-│   │   │   ├── middleware/   # Express middleware
-│   │   │   ├── routes/       # API routes
-│   │   │   ├── services/     # Business logic
-│   │   │   ├── types/        # TypeScript types
-│   │   │   └── utils/        # Utility functions
-│   │   └── package.json
-│   │
+│   ├── server/                # Legacy Node.js backend (optional)
 │   └── shared/               # Shared utilities and types
-│       └── src/
-│           ├── types/        # Shared TypeScript types
-│           └── validation.ts # Zod validation schemas
 │
 ├── docker/                   # Docker configuration files
 ├── docs/                     # Documentation
+│   ├── SUPABASE_SETUP.md    # Database schema setup
+│   ├── VERCEL_DEPLOYMENT.md # Deployment instructions
+│   └── ...                  # Other documentation
 ├── docker-compose.yml        # Docker Compose configuration
 ├── package.json             # Root package.json (workspace)
 └── README.md               # This file
@@ -170,20 +173,20 @@ tasks_tracker/
 From the root directory:
 
 ```bash
-# Start development servers (client + server)
+# Start development server (client only)
 npm run dev
 
 # Start only client
 npm run dev:client
 
-# Start only server
-npm run dev:server
-
 # Build for production
 npm run build
 
-# Run tests
-npm run test
+# Build client only
+npm run build:client
+
+# Preview production build
+npm run preview
 
 # Lint code
 npm run lint
@@ -195,128 +198,105 @@ npm run format
 npm run type-check
 ```
 
-### Database Management
+### Language Management
+
+The application uses React i18next for internationalization:
 
 ```bash
-cd packages/server
-
-# Generate Prisma client
-npm run db:generate
-
-# Push schema changes to database
-npm run db:push
-
-# Create and run migrations
-npm run db:migrate
-
-# Open Prisma Studio (database GUI)
-npm run db:studio
+# Translation files location
+packages/client/src/locales/
+├── ua.json    # Ukrainian (default)
+└── en.json    # English
 ```
+
+To add new translations:
+1. Add the key-value pairs to both language files
+2. Use the `useTranslation` hook in components:
+   ```typescript
+   import { useTranslation } from 'react-i18next';
+   
+   const { t } = useTranslation();
+   const translatedText = t('your.translation.key');
+   ```
 
 ### Code Quality
 
 The project includes:
-- **ESLint** for code linting
+- **ESLint** for code linting with TypeScript rules
 - **Prettier** for code formatting
 - **TypeScript** strict mode for type safety
-- Pre-commit hooks for code quality
+- **Vite** for fast development and optimized builds
+- **PWA** configuration for offline support
 
-## 🌐 API Documentation
+## 🌐 Supabase Integration
 
-The backend API provides the following endpoints:
+The application uses Supabase for backend services:
+
+### Database Tables
+- **users** - User profiles and metadata
+- **projects** - Project management with color coding
+- **tasks** - Task management with status and priority
+- **time_entries** - Time tracking entries with duration
 
 ### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh access token
-- `GET /api/auth/profile` - Get user profile
+- Email/password authentication
+- User profile management
+- Row Level Security (RLS) for data protection
+- Real-time user presence
 
-### Tasks
-- `GET /api/tasks` - Get tasks with pagination and filtering
-- `POST /api/tasks` - Create new task
-- `PUT /api/tasks/:id` - Update task
-- `DELETE /api/tasks/:id` - Delete task
-
-### Projects
-- `GET /api/projects` - Get all projects
-- `POST /api/projects` - Create new project
-- `PUT /api/projects/:id` - Update project
-- `DELETE /api/projects/:id` - Delete project
-
-### Time Tracking
-- `POST /api/time-entries/start` - Start time tracking
-- `PUT /api/time-entries/:id/stop` - Stop time tracking
-- `GET /api/time-entries/active` - Get active timer
-- `GET /api/time-entries/tasks/:taskId/stats` - Get task time statistics
-
-### Analytics
-- `GET /api/analytics/dashboard` - Get dashboard metrics
-- `GET /api/analytics/reports` - Generate reports
-- `GET /api/analytics/export` - Export data
+### Real-time Features
+- Live task updates across sessions
+- Real-time timer synchronization
+- Collaborative project management
 
 ## 🔒 Environment Variables
 
 ### Required Variables
 
-| Variable | Description | Default |
+| Variable | Description | Example |
 |----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | - |
-| `JWT_SECRET` | JWT signing secret | - |
-| `JWT_EXPIRES_IN` | JWT expiration time | `7d` |
-| `JWT_REFRESH_SECRET` | Refresh token secret | - |
-| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `30d` |
-| `PORT` | Server port | `5000` |
-| `NODE_ENV` | Environment | `development` |
-| `CLIENT_URL` | Frontend URL | `http://localhost:3000` |
+| `VITE_SUPABASE_URL` | Supabase project URL | `https://xxx.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJhbGciOiJIUzI1NiIsInR5cCI6...` |
+| `VITE_APP_URL` | Application URL | `http://localhost:3000` |
 
-### Optional Variables
+### Development Setup
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SMTP_HOST` | Email server host | - |
-| `SMTP_PORT` | Email server port | `587` |
-| `SMTP_USER` | Email username | - |
-| `SMTP_PASS` | Email password | - |
-| `RATE_LIMIT_WINDOW_MS` | Rate limit window | `900000` |
-| `RATE_LIMIT_MAX_REQUESTS` | Max requests per window | `100` |
+1. Create a `.env` file in the root directory
+2. Copy variables from `env.example`
+3. Replace with your Supabase project credentials
+4. Restart the development server
 
 ## 🚢 Deployment
 
-### Docker Deployment
+### Vercel Deployment (Recommended)
 
-1. **Build and deploy with Docker Compose**
+1. **Connect to Vercel**
    ```bash
-   # Production build
-   docker-compose -f docker-compose.prod.yml up -d
+   # Install Vercel CLI
+   npm i -g vercel
+   
+   # Deploy to production
+   vercel --prod
    ```
 
-2. **Environment setup**
-   - Copy `env.example` to `.env.production`
-   - Update all secrets and URLs for production
-   - Ensure database is accessible
+2. **Environment Variables**
+   - Add environment variables in Vercel dashboard
+   - Or use `vercel env` command to set them
 
-### Manual Deployment
+3. **Automatic Deployments**
+   - Connect your GitHub repository to Vercel
+   - Every push to main branch triggers automatic deployment
 
-1. **Build the applications**
+### Manual Build
+
+1. **Build the application**
    ```bash
    npm run build
    ```
 
-2. **Set up production database**
-   ```bash
-   cd packages/server
-   npm run db:migrate
-   ```
-
-3. **Start production server**
-   ```bash
-   cd packages/server
-   npm start
-   ```
-
-4. **Serve frontend**
-   - Deploy the `packages/client/dist` folder to a web server
-   - Configure reverse proxy to backend API
+2. **Deploy static files**
+   - Upload `packages/client/dist` folder to your hosting provider
+   - Configure environment variables on the hosting platform
 
 ## 🧪 Testing
 
@@ -324,13 +304,42 @@ The backend API provides the following endpoints:
 # Run all tests
 npm run test
 
-# Run tests for specific package
-npm run test --workspace=server
-npm run test --workspace=client
+# Run tests for client
+npm run test:client
 
 # Run tests in watch mode
 npm run test:watch
+
+# Generate test coverage
+npm run test:coverage
 ```
+
+## 🌍 Internationalization (i18n)
+
+### Supported Languages
+- **Ukrainian (ua)** - Default language
+- **English (en)** - Secondary language
+
+### Translation Structure
+```json
+{
+  "navigation": { ... },
+  "dashboard": { ... },
+  "tasks": { ... },
+  "projects": { ... },
+  "analytics": { ... },
+  "profile": { ... },
+  "auth": { ... },
+  "common": { ... },
+  "validation": { ... },
+  "messages": { ... }
+}
+```
+
+### Adding New Languages
+1. Create new translation file in `packages/client/src/locales/`
+2. Add language option to `LanguageToggle` component
+3. Update i18n configuration in `packages/client/src/i18n/index.ts`
 
 ## 🤝 Contributing
 
@@ -344,41 +353,43 @@ npm run test:watch
 
 - Follow TypeScript strict mode
 - Use conventional commit messages
-- Add tests for new features
-- Update documentation for API changes
-- Follow the existing code style
+- Add translations for new UI elements
+- Test in both Ukrainian and English
+- Follow the existing code style and component patterns
+- Update documentation for new features
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Port already in use**
+1. **Supabase Connection Issues**
    ```bash
-   # Kill process on port 5001
-   lsof -ti:5001 | xargs kill -9
+   # Verify environment variables
+   echo $VITE_SUPABASE_URL
+   echo $VITE_SUPABASE_ANON_KEY
    
-   # Kill process on port 3000
-   lsof -ti:3000 | xargs kill -9
+   # Check Supabase project status in dashboard
    ```
 
-2. **Database connection issues**
-   - Verify PostgreSQL is running
-   - Check DATABASE_URL in .env
-   - Ensure database exists
+2. **Translation Missing**
+   - Check browser console for missing translation keys
+   - Verify translation exists in both `ua.json` and `en.json`
+   - Restart development server after adding translations
 
-3. **Build errors**
+3. **Build Errors**
    ```bash
-   # Clear node_modules and reinstall
+   # Clear cache and reinstall
    rm -rf node_modules packages/*/node_modules
    npm install
+   
+   # Clear Vite cache
+   rm -rf packages/client/.vite
    ```
 
-4. **Prisma issues**
-   ```bash
-   # Reset Prisma client
-   cd packages/server
-   npm run db:generate
-   ```
+4. **Authentication Issues**
+   - Verify Supabase authentication settings
+   - Check user management policies in Supabase dashboard
+   - Ensure RLS policies are correctly configured
 
 ## 🔄 Updates
 
@@ -386,7 +397,29 @@ To update the application:
 
 1. Pull latest changes: `git pull origin main`
 2. Install dependencies: `npm install`
-3. Run migrations: `cd packages/server && npm run db:migrate`
-4. Restart development servers: `npm run dev`
+3. Update database schema if needed (check `SUPABASE_SETUP.md`)
+4. Restart development server: `npm run dev`
+
+## 📖 Additional Documentation
+
+- [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md) - Database schema and setup instructions
+- [`VERCEL_DEPLOYMENT.md`](./VERCEL_DEPLOYMENT.md) - Detailed deployment guide
+- [`VERCEL_SECURITY_FIX.md`](./VERCEL_SECURITY_FIX.md) - Security configuration for Vercel
+
+## 🎯 Production Deployment
+
+Current production deployment: **https://tasks-tracker-client.vercel.app**
+
+### Features in Production
+- ✅ Multi-language support (Ukrainian/English)
+- ✅ Real-time task management
+- ✅ Time tracking with analytics
+- ✅ Project organization
+- ✅ User authentication
+- ✅ PWA capabilities
+- ✅ Responsive design
+- ✅ Data export functionality
 
 ---
+
+**Built with ❤️ using modern web technologies**
