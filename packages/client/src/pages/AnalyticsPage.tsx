@@ -52,8 +52,8 @@ export default function AnalyticsPage() {
       // Prepare CSV data with task details
       const csvData = [];
       
-      // Headers matching the expected format
-      csvData.push('Task title,Status,Priority,Project,Дата створення,Total time (хв),Кількість записів часу,Description');
+      // Headers matching the expected format (using semicolon for proper Excel recognition)
+      csvData.push('Task title;Status;Priority;Project;Дата створення;Total time (хв);Кількість записів часу;Description');
       
       // Process each task
       for (const task of tasks) {
@@ -92,8 +92,8 @@ export default function AnalyticsPage() {
         const escapeCSV = (value: string | number) => {
           if (typeof value === 'number') return value.toString();
           const str = value.toString();
-          // Escape quotes by doubling them and wrap in quotes if contains comma, quote, or newline
-          if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          // Escape quotes by doubling them and wrap in quotes if contains semicolon, quote, or newline
+          if (str.includes(';') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
             return `"${str.replace(/"/g, '""')}"`;
           }
           return str;
@@ -108,7 +108,7 @@ export default function AnalyticsPage() {
           escapeCSV(totalTimeMinutes),
           escapeCSV(taskTimeEntries.length),
           escapeCSV(description)
-        ].join(','));
+        ].join(';'));
       }
       
       // Create and download CSV with proper encoding
