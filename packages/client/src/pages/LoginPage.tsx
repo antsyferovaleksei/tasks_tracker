@@ -27,13 +27,14 @@ import {
 import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from '../hooks';
 import { validateEmail } from '../utils';
-import { authService } from '../api/supabase-auth';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const LoginPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { currentTheme, setTheme } = useAppTheme();
+  const { signIn, loading: authLoading } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -86,12 +87,8 @@ const LoginPage: React.FC = () => {
     setLoginError('');
 
     try {
-      const result = await authService.signIn(formData.email, formData.password);
+      const result = await signIn(formData.email, formData.password);
       console.log('Успішний вхід:', result);
-      
-      // Зберігаємо дані користувача в localStorage або контексті
-      localStorage.setItem('supabase-user', JSON.stringify(result.user));
-      
       navigate('/tasks');
     } catch (error: any) {
       console.error('Помилка входу:', error);
@@ -105,7 +102,7 @@ const LoginPage: React.FC = () => {
     setTheme(currentTheme === 'light' ? 'dark' : 'light');
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return <LoadingSpinner fullscreen message="Вхід в систему..." />;
   }
 

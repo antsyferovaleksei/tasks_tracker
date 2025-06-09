@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import apiClient from '../api/client';
 import { authService } from '../api/supabase-auth';
+import { projectsService } from '../api/supabase-data';
 
 export default function TestPage() {
   const [loading, setLoading] = useState(false);
@@ -126,13 +127,17 @@ export default function TestPage() {
     setLoading(true);
     setError('');
     try {
-      const response = await apiClient.createProject(projectData);
-      if (response.success) {
-        setSuccess('Project created successfully!');
-        loadProjects();
-      }
+      const project = await projectsService.createProject({
+        name: projectData.name,
+        description: projectData.description,
+        color: projectData.color,
+        archived: projectData.archived
+      });
+      setSuccess(`✅ Проект "${project.name}" створено успішно!`);
+      loadProjects();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error creating project');
+      console.error('Project creation error:', err);
+      setError('Помилка створення проекту: ' + (err.message || 'Невідома помилка'));
     } finally {
       setLoading(false);
     }
@@ -140,12 +145,12 @@ export default function TestPage() {
 
   const loadProjects = async () => {
     try {
-      const response = await apiClient.getProjects();
-      if (response.success && response.data) {
-        setProjects(response.data);
-      }
+      const projects = await projectsService.getProjects();
+      setProjects(projects);
+      setSuccess(`✅ Завантажено ${projects.length} проектів`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Loading error projects');
+      console.error('Projects loading error:', err);
+      setError('Помилка завантаження проектів: ' + (err.message || 'Невідома помилка'));
     }
   };
 

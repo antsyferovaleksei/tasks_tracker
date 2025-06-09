@@ -27,7 +27,7 @@ import {
 import { motion } from 'framer-motion';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useTheme as useAppTheme, useDeviceDetection } from '../hooks';
-import { authService } from '../api/supabase-auth';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -46,6 +46,7 @@ export default function RegisterPage() {
   const theme = useTheme();
   const { currentTheme, setTheme } = useAppTheme();
   const { isMobile } = useDeviceDetection();
+  const { signUp, loading: authLoading } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +101,7 @@ export default function RegisterPage() {
     setSuccessMessage('');
 
     try {
-      const result = await authService.signUp(
+      const result = await signUp(
         formData.email.trim(),
         formData.password,
         { name: formData.name.trim() }
@@ -110,7 +111,6 @@ export default function RegisterPage() {
       
       if (result.user) {
         // Користувач зареєстрований та підтверджений
-        localStorage.setItem('supabase-user', JSON.stringify(result.user));
         setSuccessMessage('Реєстрація успішна! Перенаправляємо...');
         setTimeout(() => navigate('/tasks'), 2000);
       } else {

@@ -6,6 +6,7 @@ import { CssBaseline, GlobalStyles } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 
 import { useAuth, useTheme, useDeviceDetection } from './hooks';
+import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -269,10 +270,11 @@ const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {globalStyles}
-        <ErrorBoundary>
+      <SupabaseAuthProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          {globalStyles}
+          <ErrorBoundary>
           <Router>
             <div className="App">
               <Routes>
@@ -362,7 +364,8 @@ const App: React.FC = () => {
         />
 
 
-      </ThemeProvider>
+        </ThemeProvider>
+      </SupabaseAuthProvider>
     </QueryClientProvider>
   );
 };
