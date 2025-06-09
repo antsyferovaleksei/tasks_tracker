@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOpti
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import apiClient from '../api/client';
+import { projectsService } from '../api/supabase-data';
 import {
   User,
   Task,
@@ -22,7 +23,9 @@ import {
   RegisterRequest,
   ApiResponse,
   PaginatedResponse,
-  DeviceInfo
+  DeviceInfo,
+  TaskStatus,
+  TaskPriority
 } from '../types';
 import { 
   useAuthStore, 
@@ -341,20 +344,20 @@ export const useProjects = () => {
 
   const query = useQuery({
     queryKey: queryKeys.projects.all,
-    queryFn: () => apiClient.getProjects(),
+    queryFn: () => projectsService.getProjects(),
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Auto-refetch every minute
   });
 
   useEffect(() => {
-    if (query.data?.success && query.data.data) {
-      setProjects(query.data.data);
+    if (query.data) {
+      setProjects(query.data);
     }
   }, [query.data, setProjects]);
 
   return {
     ...query,
-    projects: query.data?.data || [],
+    projects: query.data || [],
   };
 };
 
@@ -364,16 +367,17 @@ export const useCreateProject = () => {
 
   return useMutation({
     mutationFn: (data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) =>
-      apiClient.createProject(data),
-    onSuccess: (response) => {
-      if (response.success && response.data) {
-        addProject(response.data);
+      projectsService.createProject(data),
+    onSuccess: (data) => {
+      if (data) {
+        addProject(data);
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
         toast.success('Project created!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Error creating project');
+      console.error('Project creation error:', error);
+      toast.error(error.message || 'Error creating project');
     },
   });
 };
@@ -384,16 +388,17 @@ export const useUpdateProject = () => {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Project> }) =>
-      apiClient.updateProject(id, data),
-    onSuccess: (response, variables) => {
-      if (response.success && response.data) {
-        updateProject(variables.id, response.data);
+      projectsService.updateProject(id, data),
+    onSuccess: (data, variables) => {
+      if (data) {
+        updateProject(variables.id, data);
         queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
         toast.success('Project updated!');
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Error updating project');
+      console.error('Project update error:', error);
+      toast.error(error.message || 'Error updating project');
     },
   });
 };
@@ -403,14 +408,15 @@ export const useDeleteProject = () => {
   const { deleteProject } = useProjectsStore();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.deleteProject(id),
+    mutationFn: (id: string) => projectsService.deleteProject(id),
     onSuccess: (_, id) => {
       deleteProject(id);
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
       toast.success('Project deleted!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Error deleting project');
+      console.error('Project deletion error:', error);
+      toast.error(error.message || 'Error deleting project');
     },
   });
 };
