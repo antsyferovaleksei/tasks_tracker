@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOpti
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import apiClient from '../api/client';
-import { projectsService, tasksService } from '../api/supabase-data';
+import { projectsService, tasksService, timeEntriesService, analyticsService } from '../api/supabase-data';
 import {
   User,
   Task,
@@ -229,9 +229,51 @@ export const useTasks = (filters?: TaskFilters, page = 1, limit = 20) => {
 
   const query = useQuery({
     queryKey: queryKeys.tasks.list(filters, page),
-    queryFn: () => {
-      // Використовуємо tasksService замість apiClient
-      return tasksService.getTasks(filters?.projectId, page, limit);
+    queryFn: async () => {
+      // Отримуємо всі завдання
+      const allTasks = await tasksService.getTasks(undefined, 1, 1000); // Отримуємо більше завдань для фільтрації
+      
+      // Фільтруємо на клієнті
+      let filteredTasks = allTasks;
+      
+      if (filters?.projectId) {
+        filteredTasks = filteredTasks.filter(task => task.project_id === filters.projectId);
+      }
+      
+      if (filters?.status && filters.status.length > 0) {
+        const statusMapping: Record<TaskStatus, string> = {
+          'TODO': 'todo',
+          'IN_PROGRESS': 'in_progress',
+          'COMPLETED': 'done',
+          'CANCELLED': 'todo'
+        };
+        const mappedStatuses = filters.status.map(s => statusMapping[s]);
+        filteredTasks = filteredTasks.filter(task => mappedStatuses.includes(task.status));
+      }
+      
+      if (filters?.priority && filters.priority.length > 0) {
+        const priorityMapping: Record<TaskPriority, string> = {
+          'LOW': 'low',
+          'MEDIUM': 'medium',
+          'HIGH': 'high',
+          'URGENT': 'high'
+        };
+        const mappedPriorities = filters.priority.map(p => priorityMapping[p]);
+        filteredTasks = filteredTasks.filter(task => mappedPriorities.includes(task.priority));
+      }
+      
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredTasks = filteredTasks.filter(task => 
+          task.title.toLowerCase().includes(searchLower) ||
+          (task.description && task.description.toLowerCase().includes(searchLower))
+        );
+      }
+      
+      // Пагінація
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      return filteredTasks.slice(startIndex, endIndex);
     },
     staleTime: 10 * 1000, // 10 seconds
     refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
@@ -528,20 +570,54 @@ export const useActiveTimer = () => {
 
   const query = useQuery({
     queryKey: queryKeys.timeEntries.active,
-    queryFn: () => apiClient.getActiveTimer(),
+    queryFn: () => timeEntriesService.getActiveTimer(),
     refetchInterval: 1000, // Update every second
     staleTime: 0,
   });
 
   useEffect(() => {
-    if (query.data?.success) {
-      setActiveTimer(query.data.data || null);
+    if (query.data) {
+      // Перетворюємо до клієнтського формату
+      const activeTimer = query.data ? {
+        ...query.data,
+        taskId: query.data.task_id,
+        userId: query.data.user_id,
+        createdAt: query.data.created_at,
+        updatedAt: query.data.updated_at,
+        startTime: query.data.start_time,
+        endTime: query.data.end_time,
+        isRunning: query.data.is_running,
+        task: query.data.tasks ? {
+          ...query.data.tasks,
+          projectId: query.data.tasks.project_id,
+          userId: query.data.tasks.user_id,
+          createdAt: query.data.tasks.created_at,
+          updatedAt: query.data.tasks.updated_at
+        } : undefined
+      } : null;
+      setActiveTimer(activeTimer);
     }
   }, [query.data, setActiveTimer]);
 
   return {
     ...query,
-    activeTimer: query.data?.data,
+    activeTimer: query.data ? {
+      ...query.data,
+      taskId: query.data.task_id,
+      userId: query.data.user_id,
+      createdAt: query.data.created_at,
+      updatedAt: query.data.updated_at,
+      startTime: query.data.start_time,
+      endTime: query.data.end_time,
+      isRunning: query.data.is_running,
+      task: query.data.tasks ? {
+        ...query.data.tasks,
+        projectId: query.data.tasks.project_id,
+        userId: query.data.tasks.user_id,
+        createdAt: query.data.tasks.created_at,
+        updatedAt: query.data.tasks.updated_at
+      } : undefined
+    } : null,
   };
 };
 
@@ -551,23 +627,40 @@ export const useStartTimer = () => {
 
   return useMutation({
     mutationFn: ({ taskId, description }: { taskId: string; description?: string }) =>
-      apiClient.startTimer(taskId, description),
+      timeEntriesService.startTimer(taskId, description),
     onSuccess: (response) => {
-      if (response.success && response.data) {
-        setActiveTimer(response.data);
-        // Invalidate all related queries to update the UI
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        toast.success('Timer started!');
-      }
+      // Перетворюємо до клієнтського формату
+      const activeTimer = {
+        ...response,
+        taskId: response.task_id,
+        userId: response.user_id,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at,
+        startTime: response.start_time,
+        endTime: response.end_time,
+        isRunning: response.is_running,
+        task: response.tasks ? {
+          ...response.tasks,
+          projectId: response.tasks.project_id,
+          userId: response.tasks.user_id,
+          createdAt: response.tasks.created_at,
+          updatedAt: response.tasks.updated_at
+        } : undefined
+      };
+      
+      setActiveTimer(activeTimer);
+      // Invalidate all related queries to update the UI
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
+      toast.success('Timer started!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Timer start error');
+      console.error('Start timer error:', error);
+      toast.error(error.message || 'Timer start error');
     },
   });
 };
@@ -577,24 +670,23 @@ export const useStopTimer = () => {
   const { setActiveTimer } = useTimeTrackingStore();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.stopTimer(id),
+    mutationFn: (id: string) => timeEntriesService.stopTimer(id),
     onSuccess: (response) => {
-      if (response.success) {
-        setActiveTimer(null);
-        // Invalidate all related queries to update the UI
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        // Also invalidate time stats for all tasks as status might have changed
-        queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
-        toast.success('Timer stopped!');
-      }
+      setActiveTimer(null);
+      // Invalidate all related queries to update the UI
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.active });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
+      // Also invalidate time stats for all tasks as status might have changed
+      queryClient.invalidateQueries({ queryKey: ['timeEntries', 'stats'] });
+      toast.success('Timer stopped!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Timer stop error');
+      console.error('Stop timer error:', error);
+      toast.error(error.message || 'Timer stop error');
     },
   });
 };
@@ -620,21 +712,26 @@ export const useCreateTimeEntry = () => {
 
   return useMutation({
     mutationFn: (data: Omit<TimeEntry, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) =>
-      apiClient.createTimeEntry(data),
+      timeEntriesService.createTimeEntry({
+        taskId: data.taskId,
+        description: data.description,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        duration: data.duration,
+        isRunning: data.isRunning
+      }),
     onSuccess: (response) => {
-      if (response.success && response.data) {
-        // Invalidate all related queries to update the UI
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.stats(response.data.taskId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
-        queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
-        toast.success('Time entry created!');
-      }
+      // Invalidate all related queries to update the UI
+      queryClient.invalidateQueries({ queryKey: queryKeys.timeEntries.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.timeChart() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.projects() });
+      toast.success('Time entry created!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Creation error time entry');
+      console.error('Create time entry error:', error);
+      toast.error(error.message || 'Creation error time entry');
     },
   });
 };
@@ -698,7 +795,7 @@ export const useTimeStats = (taskId: string) => {
 export const useDashboard = (period = 30) => {
   return useQuery({
     queryKey: queryKeys.analytics.dashboard(period),
-    queryFn: () => apiClient.getDashboardMetrics(period),
+    queryFn: () => analyticsService.getDashboardMetrics(period),
     staleTime: 60 * 1000, // 1 minute
     refetchInterval: 2 * 60 * 1000, // Auto-refetch every 2 minutes
   });

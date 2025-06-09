@@ -221,4 +221,429 @@ export const tasksService = {
 
     if (error) throw error;
   }
+};
+
+// Time Entries Service
+export const timeEntriesService = {
+  // Створити time entry
+  async createTimeEntry(entryData: {
+    taskId: string;
+    description?: string;
+    startTime?: string;
+    endTime?: string;
+    duration?: number;
+    isRunning: boolean;
+  }) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const { data, error } = await supabase
+      .from('time_entries')
+      .insert([{
+        task_id: entryData.taskId,
+        user_id: user.id,
+        description: entryData.description || '',
+        start_time: entryData.startTime ? new Date(entryData.startTime).toISOString() : new Date().toISOString(),
+        end_time: entryData.endTime ? new Date(entryData.endTime).toISOString() : null,
+        duration: entryData.duration || null,
+        is_running: entryData.isRunning,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Отримати активний таймер
+  async getActiveTimer() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const { data, error } = await supabase
+      .from('time_entries')
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          project_id,
+          projects (
+            id,
+            name,
+            color
+          )
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('is_running', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Запустити таймер
+  async startTimer(taskId: string, description?: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    // Спочатку зупиняємо всі активні таймери
+    await supabase
+      .from('time_entries')
+      .update({
+        is_running: false,
+        end_time: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id)
+      .eq('is_running', true);
+
+    // Створюємо новий активний таймер
+    const { data, error } = await supabase
+      .from('time_entries')
+      .insert([{
+        task_id: taskId,
+        user_id: user.id,
+        description: description || '',
+        start_time: new Date().toISOString(),
+        is_running: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          project_id,
+          projects (
+            id,
+            name,
+            color
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Зупинити таймер
+  async stopTimer(id: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const endTime = new Date();
+    
+    // Отримуємо поточний таймер щоб порахувати тривалість
+    const { data: currentTimer } = await supabase
+      .from('time_entries')
+      .select('start_time')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!currentTimer) throw new Error('Timer не знайдено');
+
+    const startTime = new Date(currentTimer.start_time);
+    const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+
+    const { data, error } = await supabase
+      .from('time_entries')
+      .update({
+        end_time: endTime.toISOString(),
+        duration: duration,
+        is_running: false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          project_id,
+          projects (
+            id,
+            name,
+            color
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Отримати time entries
+  async getTimeEntries(params?: {
+    taskId?: string;
+    projectId?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    let query = supabase
+      .from('time_entries')
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          project_id,
+          projects (
+            id,
+            name,
+            color
+          )
+        )
+      `)
+      .eq('user_id', user.id);
+
+    if (params?.taskId) {
+      query = query.eq('task_id', params.taskId);
+    }
+
+    if (params?.dateFrom) {
+      query = query.gte('start_time', params.dateFrom);
+    }
+
+    if (params?.dateTo) {
+      query = query.lte('start_time', params.dateTo);
+    }
+
+    const page = params?.page || 1;
+    const limit = params?.limit || 20;
+
+    const { data, error } = await query
+      .order('start_time', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Оновити time entry
+  async updateTimeEntry(id: string, updates: {
+    description?: string;
+    startTime?: string;
+    endTime?: string;
+    duration?: number;
+  }) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.startTime) updateData.start_time = new Date(updates.startTime).toISOString();
+    if (updates.endTime) updateData.end_time = new Date(updates.endTime).toISOString();
+    if (updates.duration !== undefined) updateData.duration = updates.duration;
+
+    // Якщо оновлюються час початку або кінця, перераховуємо тривалість
+    if (updates.startTime || updates.endTime) {
+      const currentEntry = await supabase
+        .from('time_entries')
+        .select('start_time, end_time')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (currentEntry.data) {
+        const startTime = new Date(updates.startTime || currentEntry.data.start_time);
+        const endTime = new Date(updates.endTime || currentEntry.data.end_time || new Date());
+        updateData.duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('time_entries')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          project_id,
+          projects (
+            id,
+            name,
+            color
+          )
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Видалити time entry
+  async deleteTimeEntry(id: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const { error } = await supabase
+      .from('time_entries')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+  },
+
+  // Отримати статистику часу для завдання
+  async getTaskTimeStats(taskId: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const { data, error } = await supabase
+      .from('time_entries')
+      .select('duration, is_running, start_time')
+      .eq('task_id', taskId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+
+    const totalTime = (data || []).reduce((sum: number, entry: any) => {
+      if (entry.duration) {
+        return sum + entry.duration;
+      }
+      if (entry.is_running) {
+        // Для активних таймерів рахуємо поточний час
+        return sum + Math.floor((new Date().getTime() - new Date(entry.start_time).getTime()) / 1000);
+      }
+      return sum;
+    }, 0);
+
+    const entriesCount = data?.length || 0;
+    const activeTimer = data?.find((entry: any) => entry.is_running);
+
+    return {
+      totalTime,
+      entriesCount,
+      hasActiveTimer: !!activeTimer,
+      activeTimer
+    };
+  }
+};
+
+// Analytics Service
+export const analyticsService = {
+  // Отримати dashboard метрики
+  async getDashboardMetrics(period = 30) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Користувач не авторизований');
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+
+    // Отримуємо базові метрики
+    const [tasksResult, timeEntriesResult, projectsResult] = await Promise.all([
+      // Всі завдання
+      supabase
+        .from('tasks')
+        .select('id, status, priority, created_at, due_date')
+        .eq('user_id', user.id)
+        .eq('archived', false),
+      
+      // Time entries за період
+      supabase
+        .from('time_entries')
+        .select('duration, start_time, task_id')
+        .eq('user_id', user.id)
+        .gte('start_time', startDate.toISOString()),
+      
+      // Проекти
+      supabase
+        .from('projects')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('archived', false)
+    ]);
+
+    if (tasksResult.error) throw tasksResult.error;
+    if (timeEntriesResult.error) throw timeEntriesResult.error;
+    if (projectsResult.error) throw projectsResult.error;
+
+    const tasks = tasksResult.data || [];
+    const timeEntries = timeEntriesResult.data || [];
+    const projects = projectsResult.data || [];
+
+    // Розраховуємо метрики
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === 'done').length;
+    const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
+    const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done').length;
+    const totalTimeSpent = timeEntries.reduce((sum, entry) => sum + (entry.duration || 0), 0);
+    const projectsCount = projects.length;
+    const completionRate = totalTasks > 0 ? (completedTasks / totalTasks * 100).toFixed(1) : '0';
+
+    // Статистика по дням
+    const dailyStatsMap = new Map();
+    tasks.forEach(task => {
+      const date = new Date(task.created_at).toISOString().split('T')[0];
+      if (!dailyStatsMap.has(date)) {
+        dailyStatsMap.set(date, { date, created: 0, completed: 0 });
+      }
+      const stats = dailyStatsMap.get(date);
+      stats.created++;
+      if (task.status === 'done') {
+        stats.completed++;
+      }
+    });
+
+    const dailyStats = Array.from(dailyStatsMap.values())
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(-30);
+
+    // Статистика по пріоритетам
+    const priorityStats = [
+      { priority: 'low', count: tasks.filter(t => t.priority === 'low').length },
+      { priority: 'medium', count: tasks.filter(t => t.priority === 'medium').length },
+      { priority: 'high', count: tasks.filter(t => t.priority === 'high').length }
+    ];
+
+    // Статистика по статусам
+    const statusStats = [
+      { status: 'todo', count: tasks.filter(t => t.status === 'todo').length },
+      { status: 'in_progress', count: tasks.filter(t => t.status === 'in_progress').length },
+      { status: 'done', count: tasks.filter(t => t.status === 'done').length }
+    ];
+
+    return {
+      summary: {
+        totalTasks,
+        completedTasks,
+        inProgressTasks,
+        overdueTasks,
+        totalTimeSpent,
+        projectsCount,
+        completionRate
+      },
+      charts: {
+        dailyStats,
+        priorityStats,
+        statusStats,
+        projectTimeStats: [], // Можна додати пізніше
+        weekdayStats: [] // Можна додати пізніше
+      }
+    };
+  }
 }; 
