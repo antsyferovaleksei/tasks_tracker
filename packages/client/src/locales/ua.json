@@ -87,6 +87,7 @@
   "projects": {
     "title": "Проекти",
     "addProject": "Додати проект",
+    "createProject": "Створити проект",
     "projectName": "Назва проекту",
     "projectDescription": "Опис проекту",
     "projectColor": "Колір проекту",
@@ -110,7 +111,8 @@
     "deleteWarning": "Ця дія незворотна. Всі завдання в цьому проекті також будуть видалені.",
     "creating": "Створення...",
     "updating": "Оновлення...",
-    "deleting": "Видалення..."
+    "deleting": "Видалення...",
+    "deleteConfirm": "Ви впевнені, що хочете видалити проект"
   },
   "analytics": {
     "title": "Аналітика",
@@ -339,6 +341,7 @@
     "getStarted": "Почати роботу",
     "learnMore": "Дізнатися більше",
     "goToDashboard": "Перейти до завдань",
+    "systemFeatures": "Можливості системи",
     "features": {
       "taskManagement": {
         "title": "Управління завданнями",

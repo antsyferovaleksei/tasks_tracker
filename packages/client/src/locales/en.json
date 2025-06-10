@@ -87,6 +87,7 @@
   "projects": {
     "title": "Projects",
     "addProject": "Add Project",
+    "createProject": "Create Project",
     "projectName": "Project Name",
     "projectDescription": "Project Description",
     "projectColor": "Project Color",
@@ -349,6 +350,7 @@
     "getStarted": "Get Started",
     "learnMore": "Learn More",
     "goToDashboard": "Go to Tasks",
+    "systemFeatures": "System Features",
     "features": {
       "taskManagement": {
         "title": "Task Management",

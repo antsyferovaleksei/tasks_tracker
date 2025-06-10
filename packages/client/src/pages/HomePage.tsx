@@ -275,7 +275,7 @@ const HomePage: React.FC = () => {
               fontSize: { xs: '2rem', md: '2.5rem' },
             }}
           >
-            Можливості системи
+            {t('home.systemFeatures')}
           </Typography>
 
           <Grid container spacing={4}>
